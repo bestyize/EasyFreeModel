@@ -1,0 +1,89 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font);
+  font-size: var(--fs-body);
+  color: var(--c-text);
+  background: var(--c-canvas);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+:focus-visible {
+  outline: 2px solid var(--c-brand);
+  outline-offset: 2px;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: var(--control-h);
+  padding: 0 14px;
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  background: var(--c-canvas);
+  font-size: var(--fs-small);
+}
+.btn:hover {
+  background: var(--c-surface-2);
+}
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.btn-primary {
+  height: var(--btn-primary-h);
+  border-color: var(--c-brand);
+  background: var(--c-brand);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: #e61e3a;
+}
+.btn-danger {
+  color: var(--c-danger);
+}
+
+.input {
+  height: var(--control-h);
+  padding: 0 12px;
+  border: 1px solid var(--c-border);
+  border-radius: 8px;
+  background: var(--c-canvas);
+}
+
+.card {
+  background: var(--c-canvas);
+  border: 1px solid var(--c-border);
+  border-radius: var(--radius);
+}
+
+.section-title {
+  margin: 0;
+  font-size: var(--fs-section);
+  font-weight: 600;
+}

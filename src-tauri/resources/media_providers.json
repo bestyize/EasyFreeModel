@@ -1,0 +1,1199 @@
+{
+  "version": 1,
+  "providers": [
+    {
+      "id": "openai",
+      "name": "OpenAI",
+      "capabilities": {
+        "image": {
+          "format": "openai-images",
+          "baseUrl": "https://api.openai.com/v1/images/generations",
+          "defaultModel": "gpt-image-1",
+          "models": [
+            "gpt-image-1",
+            "dall-e-3",
+            "dall-e-2"
+          ],
+          "params": [
+            "size",
+            "n"
+          ],
+          "features": [
+            "image-edit"
+          ],
+          "endpoints": {
+            "edit": "https://api.openai.com/v1/images/edits"
+          }
+        },
+        "tts": {
+          "format": "openai-speech",
+          "baseUrl": "https://api.openai.com/v1/audio/speech",
+          "defaultModel": "gpt-4o-mini-tts",
+          "models": [
+            "gpt-4o-mini-tts",
+            "tts-1",
+            "tts-1-hd"
+          ],
+          "params": [
+            "speed",
+            "format"
+          ]
+        },
+        "stt": {
+          "format": "openai-transcriptions",
+          "baseUrl": "https://api.openai.com/v1/audio/transcriptions",
+          "defaultModel": "whisper-1",
+          "models": [
+            "whisper-1",
+            "gpt-4o-transcribe",
+            "gpt-4o-mini-transcribe"
+          ],
+          "params": [
+            "language"
+          ],
+          "features": [
+            "asr-timestamps"
+          ]
+        },
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.openai.com/v1/embeddings",
+          "defaultModel": "text-embedding-3-small",
+          "models": [
+            "text-embedding-3-small",
+            "text-embedding-3-large",
+            "text-embedding-ada-002"
+          ],
+          "params": [
+            "dimensions"
+          ]
+        },
+        "search": {
+          "status": "deferred",
+          "reason": "OpenAI 的联网搜索依赖对话模型的 web_search 工具，不是独立搜索接口，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "xai",
+      "name": "xAI (Grok)",
+      "capabilities": {
+        "image": {
+          "format": "openai-images",
+          "baseUrl": "https://api.x.ai/v1/images/generations",
+          "defaultModel": "grok-2-image-1212",
+          "models": [
+            "grok-2-image-1212"
+          ],
+          "params": [
+            "n"
+          ]
+        },
+        "video": {
+          "format": "xai-video",
+          "baseUrl": "https://api.x.ai/v1/videos",
+          "defaultModel": "grok-imagine-video",
+          "models": [
+            "grok-imagine-video"
+          ],
+          "params": [
+            "duration",
+            "aspectRatio",
+            "resolution"
+          ],
+          "features": [
+            "video-image2video"
+          ]
+        },
+        "search": {
+          "status": "deferred",
+          "reason": "xAI 搜索走对话模型的 Responses 搜索工具，不是独立搜索接口，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "recraft",
+      "name": "Recraft",
+      "capabilities": {
+        "image": {
+          "format": "openai-images",
+          "baseUrl": "https://external.api.recraft.ai/v1/images/generations",
+          "defaultModel": "recraftv3",
+          "models": [
+            "recraftv3",
+            "recraftv2"
+          ],
+          "params": [
+            "size",
+            "n"
+          ]
+        }
+      }
+    },
+    {
+      "id": "venice",
+      "name": "Venice",
+      "capabilities": {
+        "image": {
+          "format": "openai-images",
+          "baseUrl": "https://api.venice.ai/api/v1/images/generations",
+          "defaultModel": "venice-sd35",
+          "models": [
+            "venice-sd35",
+            "flux-2-pro"
+          ],
+          "params": [
+            "size",
+            "n"
+          ]
+        },
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.venice.ai/api/v1/embeddings",
+          "defaultModel": "text-embedding-bge-m3",
+          "models": [
+            "text-embedding-bge-m3",
+            "text-embedding-3-large"
+          ],
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "vercel-ai-gateway",
+      "name": "Vercel AI Gateway",
+      "capabilities": {
+        "image": {
+          "format": "openai-images",
+          "baseUrl": "https://ai-gateway.vercel.sh/v1/images/generations",
+          "models": [],
+          "params": [
+            "size",
+            "n"
+          ]
+        },
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://ai-gateway.vercel.sh/v1/embeddings",
+          "models": [],
+          "params": [
+            "dimensions"
+          ]
+        },
+        "search": {
+          "status": "deferred",
+          "reason": "依赖对话模型的搜索工具，不是独立搜索接口，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "tokenrouter",
+      "name": "TokenRouter",
+      "capabilities": {
+        "image": {
+          "format": "openai-images",
+          "baseUrl": "https://api.tokenrouter.com/v1/images/generations",
+          "models": [],
+          "params": [
+            "size",
+            "n"
+          ]
+        },
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.tokenrouter.com/v1/embeddings",
+          "models": [],
+          "params": [
+            "dimensions"
+          ]
+        }
+      }
+    },
+    {
+      "id": "openrouter",
+      "name": "OpenRouter",
+      "capabilities": {
+        "video": {
+          "format": "openrouter-video",
+          "baseUrl": "https://openrouter.ai/api/v1/videos",
+          "defaultModel": "google/veo-3.1",
+          "models": [
+            "google/veo-3.1",
+            "openai/sora-2-pro",
+            "bytedance/seedance-2.0"
+          ],
+          "params": [
+            "duration",
+            "aspectRatio",
+            "resolution"
+          ],
+          "features": [
+            "video-image2video"
+          ],
+          "trustedHosts": [
+            "openrouter.ai"
+          ]
+        },
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://openrouter.ai/api/v1/embeddings",
+          "defaultModel": "openai/text-embedding-3-small",
+          "models": [
+            "openai/text-embedding-3-small",
+            "openai/text-embedding-3-large",
+            "qwen/qwen3-embedding-8b"
+          ],
+          "params": [
+            "dimensions"
+          ]
+        },
+        "tts": {
+          "status": "deferred",
+          "reason": "OpenRouter 的语音合成走对话补全接口的音频输出，请求格式与独立 TTS 接口不同，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "mistral",
+      "name": "Mistral",
+      "capabilities": {
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.mistral.ai/v1/embeddings",
+          "defaultModel": "mistral-embed",
+          "models": [
+            "mistral-embed"
+          ],
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "voyage-ai",
+      "name": "Voyage AI",
+      "capabilities": {
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.voyageai.com/v1/embeddings",
+          "defaultModel": "voyage-3.5",
+          "models": [
+            "voyage-3.5"
+          ],
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "fireworks",
+      "name": "Fireworks AI",
+      "capabilities": {
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.fireworks.ai/inference/v1/embeddings",
+          "defaultModel": "nomic-ai/nomic-embed-text-v1.5",
+          "models": [
+            "nomic-ai/nomic-embed-text-v1.5"
+          ],
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "together",
+      "name": "Together AI",
+      "capabilities": {
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.together.xyz/v1/embeddings",
+          "defaultModel": "BAAI/bge-large-en-v1.5",
+          "models": [
+            "BAAI/bge-large-en-v1.5"
+          ],
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "nebius",
+      "name": "Nebius",
+      "capabilities": {
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.tokenfactory.nebius.com/v1/embeddings",
+          "defaultModel": "Qwen/Qwen3-Embedding-8B",
+          "models": [
+            "Qwen/Qwen3-Embedding-8B"
+          ],
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "jina-ai",
+      "name": "Jina AI",
+      "capabilities": {
+        "embedding": {
+          "format": "openai-embeddings",
+          "baseUrl": "https://api.jina.ai/v1/embeddings",
+          "defaultModel": "jina-embeddings-v3",
+          "models": [
+            "jina-embeddings-v3"
+          ],
+          "params": [
+            "dimensions"
+          ]
+        }
+      }
+    },
+    {
+      "id": "nvidia",
+      "name": "NVIDIA NIM",
+      "capabilities": {
+        "embedding": {
+          "status": "deferred",
+          "reason": "NIM 嵌入模型需要 input_type（query/passage）等专有字段，尚未接入"
+        },
+        "tts": {
+          "status": "deferred",
+          "reason": "NVIDIA Riva TTS 使用专有请求格式，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "github",
+      "name": "GitHub Models",
+      "capabilities": {
+        "embedding": {
+          "status": "deferred",
+          "reason": "GitHub 以 OAuth 设备码授权，不是 API Key 凭据，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "selfhosted-embedding",
+      "name": "Self-hosted Embedding",
+      "capabilities": {
+        "embedding": {
+          "status": "deferred",
+          "reason": "自建服务需要用户配置 baseUrl，目前没有 baseUrl 配置入口（需数据层支持）"
+        }
+      }
+    },
+    {
+      "id": "selfhosted-stt",
+      "name": "Self-hosted STT",
+      "capabilities": {
+        "stt": {
+          "status": "deferred",
+          "reason": "自建服务需要用户配置 baseUrl，目前没有 baseUrl 配置入口（需数据层支持）"
+        }
+      }
+    },
+    {
+      "id": "selfhosted-tts",
+      "name": "Self-hosted TTS",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "自建服务需要用户配置 baseUrl，目前没有 baseUrl 配置入口（需数据层支持）"
+        }
+      }
+    },
+    {
+      "id": "groq",
+      "name": "Groq",
+      "capabilities": {
+        "stt": {
+          "format": "openai-transcriptions",
+          "baseUrl": "https://api.groq.com/openai/v1/audio/transcriptions",
+          "defaultModel": "whisper-large-v3-turbo",
+          "models": [
+            "whisper-large-v3-turbo",
+            "whisper-large-v3"
+          ],
+          "params": [
+            "language"
+          ],
+          "features": [
+            "asr-timestamps"
+          ]
+        }
+      }
+    },
+    {
+      "id": "gemini",
+      "name": "Gemini",
+      "capabilities": {
+        "embedding": {
+          "format": "gemini-embeddings",
+          "baseUrl": "https://generativelanguage.googleapis.com/v1beta/models",
+          "defaultModel": "gemini-embedding-001",
+          "models": [
+            "gemini-embedding-001"
+          ],
+          "params": [
+            "dimensions"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "x-goog-api-key"
+          }
+        },
+        "image": {
+          "status": "deferred",
+          "reason": "Gemini 图像走 generateContent 的多模态输出，格式尚未接入"
+        },
+        "tts": {
+          "status": "deferred",
+          "reason": "Gemini TTS 走 generateContent 的音频输出（PCM），格式尚未接入"
+        },
+        "stt": {
+          "status": "deferred",
+          "reason": "Gemini 转写走 generateContent 的内联音频，格式尚未接入"
+        },
+        "search": {
+          "status": "deferred",
+          "reason": "Gemini 联网搜索是对话模型的 Google 搜索工具，不是独立搜索接口，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "stability-ai",
+      "name": "Stability AI",
+      "capabilities": {
+        "image": {
+          "format": "stability-v2",
+          "baseUrl": "https://api.stability.ai/v2beta/stable-image/generate",
+          "defaultModel": "stable-image-core",
+          "models": [
+            "stable-image-ultra",
+            "stable-image-core",
+            "sd3.5-large",
+            "sd3.5-large-turbo",
+            "sd3.5-medium"
+          ],
+          "params": [
+            "size",
+            "seed"
+          ]
+        }
+      }
+    },
+    {
+      "id": "black-forest-labs",
+      "name": "Black Forest Labs",
+      "capabilities": {
+        "image": {
+          "format": "bfl-flux",
+          "baseUrl": "https://api.bfl.ai/v1",
+          "defaultModel": "flux-pro-1.1",
+          "models": [
+            "flux-pro-1.1",
+            "flux-pro-1.1-ultra",
+            "flux-dev",
+            "flux-pro"
+          ],
+          "params": [
+            "size",
+            "seed"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "x-key"
+          },
+          "trustedHosts": [
+            "bfl.ai"
+          ],
+          "pollIntervalMs": 1500,
+          "pollTimeoutSecs": 300
+        }
+      }
+    },
+    {
+      "id": "fal-ai",
+      "name": "fal.ai",
+      "capabilities": {
+        "image": {
+          "format": "fal-queue",
+          "baseUrl": "https://queue.fal.run",
+          "defaultModel": "fal-ai/flux/schnell",
+          "models": [
+            "fal-ai/flux/schnell",
+            "fal-ai/flux/dev",
+            "fal-ai/flux-pro/v1.1",
+            "fal-ai/recraft-v3"
+          ],
+          "params": [
+            "size",
+            "n",
+            "seed"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "prefix": "Key "
+          },
+          "trustedHosts": [
+            "fal.run"
+          ],
+          "pollIntervalMs": 1500,
+          "pollTimeoutSecs": 300
+        }
+      }
+    },
+    {
+      "id": "runwayml",
+      "name": "Runway",
+      "capabilities": {
+        "image": {
+          "format": "runway-image",
+          "baseUrl": "https://api.dev.runwayml.com/v1",
+          "defaultModel": "gen4_image",
+          "models": [
+            "gen4_image",
+            "gen4_image_turbo"
+          ],
+          "params": [
+            "size",
+            "seed"
+          ],
+          "extraHeaders": {
+            "X-Runway-Version": "2024-11-06"
+          }
+        },
+        "video": {
+          "format": "runway-video",
+          "baseUrl": "https://api.dev.runwayml.com/v1",
+          "defaultModel": "gen4_turbo",
+          "models": [
+            "gen4_turbo",
+            "gen3a_turbo"
+          ],
+          "params": [
+            "duration",
+            "aspectRatio"
+          ],
+          "features": [
+            "video-image2video"
+          ],
+          "extraHeaders": {
+            "X-Runway-Version": "2024-11-06"
+          }
+        }
+      }
+    },
+    {
+      "id": "minimax",
+      "name": "MiniMax",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "MiniMax 图像接口格式（image_generation）与 OpenAI 兼容格式不同，尚未验证接入"
+        },
+        "tts": {
+          "status": "deferred",
+          "reason": "MiniMax t2a_v2 使用专有请求格式，尚未接入"
+        },
+        "search": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        }
+      }
+    },
+    {
+      "id": "minimax-cn",
+      "name": "MiniMax (CN)",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "MiniMax t2a_v2 使用专有请求格式，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "cloudflare-ai",
+      "name": "Cloudflare Workers AI",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "需要账户 ID（路径参数），目前没有对应配置项，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "huggingface",
+      "name": "Hugging Face",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "路由模型映射较复杂，尚未接入"
+        },
+        "stt": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        }
+      }
+    },
+    {
+      "id": "nanobanana",
+      "name": "NanoBanana",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "异步回调式接口尚未验证，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "topaz",
+      "name": "Topaz",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "图像增强接口格式尚未接入"
+        }
+      }
+    },
+    {
+      "id": "sdwebui",
+      "name": "SD WebUI",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "本地服务需要用户配置 baseUrl，目前没有配置入口（需数据层支持）"
+        }
+      }
+    },
+    {
+      "id": "comfyui",
+      "name": "ComfyUI",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "本地工作流服务需要用户配置 baseUrl 与工作流，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "codex",
+      "name": "OpenAI Codex",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "依赖 OAuth 订阅账户的私有接口，本次不实现"
+        }
+      }
+    },
+    {
+      "id": "antigravity",
+      "name": "Antigravity",
+      "capabilities": {
+        "image": {
+          "status": "deferred",
+          "reason": "依赖 OAuth 订阅账户的私有接口，本次不实现"
+        },
+        "search": {
+          "status": "deferred",
+          "reason": "依赖 OAuth 订阅账户的私有接口，本次不实现"
+        }
+      }
+    },
+    {
+      "id": "elevenlabs",
+      "name": "ElevenLabs",
+      "capabilities": {
+        "tts": {
+          "format": "elevenlabs-tts",
+          "baseUrl": "https://api.elevenlabs.io/v1/text-to-speech",
+          "defaultModel": "eleven_multilingual_v2",
+          "models": [
+            "eleven_multilingual_v2",
+            "eleven_turbo_v2_5",
+            "eleven_flash_v2_5"
+          ],
+          "params": [
+            "speed"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "xi-api-key"
+          }
+        },
+        "stt": {
+          "format": "elevenlabs-stt",
+          "baseUrl": "https://api.elevenlabs.io/v1/speech-to-text",
+          "defaultModel": "scribe_v1",
+          "models": [
+            "scribe_v1",
+            "scribe_v2"
+          ],
+          "params": [
+            "language"
+          ],
+          "features": [
+            "asr-timestamps",
+            "asr-diarization"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "xi-api-key"
+          }
+        }
+      }
+    },
+    {
+      "id": "cartesia",
+      "name": "Cartesia",
+      "capabilities": {
+        "tts": {
+          "format": "cartesia-tts",
+          "baseUrl": "https://api.cartesia.ai/tts/bytes",
+          "defaultModel": "sonic-2",
+          "models": [
+            "sonic-2",
+            "sonic-3"
+          ],
+          "params": [
+            "language"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "X-API-Key"
+          },
+          "extraHeaders": {
+            "Cartesia-Version": "2024-06-10"
+          }
+        }
+      }
+    },
+    {
+      "id": "deepgram",
+      "name": "Deepgram",
+      "capabilities": {
+        "stt": {
+          "format": "deepgram-listen",
+          "baseUrl": "https://api.deepgram.com/v1/listen",
+          "defaultModel": "nova-3",
+          "models": [
+            "nova-3",
+            "nova-2"
+          ],
+          "params": [
+            "language"
+          ],
+          "features": [
+            "asr-timestamps",
+            "asr-diarization"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "Authorization",
+            "prefix": "Token "
+          }
+        }
+      }
+    },
+    {
+      "id": "assemblyai",
+      "name": "AssemblyAI",
+      "capabilities": {
+        "stt": {
+          "status": "deferred",
+          "reason": "需要「上传→提交→轮询」三步且请求字段随版本变化，尚未验证接入"
+        }
+      }
+    },
+    {
+      "id": "aws-polly",
+      "name": "AWS Polly",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "需要 AWS SigV4 签名与区域配置，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "fish-audio",
+      "name": "Fish Audio",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        }
+      }
+    },
+    {
+      "id": "inworld",
+      "name": "Inworld",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        }
+      }
+    },
+    {
+      "id": "playht",
+      "name": "PlayHT",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "凭据需要 userId:apiKey 组合，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "xiaomi-mimo",
+      "name": "Xiaomi MiMo",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        }
+      }
+    },
+    {
+      "id": "coqui",
+      "name": "Coqui",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "本地服务需要用户配置 baseUrl，目前没有配置入口（需数据层支持）"
+        }
+      }
+    },
+    {
+      "id": "tortoise",
+      "name": "Tortoise",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "本地服务需要用户配置 baseUrl，目前没有配置入口（需数据层支持）"
+        }
+      }
+    },
+    {
+      "id": "local-device",
+      "name": "Local Device TTS",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "本地系统语音属于后期扩展（设计文档 §4.7），本次不实现"
+        }
+      }
+    },
+    {
+      "id": "edge-tts",
+      "name": "Edge TTS",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "依赖消费级浏览器朗读功能的私有接口，本次不实现"
+        }
+      }
+    },
+    {
+      "id": "google-tts",
+      "name": "Google TTS",
+      "capabilities": {
+        "tts": {
+          "status": "deferred",
+          "reason": "依赖消费级翻译网页的私有接口，本次不实现"
+        }
+      }
+    },
+    {
+      "id": "vertex",
+      "name": "Vertex AI",
+      "capabilities": {
+        "video": {
+          "status": "deferred",
+          "reason": "需要 Google 服务账号/OAuth 访问令牌与项目配置，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "serper",
+      "name": "Serper",
+      "capabilities": {
+        "search": {
+          "format": "serper-search",
+          "baseUrl": "https://google.serper.dev",
+          "params": [
+            "count",
+            "region",
+            "timeRange"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "X-API-Key"
+          }
+        }
+      }
+    },
+    {
+      "id": "brave-search",
+      "name": "Brave Search",
+      "capabilities": {
+        "search": {
+          "format": "brave-search",
+          "baseUrl": "https://api.search.brave.com/res/v1",
+          "params": [
+            "count",
+            "region",
+            "timeRange"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "X-Subscription-Token"
+          }
+        }
+      }
+    },
+    {
+      "id": "tavily",
+      "name": "Tavily",
+      "capabilities": {
+        "search": {
+          "format": "tavily-search",
+          "baseUrl": "https://api.tavily.com/search",
+          "params": [
+            "count",
+            "timeRange"
+          ]
+        },
+        "fetch": {
+          "format": "tavily-extract",
+          "baseUrl": "https://api.tavily.com/extract",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "exa",
+      "name": "Exa",
+      "capabilities": {
+        "search": {
+          "format": "exa-search",
+          "baseUrl": "https://api.exa.ai/search",
+          "params": [
+            "count"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "x-api-key"
+          }
+        },
+        "fetch": {
+          "format": "exa-contents",
+          "baseUrl": "https://api.exa.ai/contents",
+          "params": [],
+          "auth": {
+            "type": "header",
+            "name": "x-api-key"
+          }
+        }
+      }
+    },
+    {
+      "id": "linkup",
+      "name": "Linkup",
+      "capabilities": {
+        "search": {
+          "format": "linkup-search",
+          "baseUrl": "https://api.linkup.so/v1/search",
+          "params": [
+            "count",
+            "timeRange"
+          ]
+        }
+      }
+    },
+    {
+      "id": "perplexity",
+      "name": "Perplexity",
+      "capabilities": {
+        "search": {
+          "format": "perplexity-search",
+          "baseUrl": "https://api.perplexity.ai/search",
+          "params": [
+            "count",
+            "region"
+          ]
+        }
+      }
+    },
+    {
+      "id": "youcom",
+      "name": "You.com",
+      "capabilities": {
+        "search": {
+          "format": "youcom-search",
+          "baseUrl": "https://ydc-index.io/v1/search",
+          "params": [
+            "count",
+            "region",
+            "timeRange"
+          ],
+          "auth": {
+            "type": "header",
+            "name": "X-API-Key"
+          }
+        }
+      }
+    },
+    {
+      "id": "searchapi",
+      "name": "SearchAPI",
+      "capabilities": {
+        "search": {
+          "format": "searchapi-search",
+          "baseUrl": "https://www.searchapi.io/api/v1/search",
+          "params": [
+            "count",
+            "region",
+            "timeRange"
+          ],
+          "auth": {
+            "type": "query",
+            "name": "api_key"
+          }
+        }
+      }
+    },
+    {
+      "id": "ollama-search",
+      "name": "Ollama Web Search",
+      "capabilities": {
+        "search": {
+          "format": "ollama-search",
+          "baseUrl": "https://ollama.com/api/web_search",
+          "params": [
+            "count"
+          ]
+        }
+      }
+    },
+    {
+      "id": "google-pse",
+      "name": "Google Programmable Search",
+      "capabilities": {
+        "search": {
+          "status": "deferred",
+          "reason": "需要额外的搜索引擎 ID（cx）配置项，目前没有对应入口，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "searxng",
+      "name": "SearXNG",
+      "capabilities": {
+        "search": {
+          "status": "deferred",
+          "reason": "自建服务需要用户配置 baseUrl，目前没有配置入口（需数据层支持）"
+        }
+      }
+    },
+    {
+      "id": "glm",
+      "name": "GLM Web Search",
+      "capabilities": {
+        "search": {
+          "status": "deferred",
+          "reason": "走 MCP JSON-RPC 通道并依赖 OAuth/订阅账户，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "kimi",
+      "name": "Kimi",
+      "capabilities": {
+        "search": {
+          "status": "deferred",
+          "reason": "依赖 OAuth 账户与对话模型的搜索工具，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "perplexity-agent",
+      "name": "Perplexity Agent",
+      "capabilities": {
+        "search": {
+          "status": "deferred",
+          "reason": "对话式搜索（Responses API），不是结构化搜索结果接口，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "tinyfish",
+      "name": "TinyFish",
+      "capabilities": {
+        "search": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        },
+        "fetch": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        }
+      }
+    },
+    {
+      "id": "xquik",
+      "name": "Xquik",
+      "capabilities": {
+        "search": {
+          "status": "deferred",
+          "reason": "仅返回推文，不是通用网页搜索，尚未接入"
+        }
+      }
+    },
+    {
+      "id": "firecrawl",
+      "name": "Firecrawl",
+      "capabilities": {
+        "fetch": {
+          "format": "firecrawl-scrape",
+          "baseUrl": "https://api.firecrawl.dev/v1/scrape",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "jina-reader",
+      "name": "Jina Reader",
+      "capabilities": {
+        "fetch": {
+          "format": "jina-reader",
+          "baseUrl": "https://r.jina.ai/",
+          "params": []
+        }
+      }
+    },
+    {
+      "id": "ollama",
+      "name": "Ollama Web Fetch",
+      "capabilities": {
+        "fetch": {
+          "status": "deferred",
+          "reason": "尚未接入"
+        }
+      }
+    },
+    {
+      "id": "grok-web",
+      "name": "Grok Web (Subscription)",
+      "capabilities": {},
+      "status": "deferred",
+      "reason": "依赖消费级网站的私有接口与网页 Cookie，本次不实现"
+    },
+    {
+      "id": "perplexity-web",
+      "name": "Perplexity Web (Pro/Max)",
+      "capabilities": {},
+      "status": "deferred",
+      "reason": "依赖消费级网站的私有接口与网页 Cookie，本次不实现"
+    }
+  ]
+}

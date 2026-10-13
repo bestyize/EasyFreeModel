@@ -1,0 +1,12 @@
+{
+  "model": "llama3.1",
+  "messages": [
+    {"role": "system", "content": "You are helpful."},
+    {"role": "system", "content": "Answer briefly."},
+    {"role": "user", "content": "Hello"},
+    {"role": "assistant", "content": "Hi!"},
+    {"role": "user", "content": "What is 2+2?"}
+  ],
+  "stream": false,
+  "options": {"temperature": 0.2, "top_p": 0.9, "num_predict": 256, "stop": ["END"]}
+}

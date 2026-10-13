@@ -1,0 +1,3130 @@
+[
+  {
+    "id": "alicode-intl",
+    "alias": "alicode-intl",
+    "name": "Alibaba Coding",
+    "category": "apikey",
+    "color": "#FF6A00",
+    "textIcon": "ALi",
+    "website": "https://www.alibabacloud.com/product/coding",
+    "format": "openai",
+    "baseUrlHost": "coding-intl.dashscope.aliyuncs.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "alicode",
+    "alias": "alicode",
+    "name": "Alibaba",
+    "category": "apikey",
+    "color": "#FF6A00",
+    "textIcon": "ALi",
+    "website": "https://bailian.console.aliyun.com",
+    "format": "openai",
+    "baseUrlHost": "coding.dashscope.aliyuncs.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "anthropic",
+    "alias": "anthropic",
+    "name": "Anthropic",
+    "category": "apikey",
+    "color": "#D97757",
+    "textIcon": "AN",
+    "website": "https://console.anthropic.com",
+    "format": "claude",
+    "baseUrlHost": "api.anthropic.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "imageToText"
+    ],
+    "modelCount": 3,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "antigravity",
+    "alias": "ag",
+    "name": "Antigravity",
+    "category": "oauth",
+    "color": "#F59E0B",
+    "textIcon": null,
+    "website": "https://antigravity.google",
+    "format": "antigravity",
+    "baseUrlHost": null,
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "image",
+      "webSearch"
+    ],
+    "modelCount": 25,
+    "deprecated": true,
+    "riskNotice": "RISK_NOTICE"
+  },
+  {
+    "id": "assemblyai",
+    "alias": "assemblyai",
+    "name": "AssemblyAI",
+    "category": "apikey",
+    "color": "#0062FF",
+    "textIcon": "AA",
+    "website": "https://assemblyai.com",
+    "format": "openai",
+    "baseUrlHost": "api.assemblyai.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "stt"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "aws-polly",
+    "alias": "polly",
+    "name": "AWS Polly",
+    "category": "apikey",
+    "color": "#FF9900",
+    "textIcon": "PL",
+    "website": "https://aws.amazon.com/polly/",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "azure",
+    "alias": "azure",
+    "name": "Azure OpenAI",
+    "category": "apikey",
+    "color": "#0078D4",
+    "textIcon": "AZ",
+    "website": "https://azure.microsoft.com/en-us/products/ai-services/openai-service",
+    "format": "openai",
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "black-forest-labs",
+    "alias": "black-forest-labs",
+    "name": "Black Forest Labs",
+    "category": "apikey",
+    "color": "#111827",
+    "textIcon": "BF",
+    "website": "https://blackforestlabs.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 6,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "blackbox",
+    "alias": "blackbox",
+    "name": "Blackbox AI",
+    "category": "apikey",
+    "color": "#5B5FEF",
+    "textIcon": "BB",
+    "website": "https://blackbox.ai",
+    "format": "openai",
+    "baseUrlHost": "api.blackbox.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 10,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "brave-search",
+    "alias": "brave",
+    "name": "Brave Search",
+    "category": "apikey",
+    "color": "#FB542B",
+    "textIcon": "BR",
+    "website": "https://brave.com/search/api",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "byteplus",
+    "alias": "byteplus",
+    "name": "BytePlus ModelArk",
+    "category": "freeTier",
+    "color": "#2563EB",
+    "textIcon": "BP",
+    "website": "https://console.byteplus.com/ark",
+    "format": "openai",
+    "baseUrlHost": "ark.ap-southeast.bytepluses.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "cartesia",
+    "alias": "cartesia",
+    "name": "Cartesia",
+    "category": "apikey",
+    "color": "#FF4F8B",
+    "textIcon": "CA",
+    "website": "https://cartesia.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "cerebras",
+    "alias": "cerebras",
+    "name": "Cerebras",
+    "category": "apikey",
+    "color": "#FF4F00",
+    "textIcon": "CB",
+    "website": "https://www.cerebras.ai",
+    "format": "openai",
+    "baseUrlHost": "api.cerebras.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 6,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "chutes",
+    "alias": "chutes",
+    "name": "Chutes AI",
+    "category": "apikey",
+    "color": "#ffffffff",
+    "textIcon": "CH",
+    "website": "https://chutes.ai",
+    "format": "openai",
+    "baseUrlHost": "llm.chutes.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "claude",
+    "alias": "cc",
+    "name": "Claude Code",
+    "category": "oauth",
+    "color": "#D97757",
+    "textIcon": null,
+    "website": "https://claude.ai",
+    "format": "claude",
+    "baseUrlHost": "api.anthropic.com",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": true,
+    "riskNotice": "RISK_NOTICE"
+  },
+  {
+    "id": "cline",
+    "alias": "cl",
+    "name": "Cline",
+    "category": "oauth",
+    "color": "#5B9BD5",
+    "textIcon": "CL",
+    "website": "https://cline.bot",
+    "format": "openai",
+    "baseUrlHost": "api.cline.bot",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "clinepass",
+    "alias": "clinepass",
+    "name": "ClinePass",
+    "category": "oauth",
+    "color": "#5B9BD5",
+    "textIcon": "CP",
+    "website": "https://cline.bot",
+    "format": "openai",
+    "baseUrlHost": "api.cline.bot",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "apikey",
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 10,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "cloudflare-ai",
+    "alias": "cloudflare-ai",
+    "name": "Cloudflare",
+    "category": "freeTier",
+    "color": "#F38020",
+    "textIcon": "CF",
+    "website": "https://developers.cloudflare.com/workers-ai/",
+    "format": "openai",
+    "baseUrlHost": "api.cloudflare.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "image",
+      "systemone"
+    ],
+    "modelCount": 25,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "codebuddy-cn",
+    "alias": "cbcn",
+    "name": "CodeBuddy CN",
+    "category": "oauth",
+    "color": "#006EFF",
+    "textIcon": null,
+    "website": "https://copilot.tencent.com",
+    "format": "openai",
+    "baseUrlHost": "copilot.tencent.com",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 11,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "codex",
+    "alias": "cx",
+    "name": "OpenAI Codex",
+    "category": "oauth",
+    "color": "#3B82F6",
+    "textIcon": null,
+    "website": "https://chatgpt.com/codex",
+    "format": "openai-responses",
+    "baseUrlHost": "chatgpt.com",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "image"
+    ],
+    "modelCount": 31,
+    "deprecated": true,
+    "riskNotice": "RISK_NOTICE"
+  },
+  {
+    "id": "cohere",
+    "alias": "cohere",
+    "name": "Cohere",
+    "category": "apikey",
+    "color": "#39594D",
+    "textIcon": "CO",
+    "website": "https://cohere.com",
+    "format": "openai",
+    "baseUrlHost": "api.cohere.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 3,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "comfyui",
+    "alias": "comfyui",
+    "name": "ComfyUI",
+    "category": "apikey",
+    "color": "#4CAF50",
+    "textIcon": "CF",
+    "website": "https://github.com/comfyanonymous/ComfyUI",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "commandcode",
+    "alias": "commandcode",
+    "name": "Command Code",
+    "category": "apikey",
+    "color": "#000000",
+    "textIcon": "CC",
+    "website": "https://commandcode.ai",
+    "format": "commandcode",
+    "baseUrlHost": "api.commandcode.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 22,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "coqui",
+    "alias": "coqui",
+    "name": "Coqui TTS",
+    "category": "freeTier",
+    "color": "#10B981",
+    "textIcon": "CQ",
+    "website": "https://github.com/coqui-ai/TTS",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "cursor",
+    "alias": "cu",
+    "name": "Cursor IDE",
+    "category": "oauth",
+    "color": "#00D4AA",
+    "textIcon": null,
+    "website": "https://cursor.com",
+    "format": "cursor",
+    "baseUrlHost": "api2.cursor.sh",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 14,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "deepgram",
+    "alias": "deepgram",
+    "name": "Deepgram",
+    "category": "apikey",
+    "color": "#13EF93",
+    "textIcon": "DG",
+    "website": "https://deepgram.com",
+    "format": "openai",
+    "baseUrlHost": "api.deepgram.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "stt"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "deepseek",
+    "alias": "deepseek",
+    "name": "DeepSeek",
+    "category": "apikey",
+    "color": "#4D6BFE",
+    "textIcon": "DS",
+    "website": "https://deepseek.com",
+    "format": "openai",
+    "baseUrlHost": "api.deepseek.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "edge-tts",
+    "alias": "edge-tts",
+    "name": "Edge TTS",
+    "category": "freeTier",
+    "color": "#0078D4",
+    "textIcon": "ET",
+    "website": null,
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "elevenlabs",
+    "alias": "el",
+    "name": "ElevenLabs",
+    "category": "apikey",
+    "color": "#6C47FF",
+    "textIcon": "EL",
+    "website": "https://elevenlabs.io",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "tts",
+      "stt"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "exa",
+    "alias": "exa",
+    "name": "Exa",
+    "category": "apikey",
+    "color": "#2563EB",
+    "textIcon": "EX",
+    "website": "https://exa.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch",
+      "webFetch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "fal-ai",
+    "alias": "fal-ai",
+    "name": "Fal.ai",
+    "category": "apikey",
+    "color": "#2563EB",
+    "textIcon": "FL",
+    "website": "https://fal.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "featherless",
+    "alias": "featherless",
+    "name": "Featherless",
+    "category": "apikey",
+    "color": "#111827",
+    "textIcon": "FL",
+    "website": "https://featherless.ai",
+    "format": "openai",
+    "baseUrlHost": "api.featherless.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "firecrawl",
+    "alias": "firecrawl",
+    "name": "Firecrawl",
+    "category": "apikey",
+    "color": "#F59E0B",
+    "textIcon": "FC",
+    "website": "https://firecrawl.dev",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webFetch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "fireworks",
+    "alias": "fireworks",
+    "name": "Fireworks AI",
+    "category": "apikey",
+    "color": "#7B2EF2",
+    "textIcon": "FW",
+    "website": "https://fireworks.ai",
+    "format": "openai",
+    "baseUrlHost": "api.fireworks.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "gemini-cli",
+    "alias": "gc",
+    "name": "Gemini CLI",
+    "category": "free",
+    "color": "#4285F4",
+    "textIcon": null,
+    "website": "https://github.com/google-gemini/gemini-cli",
+    "format": "gemini-cli",
+    "baseUrlHost": "cloudcode-pa.googleapis.com",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": true,
+    "riskNotice": "RISK_NOTICE"
+  },
+  {
+    "id": "gemini",
+    "alias": "gemini",
+    "name": "Gemini",
+    "category": "freeTier",
+    "color": "#4285F4",
+    "textIcon": "GE",
+    "website": "https://ai.google.dev",
+    "format": "gemini",
+    "baseUrlHost": "generativelanguage.googleapis.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding",
+      "image",
+      "imageToText",
+      "webSearch",
+      "tts",
+      "stt"
+    ],
+    "modelCount": 27,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "github",
+    "alias": "gh",
+    "name": "GitHub Copilot",
+    "category": "oauth",
+    "color": "#333333",
+    "textIcon": null,
+    "website": "https://github.com/features/copilot",
+    "format": "openai",
+    "baseUrlHost": "api.githubcopilot.com",
+    "hasOAuth": true,
+    "oauthFlow": "device",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding"
+    ],
+    "modelCount": 19,
+    "deprecated": true,
+    "riskNotice": "RISK_NOTICE"
+  },
+  {
+    "id": "gitlab",
+    "alias": "gitlab",
+    "name": "GitLab Duo",
+    "category": "oauth",
+    "color": "#FC6D26",
+    "textIcon": "GL",
+    "website": "https://gitlab.com",
+    "format": "openai",
+    "baseUrlHost": "gitlab.com",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "glm-cn",
+    "alias": "glm-cn",
+    "name": "GLM (China)",
+    "category": "apikey",
+    "color": "#DC2626",
+    "textIcon": "GC",
+    "website": "https://open.bigmodel.cn",
+    "format": "openai",
+    "baseUrlHost": "open.bigmodel.cn",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 10,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "glm",
+    "alias": "glm",
+    "name": "Zai GLM Coding",
+    "category": "oauth",
+    "color": "#2563EB",
+    "textIcon": "GL",
+    "website": "https://open.bigmodel.cn",
+    "format": "claude",
+    "baseUrlHost": "api.z.ai",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "webSearch"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "google-pse",
+    "alias": "gpse",
+    "name": "Google PSE",
+    "category": "apikey",
+    "color": "#4285F4",
+    "textIcon": "GP",
+    "website": "https://programmablesearchengine.google.com",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "google-tts",
+    "alias": "google-tts",
+    "name": "Google TTS",
+    "category": "freeTier",
+    "color": "#4285F4",
+    "textIcon": "GT",
+    "website": null,
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "grok-cli",
+    "alias": "gcli",
+    "name": "Grok CLI (Grok Build)",
+    "category": "oauth",
+    "color": "#1DA1F2",
+    "textIcon": "GC",
+    "website": "https://x.ai",
+    "format": "openai-responses",
+    "baseUrlHost": "cli-chat-proxy.grok.com",
+    "hasOAuth": true,
+    "oauthFlow": "device",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 5,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "grok-web",
+    "alias": "grok-web",
+    "name": "Grok Web (Subscription)",
+    "category": "webCookie",
+    "color": "#1DA1F2",
+    "textIcon": "GW",
+    "website": "https://grok.com",
+    "format": "grok-web",
+    "baseUrlHost": "grok.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 12,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "groq",
+    "alias": "groq",
+    "name": "Groq",
+    "category": "apikey",
+    "color": "#F55036",
+    "textIcon": "GQ",
+    "website": "https://groq.com",
+    "format": "openai",
+    "baseUrlHost": "api.groq.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "imageToText",
+      "stt"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "huggingface",
+    "alias": "huggingface",
+    "name": "HuggingFace",
+    "category": "apikey",
+    "color": "#FFD21E",
+    "textIcon": "HF",
+    "website": "https://huggingface.co",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image",
+      "stt"
+    ],
+    "modelCount": 25,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "hyperbolic",
+    "alias": "hyperbolic",
+    "name": "Hyperbolic",
+    "category": "apikey",
+    "color": "#00D4FF",
+    "textIcon": "HY",
+    "website": "https://hyperbolic.xyz",
+    "format": "openai",
+    "baseUrlHost": "api.hyperbolic.xyz",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "iflow",
+    "alias": "if",
+    "name": "iFlow AI",
+    "category": "oauth",
+    "color": "#6366F1",
+    "textIcon": null,
+    "website": "https://iflow.cn",
+    "format": "openai",
+    "baseUrlHost": "apis.iflow.cn",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 15,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "inworld",
+    "alias": "inworld",
+    "name": "Inworld TTS",
+    "category": "apikey",
+    "color": "#FF6B6B",
+    "textIcon": "IW",
+    "website": "https://inworld.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "jina-ai",
+    "alias": "jina",
+    "name": "Jina AI",
+    "category": "apikey",
+    "color": "#2563EB",
+    "textIcon": "JA",
+    "website": "https://jina.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "embedding"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "jina-reader",
+    "alias": "jina-reader",
+    "name": "Jina Reader",
+    "category": "apikey",
+    "color": "#000000",
+    "textIcon": "JR",
+    "website": "https://jina.ai/reader",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webFetch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "kilocode",
+    "alias": "kc",
+    "name": "Kilo Code",
+    "category": "oauth",
+    "color": "#FF6B35",
+    "textIcon": "KC",
+    "website": "https://kilocode.ai",
+    "format": "openai",
+    "baseUrlHost": "api.kilo.ai",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "kimchi",
+    "alias": "kimchi",
+    "name": "Kimchi",
+    "category": "freeTier",
+    "color": "#FF521D",
+    "textIcon": "KC",
+    "website": "https://kimchi.dev",
+    "format": "openai",
+    "baseUrlHost": "llm.kimchi.dev",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "imageToText"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "kimi",
+    "alias": "kimi",
+    "name": "Kimi",
+    "category": "oauth",
+    "color": "#1E3A8A",
+    "textIcon": "KM",
+    "website": "https://kimi.moonshot.cn",
+    "format": "claude",
+    "baseUrlHost": "api.kimi.com",
+    "hasOAuth": true,
+    "oauthFlow": "device",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "webSearch"
+    ],
+    "modelCount": 10,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "kiro",
+    "alias": "kr",
+    "name": "Kiro AI",
+    "category": "free",
+    "color": "#FF6B35",
+    "textIcon": null,
+    "website": "https://kiro.dev",
+    "format": "kiro",
+    "baseUrlHost": "runtime.us-east-1.kiro.dev",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 48,
+    "deprecated": true,
+    "riskNotice": "RISK_NOTICE"
+  },
+  {
+    "id": "linkup",
+    "alias": "linkup",
+    "name": "Linkup",
+    "category": "apikey",
+    "color": "#0EA5E9",
+    "textIcon": "LK",
+    "website": "https://linkup.so",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "local-device",
+    "alias": "local-device",
+    "name": "Local Device",
+    "category": "freeTier",
+    "color": "#64748B",
+    "textIcon": "LD",
+    "website": null,
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "mimo-free",
+    "alias": "mmf",
+    "name": "MiMo Code Free",
+    "category": "free",
+    "color": "#FF6900",
+    "textIcon": "MF",
+    "website": null,
+    "format": "openai",
+    "baseUrlHost": "api.xiaomimimo.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 1,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "minimax-cn",
+    "alias": "minimax-cn",
+    "name": "Minimax (China)",
+    "category": "apikey",
+    "color": "#DC2626",
+    "textIcon": "MC",
+    "website": "https://www.minimaxi.com",
+    "format": "claude",
+    "baseUrlHost": "api.minimaxi.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "tts"
+    ],
+    "modelCount": 12,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "minimax",
+    "alias": "minimax",
+    "name": "Minimax Coding",
+    "category": "apikey",
+    "color": "#7C3AED",
+    "textIcon": "MM",
+    "website": "https://www.minimaxi.com",
+    "format": "claude",
+    "baseUrlHost": "api.minimax.io",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "image",
+      "imageToText",
+      "webSearch",
+      "tts"
+    ],
+    "modelCount": 13,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "mistral",
+    "alias": "mistral",
+    "name": "Mistral",
+    "category": "apikey",
+    "color": "#FF7000",
+    "textIcon": "MI",
+    "website": "https://mistral.ai",
+    "format": "openai",
+    "baseUrlHost": "api.mistral.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "imageToText",
+      "embedding"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "mmf",
+    "alias": "mmf",
+    "name": "MMF",
+    "category": "apikey",
+    "color": "#6366F1",
+    "textIcon": "MF",
+    "website": null,
+    "format": "openai",
+    "baseUrlHost": "api.xiaomimimo.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 1,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "nanobanana",
+    "alias": "nanobanana",
+    "name": "NanoBanana API",
+    "category": "apikey",
+    "color": "#FFD700",
+    "textIcon": "🍌",
+    "website": "https://nanobananaapi.ai",
+    "format": "openai",
+    "baseUrlHost": "api.nanobananaapi.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "nebius",
+    "alias": "nebius",
+    "name": "Nebius AI",
+    "category": "apikey",
+    "color": "#6C5CE7",
+    "textIcon": "NB",
+    "website": "https://nebius.com",
+    "format": "openai",
+    "baseUrlHost": "api.studio.nebius.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "nvidia",
+    "alias": "nvidia",
+    "name": "NVIDIA NIM",
+    "category": "freeTier",
+    "color": "#76B900",
+    "textIcon": "NV",
+    "website": "https://developer.nvidia.com/nim",
+    "format": "openai",
+    "baseUrlHost": "integrate.api.nvidia.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "tts",
+      "embedding"
+    ],
+    "modelCount": 11,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "ollama-local",
+    "alias": "ollama-local",
+    "name": "Ollama Local",
+    "category": "apikey",
+    "color": "#ffffffff",
+    "textIcon": "OL",
+    "website": "https://ollama.com",
+    "format": "ollama",
+    "baseUrlHost": "localhost:11434",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "ollama",
+    "alias": "ollama",
+    "name": "Ollama Cloud",
+    "category": "freeTier",
+    "color": "#ffffffff",
+    "textIcon": "OL",
+    "website": "https://ollama.com",
+    "format": "ollama",
+    "baseUrlHost": "ollama.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "webFetch"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "ollama-search",
+    "alias": "ollama-search",
+    "name": "Ollama Search",
+    "category": "apikey",
+    "color": "#ffffff",
+    "textIcon": "OL",
+    "website": "https://ollama.com",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "qoder-cn",
+    "alias": "qdcn",
+    "name": "Qoder CN",
+    "category": "oauth",
+    "color": "#EC4899",
+    "textIcon": null,
+    "website": "https://qoder.com.cn",
+    "format": "openai",
+    "baseUrlHost": "gateway.qoder.com.cn",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 16,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "openai",
+    "alias": "openai",
+    "name": "OpenAI",
+    "category": "apikey",
+    "color": "#10A37F",
+    "textIcon": "OA",
+    "website": "https://platform.openai.com",
+    "format": "openai",
+    "baseUrlHost": "api.openai.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding",
+      "tts",
+      "stt",
+      "image",
+      "imageToText",
+      "webSearch"
+    ],
+    "modelCount": 36,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "opencode-go",
+    "alias": "opencode-go",
+    "name": "OpenCode Go",
+    "category": "apikey",
+    "color": "#E87040",
+    "textIcon": "OC",
+    "website": "https://opencode.ai/auth",
+    "format": "openai",
+    "baseUrlHost": "opencode.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 42,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "opencode-zen",
+    "alias": "ocz",
+    "name": "OpenCode Zen",
+    "category": "apikey",
+    "color": "#E87040",
+    "textIcon": "OZ",
+    "website": "https://opencode.ai/auth",
+    "format": "openai",
+    "baseUrlHost": "opencode.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "systemone"
+    ],
+    "modelCount": 74,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "opencode",
+    "alias": "oc",
+    "name": "OpenCode Free",
+    "category": "free",
+    "color": "#E87040",
+    "textIcon": "OC",
+    "website": null,
+    "format": "openai",
+    "baseUrlHost": "opencode.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "llm",
+      "systemone"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "openrouter",
+    "alias": "openrouter",
+    "name": "OpenRouter",
+    "category": "freeTier",
+    "color": "#F97316",
+    "textIcon": "OR",
+    "website": "https://openrouter.ai",
+    "format": "openai",
+    "baseUrlHost": "openrouter.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding",
+      "tts",
+      "imageToText",
+      "video",
+      "systemone"
+    ],
+    "modelCount": 18,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "perplexity-web",
+    "alias": "perplexity-web",
+    "name": "Perplexity Web (Pro/Max)",
+    "category": "webCookie",
+    "color": "#20808D",
+    "textIcon": "PW",
+    "website": "https://www.perplexity.ai",
+    "format": "perplexity-web",
+    "baseUrlHost": "www.perplexity.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "perplexity",
+    "alias": "perplexity",
+    "name": "Perplexity",
+    "category": "apikey",
+    "color": "#20808D",
+    "textIcon": "PP",
+    "website": "https://www.perplexity.ai",
+    "format": "openai",
+    "baseUrlHost": "api.perplexity.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "webSearch"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "perplexity-agent",
+    "alias": "perplexity-agent",
+    "name": "Perplexity Agent",
+    "category": "apikey",
+    "color": "#20808D",
+    "textIcon": "PA",
+    "website": "https://www.perplexity.ai",
+    "format": "openai-responses",
+    "baseUrlHost": "api.perplexity.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "webSearch"
+    ],
+    "modelCount": 11,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "playht",
+    "alias": "playht",
+    "name": "PlayHT",
+    "category": "apikey",
+    "color": "#00B4D8",
+    "textIcon": "PH",
+    "website": "https://play.ht",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "qoder",
+    "alias": "qd",
+    "name": "Qoder",
+    "category": "oauth",
+    "color": "#EC4899",
+    "textIcon": null,
+    "website": "https://qoder.com",
+    "format": "openai",
+    "baseUrlHost": "api3.qoder.sh",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 16,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "recraft",
+    "alias": "recraft",
+    "name": "Recraft",
+    "category": "apikey",
+    "color": "#EC4899",
+    "textIcon": "RC",
+    "website": "https://recraft.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "runwayml",
+    "alias": "runwayml",
+    "name": "Runway ML",
+    "category": "apikey",
+    "color": "#000000",
+    "textIcon": "RW",
+    "website": "https://runwayml.com",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "sdwebui",
+    "alias": "sdwebui",
+    "name": "SD WebUI",
+    "category": "apikey",
+    "color": "#FF7043",
+    "textIcon": "SD",
+    "website": "https://github.com/AUTOMATIC1111/stable-diffusion-webui",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "searchapi",
+    "alias": "searchapi",
+    "name": "SearchAPI",
+    "category": "apikey",
+    "color": "#0EA5A4",
+    "textIcon": "SA",
+    "website": "https://www.searchapi.io",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "searxng",
+    "alias": "searxng",
+    "name": "SearXNG",
+    "category": "freeTier",
+    "color": "#3B82F6",
+    "textIcon": "SX",
+    "website": "https://docs.searxng.org",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "serper",
+    "alias": "serper",
+    "name": "Serper",
+    "category": "apikey",
+    "color": "#4F46E5",
+    "textIcon": "SP",
+    "website": "https://serper.dev",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "siliconflow",
+    "alias": "siliconflow",
+    "name": "SiliconFlow",
+    "category": "apikey",
+    "color": "#5B6EF5",
+    "textIcon": "SF",
+    "website": "https://cloud.siliconflow.com",
+    "format": "openai",
+    "baseUrlHost": "api.siliconflow.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 16,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "stability-ai",
+    "alias": "stability-ai",
+    "name": "Stability AI",
+    "category": "apikey",
+    "color": "#8B5CF6",
+    "textIcon": "SA",
+    "website": "https://stability.ai",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 5,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "tavily",
+    "alias": "tavily",
+    "name": "Tavily",
+    "category": "apikey",
+    "color": "#5B21B6",
+    "textIcon": "TV",
+    "website": "https://tavily.com",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch",
+      "webFetch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "together",
+    "alias": "together",
+    "name": "Together AI",
+    "category": "apikey",
+    "color": "#0F6FFF",
+    "textIcon": "TG",
+    "website": "https://www.together.ai",
+    "format": "openai",
+    "baseUrlHost": "api.together.xyz",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding"
+    ],
+    "modelCount": 6,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "topaz",
+    "alias": "topaz",
+    "name": "Topaz",
+    "category": "apikey",
+    "color": "#059669",
+    "textIcon": "TP",
+    "website": "https://topazlabs.com",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "image"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "tortoise",
+    "alias": "tortoise",
+    "name": "Tortoise TTS",
+    "category": "freeTier",
+    "color": "#7C3AED",
+    "textIcon": "TT",
+    "website": "https://github.com/neonbjb/tortoise-tts",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": true,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "venice",
+    "alias": "venice",
+    "name": "Venice AI",
+    "category": "apikey",
+    "color": "#DC2626",
+    "textIcon": "VE",
+    "website": "https://venice.ai",
+    "format": "openai",
+    "baseUrlHost": "api.venice.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding",
+      "image"
+    ],
+    "modelCount": 15,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "vercel-ai-gateway",
+    "alias": "vercel-ai-gateway",
+    "name": "Vercel AI Gateway",
+    "category": "apikey",
+    "color": "#111827",
+    "textIcon": "VG",
+    "website": "https://vercel.com/ai-gateway",
+    "format": "openai",
+    "baseUrlHost": "ai-gateway.vercel.sh",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding",
+      "image",
+      "imageToText",
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "vertex-partner",
+    "alias": "vertex-partner",
+    "name": "Vertex Partner",
+    "category": "apikey",
+    "color": "#34A853",
+    "textIcon": "VP",
+    "website": "https://cloud.google.com/vertex-ai/generative-ai/docs/partner-models/use-partner-models",
+    "format": "openai",
+    "baseUrlHost": "aiplatform.googleapis.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "vertex",
+    "alias": "vertex",
+    "name": "Vertex AI",
+    "category": "freeTier",
+    "color": "#4285F4",
+    "textIcon": "VX",
+    "website": "https://cloud.google.com/vertex-ai",
+    "format": "vertex",
+    "baseUrlHost": "aiplatform.googleapis.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "imageToText",
+      "video"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "volcengine-ark",
+    "alias": "volcengine-ark",
+    "name": "Volcengine Ark",
+    "category": "apikey",
+    "color": "#1677FF",
+    "textIcon": "ARK",
+    "website": "https://ark.cn-beijing.volces.com",
+    "format": "openai",
+    "baseUrlHost": "ark.cn-beijing.volces.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 9,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "voyage-ai",
+    "alias": "voyage-ai",
+    "name": "Voyage AI",
+    "category": "apikey",
+    "color": "#0EA5E9",
+    "textIcon": "VG",
+    "website": "https://www.voyageai.com",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "embedding"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "xai",
+    "alias": "xai",
+    "name": "xAI (Grok)",
+    "category": "oauth",
+    "color": "#1DA1F2",
+    "textIcon": "XA",
+    "website": "https://x.ai",
+    "format": "openai",
+    "baseUrlHost": "api.x.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "imageToText",
+      "webSearch",
+      "image",
+      "video"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "xiaomi-mimo",
+    "alias": "xiaomi-mimo",
+    "name": "Xiaomi MiMo",
+    "category": "oauth",
+    "color": "#FF6900",
+    "textIcon": "XM",
+    "website": "https://xiaomimimo.com",
+    "format": "openai",
+    "baseUrlHost": "api.xiaomimimo.com",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "tts"
+    ],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "xiaomi-tokenplan",
+    "alias": "xiaomi-tokenplan",
+    "name": "Xiaomi MiMo (Token Plan)",
+    "category": "apikey",
+    "color": "#FF6700",
+    "textIcon": "XT",
+    "website": "https://mimo.xiaomi.com",
+    "format": "openai",
+    "baseUrlHost": "token-plan-sgp.xiaomimimo.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 9,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "youcom",
+    "alias": "youcom",
+    "name": "You.com Search",
+    "category": "apikey",
+    "color": "#7C3AED",
+    "textIcon": "YC",
+    "website": "https://you.com",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "alims-intl",
+    "alias": "alims-intl",
+    "name": "Alibaba Studio",
+    "category": "apikey",
+    "color": "#FF6A00",
+    "textIcon": "ALi",
+    "website": "https://modelstudio.console.alibabacloud.com",
+    "format": "openai",
+    "baseUrlHost": "dashscope-intl.aliyuncs.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "codebuddy-intl",
+    "alias": "cbai",
+    "name": "CodeBuddy",
+    "category": "oauth",
+    "color": "#006EFF",
+    "textIcon": null,
+    "website": "https://www.codebuddy.ai",
+    "format": "openai",
+    "baseUrlHost": "www.codebuddy.ai",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 15,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "zed",
+    "alias": "zd",
+    "name": "Zed",
+    "category": "oauth",
+    "color": "#A855F7",
+    "textIcon": null,
+    "website": "https://zed.dev",
+    "format": "openai",
+    "baseUrlHost": "cloud.zed.dev",
+    "hasOAuth": true,
+    "oauthFlow": "authorization-code",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "api-airforce",
+    "alias": "af",
+    "name": "API.airforce",
+    "category": "freeTier",
+    "color": "#0EA5E9",
+    "textIcon": "AF",
+    "website": "https://api.airforce",
+    "format": "openai",
+    "baseUrlHost": "api.airforce",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 3,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "baidu",
+    "alias": "qianfan",
+    "name": "Baidu Qianfan",
+    "category": "apikey",
+    "color": "#2932E1",
+    "textIcon": "BD",
+    "website": "https://cloud.baidu.com/product/qianfan.html",
+    "format": "openai",
+    "baseUrlHost": "qianfan.baidubce.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 7,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "bazaarlink",
+    "alias": "bzl",
+    "name": "Bazaarlink",
+    "category": "freeTier",
+    "color": "#DC2626",
+    "textIcon": "BZ",
+    "website": "https://bazaarlink.ai",
+    "format": "openai",
+    "baseUrlHost": "bazaarlink.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 24,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "bluesminds",
+    "alias": "bm",
+    "name": "BluesMinds",
+    "category": "apikey",
+    "color": "#2563EB",
+    "textIcon": "BM",
+    "website": "https://bluesminds.com",
+    "format": "openai",
+    "baseUrlHost": "api.bluesminds.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 14,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "kilo-gateway",
+    "alias": "kgw",
+    "name": "Kilo Gateway",
+    "category": "freeTier",
+    "color": "#8B5CF6",
+    "textIcon": "KG",
+    "website": "https://kilo.ai",
+    "format": "openai",
+    "baseUrlHost": "api.kilo.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 6,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "llm7",
+    "alias": "llm7",
+    "name": "LLM7",
+    "category": "apikey",
+    "color": "#7C3AED",
+    "textIcon": "L7",
+    "website": "https://llm7.io",
+    "format": "openai",
+    "baseUrlHost": "api.llm7.io",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 5,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "sambanova",
+    "alias": "samba",
+    "name": "SambaNova",
+    "category": "apikey",
+    "color": "#F97316",
+    "textIcon": "SN",
+    "website": "https://sambanova.ai",
+    "format": "openai",
+    "baseUrlHost": "api.sambanova.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 1,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "tencent",
+    "alias": "hunyuan",
+    "name": "Tencent Hunyuan",
+    "category": "apikey",
+    "color": "#0052D9",
+    "textIcon": "HY",
+    "website": "https://cloud.tencent.com/product/hunyuan",
+    "format": "openai",
+    "baseUrlHost": "api.hunyuan.cloud.tencent.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "morph",
+    "alias": "morph",
+    "name": "Morph",
+    "category": "apikey",
+    "color": "#14B8A6",
+    "textIcon": "MP",
+    "website": "https://morphllm.com",
+    "format": "openai",
+    "baseUrlHost": "api.morphllm.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 6,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "poolside",
+    "alias": "poolside",
+    "name": "Poolside",
+    "category": "freeTier",
+    "color": "#0EA5E9",
+    "textIcon": "PS",
+    "website": "https://poolside.ai",
+    "format": "openai",
+    "baseUrlHost": "inference.poolside.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "tokenrouter",
+    "alias": "tokenrouter",
+    "name": "TokenRouter",
+    "category": "apikey",
+    "color": "#0EA5E9",
+    "textIcon": "TR",
+    "website": "https://www.tokenrouter.com",
+    "format": "openai",
+    "baseUrlHost": "api.tokenrouter.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm",
+      "embedding",
+      "image"
+    ],
+    "modelCount": 22,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "selfhosted-stt",
+    "alias": "selfhosted-stt",
+    "name": "Self-hosted STT",
+    "category": "apikey",
+    "color": "#ffffffff",
+    "textIcon": "ST",
+    "website": "https://github.com/ggml-org/whisper.cpp",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "stt"
+    ],
+    "modelCount": 1,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "selfhosted-tts",
+    "alias": "selfhosted-tts",
+    "name": "Self-hosted TTS",
+    "category": "apikey",
+    "color": "#ffffffff",
+    "textIcon": "TT",
+    "website": "https://github.com/remsky/Kokoro-FastAPI",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 1,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "selfhosted-embedding",
+    "alias": "selfhosted-embedding",
+    "name": "Self-hosted Embedding",
+    "category": "apikey",
+    "color": "#ffffffff",
+    "textIcon": "SE",
+    "website": "https://github.com/ggml-org/llama.cpp",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "embedding"
+    ],
+    "modelCount": 1,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "fish-audio",
+    "alias": "fish",
+    "name": "Fish Audio",
+    "category": "apikey",
+    "color": "#1E9BF0",
+    "textIcon": "FA",
+    "website": "https://fish.audio",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "tts"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "alitp-intl",
+    "alias": "alitp-intl",
+    "name": "Alibaba Token Plan",
+    "category": "apikey",
+    "color": "#FF6A00",
+    "textIcon": "ATP",
+    "website": "https://www.alibabacloud.com/campaign/ai-landing-page-token",
+    "format": "openai",
+    "baseUrlHost": "token-plan.ap-southeast-1.maas.aliyuncs.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 6,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "xquik",
+    "alias": "xquik",
+    "name": "Xquik",
+    "category": "apikey",
+    "color": "#5C3327",
+    "textIcon": "XQ",
+    "website": "https://docs.xquik.com/api-reference/x/search-tweets",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "tokenharbor",
+    "alias": "tokenharbor",
+    "name": "Token Harbor",
+    "category": "apikey",
+    "color": "#0F766E",
+    "textIcon": "TH",
+    "website": "https://tokenharbor.ai",
+    "format": "openai",
+    "baseUrlHost": "tokenharbor.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 6,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "dahl",
+    "alias": "dahl",
+    "name": "Dahl Inference",
+    "category": "apikey",
+    "color": "#1E40AF",
+    "textIcon": "DH",
+    "website": "https://dahl.global",
+    "format": "openai",
+    "baseUrlHost": "inference.dahl.global",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 3,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "atria",
+    "alias": "atria",
+    "name": "Atria Dawn",
+    "category": "apikey",
+    "color": "#C2410C",
+    "textIcon": "AD",
+    "website": "https://atria-asi.ai",
+    "format": "openai",
+    "baseUrlHost": "api.atria-asi.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 1,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "agnes",
+    "alias": "agnes",
+    "name": "Agnes AI",
+    "category": "freeTier",
+    "color": "#7C3AED",
+    "textIcon": "AG",
+    "website": "https://agnes-ai.com",
+    "format": "openai",
+    "baseUrlHost": "apihub.agnes-ai.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "bai",
+    "alias": "bai",
+    "name": "B.AI",
+    "category": "apikey",
+    "color": "#0369A1",
+    "textIcon": "BA",
+    "website": "https://b.ai",
+    "format": "openai",
+    "baseUrlHost": "api.b.ai",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "tinyfish",
+    "alias": "tinyfish",
+    "name": "TinyFish",
+    "category": "apikey",
+    "color": "#FF6700",
+    "textIcon": "TF",
+    "website": "https://www.tinyfish.ai/",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "webSearch",
+      "webFetch"
+    ],
+    "modelCount": 0,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "v1m",
+    "alias": "v1m",
+    "name": "v1m (System One)",
+    "category": "apikey",
+    "color": "#6366F1",
+    "textIcon": "V1",
+    "website": "https://v1m.ir",
+    "format": null,
+    "baseUrlHost": null,
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "systemone"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "muse",
+    "alias": "muse",
+    "name": "Muse (Meta Model API)",
+    "category": "oauth",
+    "color": "#0866FF",
+    "textIcon": "MU",
+    "website": "https://muse.ai",
+    "format": "openai",
+    "baseUrlHost": "api.meta.ai",
+    "hasOAuth": true,
+    "oauthFlow": "device",
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 5,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "minimax-code",
+    "alias": "mm",
+    "name": "MiniMax Code",
+    "category": "oauth",
+    "color": "#FF4D4F",
+    "textIcon": "MM",
+    "website": "https://agent.minimax.cn",
+    "format": "claude",
+    "baseUrlHost": "agent.minimax.cn",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "minimax-code-global",
+    "alias": "mmg",
+    "name": "MiniMax Code (Global)",
+    "category": "oauth",
+    "color": "#FF4D4F",
+    "textIcon": "MM",
+    "website": "https://agent.minimax.io",
+    "format": "claude",
+    "baseUrlHost": "agent.minimax.io",
+    "hasOAuth": true,
+    "oauthFlow": "other",
+    "authModes": [
+      "oauth"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 4,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "bedrock",
+    "alias": "br",
+    "name": "AWS Bedrock",
+    "category": "apikey",
+    "color": "#FF9900",
+    "textIcon": "BR",
+    "website": "https://aws.amazon.com/bedrock/",
+    "format": "claude",
+    "baseUrlHost": "bedrock-runtime.{region}.amazonaws.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 11,
+    "deprecated": false,
+    "riskNotice": null
+  },
+  {
+    "id": "bedrock-xai",
+    "alias": "brx",
+    "name": "AWS Bedrock (xAI)",
+    "category": "apikey",
+    "color": "#FF9900",
+    "textIcon": "BX",
+    "website": "https://aws.amazon.com/bedrock/",
+    "format": "openai",
+    "baseUrlHost": "bedrock-runtime.{region}.amazonaws.com",
+    "hasOAuth": false,
+    "oauthFlow": null,
+    "authModes": [
+      "apikey"
+    ],
+    "noAuth": false,
+    "serviceKinds": [
+      "llm"
+    ],
+    "modelCount": 2,
+    "deprecated": false,
+    "riskNotice": null
+  }
+]

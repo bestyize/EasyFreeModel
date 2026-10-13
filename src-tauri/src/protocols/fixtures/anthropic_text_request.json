@@ -1,0 +1,17 @@
+{
+  "model": "gpt-4o-mini",
+  "max_tokens": 256,
+  "system": [
+    {"type": "text", "text": "You are helpful."},
+    {"type": "text", "text": "Answer briefly."}
+  ],
+  "messages": [
+    {"role": "user", "content": "Hello"},
+    {"role": "assistant", "content": "Hi!"},
+    {"role": "user", "content": [{"type": "text", "text": "What is 2+2?"}]}
+  ],
+  "temperature": 0.2,
+  "top_p": 0.9,
+  "stop_sequences": ["END"],
+  "metadata": {"user_id": "u-1"}
+}

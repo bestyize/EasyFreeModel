@@ -1,0 +1,9 @@
+{
+  "systemInstruction": {"parts": [{"text": "You are helpful."}, {"text": "Answer briefly."}]},
+  "contents": [
+    {"role": "user", "parts": [{"text": "Hello"}]},
+    {"role": "model", "parts": [{"text": "Hi!"}]},
+    {"role": "user", "parts": [{"text": "What is 2+2?"}]}
+  ],
+  "generationConfig": {"temperature": 0.2, "topP": 0.9, "maxOutputTokens": 256, "stopSequences": ["END"]}
+}

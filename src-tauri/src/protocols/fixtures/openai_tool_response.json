@@ -1,0 +1,14 @@
+{
+  "id": "chatcmpl-abc",
+  "object": "chat.completion",
+  "created": 1760000000,
+  "model": "gpt-4o",
+  "choices": [{
+    "index": 0,
+    "message": {"role": "assistant", "content": "Checking.", "tool_calls": [
+      {"id": "call_9", "type": "function", "function": {"name": "get_weather", "arguments": "{\"city\":\"Oslo\"}"}}
+    ]},
+    "finish_reason": "tool_calls"
+  }],
+  "usage": {"prompt_tokens": 120, "completion_tokens": 20, "total_tokens": 140, "prompt_tokens_details": {"cached_tokens": 100}}
+}

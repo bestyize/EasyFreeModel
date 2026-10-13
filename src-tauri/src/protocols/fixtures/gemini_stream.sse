@@ -1,0 +1,12 @@
+data: {"candidates":[{"content":{"role":"model","parts":[{"text":"Let me think about the weather. ","thought":true}]},"index":0}],"usageMetadata":{"promptTokenCount":120,"cachedContentTokenCount":100,"totalTokenCount":120},"modelVersion":"gemini-2.5-pro","responseId":"resp-1"}
+
+data: {"candidates":[{"content":{"role":"model","parts":[{"text":"Two cities.","thought":true}]},"index":0}],"modelVersion":"gemini-2.5-pro","responseId":"resp-1"}
+
+data: {"candidates":[{"content":{"role":"model","parts":[{"text":"Checking 你"}]},"index":0}],"modelVersion":"gemini-2.5-pro","responseId":"resp-1"}
+
+data: {"candidates":[{"content":{"role":"model","parts":[{"text":"好 now."}]},"index":0}],"modelVersion":"gemini-2.5-pro","responseId":"resp-1"}
+
+data: {"candidates":[{"content":{"role":"model","parts":[{"functionCall":{"name":"get_weather","args":{"city":"Oslo"}},"thoughtSignature":"c2lnLTE="},{"functionCall":{"id":"call_b","name":"get_weather","args":{"city":"Rome"}}}]},"index":0}],"modelVersion":"gemini-2.5-pro","responseId":"resp-1"}
+
+data: {"candidates":[{"content":{"role":"model","parts":[{"text":""}]},"finishReason":"STOP","index":0}],"usageMetadata":{"promptTokenCount":120,"cachedContentTokenCount":100,"candidatesTokenCount":14,"thoughtsTokenCount":6,"totalTokenCount":140},"modelVersion":"gemini-2.5-pro","responseId":"resp-1"}
+

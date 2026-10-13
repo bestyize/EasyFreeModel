@@ -1,0 +1,22 @@
+{
+  "model": "gpt-4o",
+  "input": [
+    {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Weather in Paris and Tokyo, then Berlin?"}]},
+    {"type": "function_call", "id": "fc_1", "call_id": "call_1", "name": "get_weather", "arguments": "{\"city\":\"Paris\"}", "status": "completed"},
+    {"type": "function_call", "id": "fc_2", "call_id": "call_2", "name": "get_weather", "arguments": "{\"city\":\"Tokyo\"}", "status": "completed"},
+    {"type": "function_call_output", "call_id": "call_1", "output": "18C sunny"},
+    {"type": "function_call_output", "call_id": "call_2", "output": "25C rain"},
+    {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Let me also check Berlin."}]},
+    {"type": "function_call", "id": "fc_3", "call_id": "call_3", "name": "get_weather", "arguments": "{\"city\":\"Berlin\"}", "status": "completed"},
+    {"type": "function_call_output", "call_id": "call_3", "output": "12C cloudy"}
+  ],
+  "tools": [{
+    "type": "function",
+    "name": "get_weather",
+    "description": "Get current weather for a city",
+    "parameters": {"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]},
+    "strict": false
+  }],
+  "tool_choice": "auto",
+  "max_output_tokens": 512
+}

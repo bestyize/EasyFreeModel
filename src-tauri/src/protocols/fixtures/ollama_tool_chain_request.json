@@ -1,0 +1,25 @@
+{
+  "model": "qwen3",
+  "messages": [
+    {"role": "user", "content": "Weather in Paris and Tokyo, then Berlin?"},
+    {"role": "assistant", "content": "", "tool_calls": [
+      {"id": "call_1", "function": {"index": 0, "name": "get_weather", "arguments": {"city": "Paris"}}},
+      {"id": "call_2", "function": {"index": 1, "name": "get_weather", "arguments": {"city": "Tokyo"}}}
+    ]},
+    {"role": "tool", "tool_name": "get_weather", "content": "18C sunny"},
+    {"role": "tool", "tool_name": "get_weather", "content": "25C rain"},
+    {"role": "assistant", "content": "Let me also check Berlin.", "tool_calls": [
+      {"id": "call_3", "function": {"index": 0, "name": "get_weather", "arguments": {"city": "Berlin"}}}
+    ]},
+    {"role": "tool", "tool_name": "get_weather", "content": "12C cloudy"}
+  ],
+  "tools": [{
+    "type": "function",
+    "function": {
+      "name": "get_weather",
+      "description": "Get current weather for a city",
+      "parameters": {"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}
+    }
+  }],
+  "options": {"num_predict": 512}
+}

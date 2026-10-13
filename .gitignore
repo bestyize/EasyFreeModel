@@ -1,0 +1,21 @@
+# dependencies and build output
+node_modules/
+dist/
+src-tauri/target/
+src-tauri/gen/
+
+# editor and OS
+.idea/
+.vscode/
+.DS_Store
+.buildcache/
+
+# local tool state
+.claude/settings.local.json
+.claude/scheduled_tasks.json
+
+# environment and credentials
+.env
+.env.*
+*.pem
+*.key

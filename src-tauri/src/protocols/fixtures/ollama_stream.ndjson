@@ -1,0 +1,6 @@
+{"model":"qwen3","created_at":"2025-10-09T08:53:20.1Z","message":{"role":"assistant","content":"","thinking":"Need the "},"done":false}
+{"model":"qwen3","created_at":"2025-10-09T08:53:20.2Z","message":{"role":"assistant","content":"","thinking":"weather."},"done":false}
+{"model":"qwen3","created_at":"2025-10-09T08:53:20.3Z","message":{"role":"assistant","content":"Check"},"done":false}
+{"model":"qwen3","created_at":"2025-10-09T08:53:20.4Z","message":{"role":"assistant","content":"ing 你好."},"done":false}
+{"model":"qwen3","created_at":"2025-10-09T08:53:20.5Z","message":{"role":"assistant","content":"","tool_calls":[{"function":{"index":0,"name":"get_weather","arguments":{"city":"Oslo"}}}]},"done":false}
+{"model":"qwen3","created_at":"2025-10-09T08:53:20.6Z","message":{"role":"assistant","content":""},"done":true,"done_reason":"stop","total_duration":5589157167,"prompt_eval_count":120,"prompt_eval_duration":383809000,"eval_count":20,"eval_duration":1731348000}

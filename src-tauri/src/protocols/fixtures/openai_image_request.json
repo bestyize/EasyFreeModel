@@ -1,0 +1,12 @@
+{
+  "model": "gpt-4o",
+  "messages": [{
+    "role": "user",
+    "content": [
+      {"type": "text", "text": "Describe these"},
+      {"type": "image_url", "image_url": {"url": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUg=="}},
+      {"type": "image_url", "image_url": {"url": "https://example.com/cat.jpg"}}
+    ]
+  }],
+  "max_tokens": 100
+}

@@ -1,0 +1,20 @@
+{
+  "id": "chatcmpl-abc",
+  "object": "response",
+  "created_at": 1760000000,
+  "status": "completed",
+  "model": "gpt-4o",
+  "output": [
+    {"type": "message", "id": "msg_1", "status": "completed", "role": "assistant",
+     "content": [{"type": "output_text", "text": "Checking.", "annotations": []}]},
+    {"type": "web_search_call", "id": "ws_1", "status": "completed"},
+    {"type": "function_call", "id": "fc_1", "call_id": "call_9", "name": "get_weather", "arguments": "{\"city\":\"Oslo\"}", "status": "completed"}
+  ],
+  "usage": {
+    "input_tokens": 120,
+    "input_tokens_details": {"cached_tokens": 100},
+    "output_tokens": 20,
+    "output_tokens_details": {"reasoning_tokens": 5},
+    "total_tokens": 140
+  }
+}

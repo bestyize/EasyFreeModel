@@ -1,0 +1,14 @@
+{
+  "model": "o4-mini",
+  "input": [
+    {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Plan a trip and check Oslo weather."}]},
+    {"type": "reasoning", "id": "rs_1", "summary": [{"type": "summary_text", "text": "Need weather first."}, {"type": "summary_text", "text": "Then plan."}], "encrypted_content": "ENC-1"},
+    {"type": "function_call", "id": "fc_1", "call_id": "call_1", "name": "get_weather", "arguments": "{\"city\":\"Oslo\"}"},
+    {"type": "function_call_output", "call_id": "call_1", "output": "4C snow"},
+    {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Thanks, continue."}]}
+  ],
+  "tools": [{"type": "function", "name": "get_weather", "parameters": {"type": "object", "properties": {"city": {"type": "string"}}}}],
+  "reasoning": {"effort": "high", "summary": "auto"},
+  "max_output_tokens": 2000,
+  "stream": true
+}

@@ -1,0 +1,29 @@
+{
+  "contents": [
+    {"role": "user", "parts": [{"text": "Weather in Paris and Tokyo, then Berlin?"}]},
+    {"role": "model", "parts": [
+      {"functionCall": {"id": "call_1", "name": "get_weather", "args": {"city": "Paris"}}},
+      {"functionCall": {"id": "call_2", "name": "get_weather", "args": {"city": "Tokyo"}}}
+    ]},
+    {"role": "user", "parts": [
+      {"functionResponse": {"id": "call_1", "name": "get_weather", "response": {"output": "18C sunny"}}},
+      {"functionResponse": {"id": "call_2", "name": "get_weather", "response": {"output": "25C rain"}}}
+    ]},
+    {"role": "model", "parts": [
+      {"text": "Let me also check Berlin."},
+      {"functionCall": {"id": "call_3", "name": "get_weather", "args": {"city": "Berlin"}}}
+    ]},
+    {"role": "user", "parts": [
+      {"functionResponse": {"id": "call_3", "name": "get_weather", "response": {"output": "12C cloudy"}}}
+    ]}
+  ],
+  "tools": [{
+    "functionDeclarations": [{
+      "name": "get_weather",
+      "description": "Get current weather for a city",
+      "parameters": {"type": "OBJECT", "properties": {"city": {"type": "STRING"}}, "required": ["city"]}
+    }]
+  }],
+  "toolConfig": {"functionCallingConfig": {"mode": "AUTO"}},
+  "generationConfig": {"maxOutputTokens": 512}
+}

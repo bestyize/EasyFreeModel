@@ -1,0 +1,13 @@
+{
+  "id": "chatcmpl-abc",
+  "type": "message",
+  "role": "assistant",
+  "model": "gpt-4o",
+  "content": [
+    {"type": "text", "text": "Checking."},
+    {"type": "tool_use", "id": "call_9", "name": "get_weather", "input": {"city": "Oslo"}}
+  ],
+  "stop_reason": "tool_use",
+  "stop_sequence": null,
+  "usage": {"input_tokens": 20, "cache_read_input_tokens": 100, "output_tokens": 20}
+}

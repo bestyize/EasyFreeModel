@@ -1,0 +1,11 @@
+{
+  "contents": [{
+    "role": "user",
+    "parts": [
+      {"text": "Describe these"},
+      {"inlineData": {"mimeType": "image/png", "data": "iVBORw0KGgoAAAANSUhEUg=="}},
+      {"fileData": {"mimeType": "image/jpeg", "fileUri": "https://example.com/cat.jpg"}}
+    ]
+  }],
+  "generationConfig": {"maxOutputTokens": 100}
+}

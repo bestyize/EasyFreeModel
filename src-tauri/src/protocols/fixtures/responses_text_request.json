@@ -1,0 +1,15 @@
+{
+  "model": "gpt-4o-mini",
+  "instructions": "You are helpful.",
+  "input": [
+    {"role": "developer", "content": "Answer briefly."},
+    {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "Hello"}]},
+    {"type": "message", "role": "assistant", "content": [{"type": "output_text", "text": "Hi!", "annotations": []}]},
+    {"type": "message", "role": "user", "content": [{"type": "input_text", "text": "What is 2+2?"}]}
+  ],
+  "temperature": 0.2,
+  "top_p": 0.9,
+  "max_output_tokens": 256,
+  "user": "u-1",
+  "store": false
+}

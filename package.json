@@ -1,0 +1,32 @@
+{
+  "name": "router-desktop",
+  "private": true,
+  "version": "0.5.99",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc --noEmit && vite build",
+    "typecheck": "vue-tsc --noEmit",
+    "test": "vitest run",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.12.3",
+    "echarts": "6.1.0",
+    "lucide-vue-next": "1.0.0",
+    "pinia": "4.0.3",
+    "vue": "3.5.44",
+    "vue-router": "5.4.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.12.2",
+    "@types/node": "25.9.9",
+    "@vitejs/plugin-vue": "6.0.10",
+    "@vue/test-utils": "2.5.1",
+    "jsdom": "29.1.1",
+    "typescript": "5.9.3",
+    "vite": "8.3.4",
+    "vitest": "5.0.4",
+    "vue-tsc": "3.3.13"
+  }
+}

@@ -1,0 +1,28 @@
+{
+  "model": "gpt-4o",
+  "max_tokens": 512,
+  "messages": [
+    {"role": "user", "content": "Weather in Paris and Tokyo, then Berlin?"},
+    {"role": "assistant", "content": [
+      {"type": "tool_use", "id": "call_1", "name": "get_weather", "input": {"city": "Paris"}},
+      {"type": "tool_use", "id": "call_2", "name": "get_weather", "input": {"city": "Tokyo"}}
+    ]},
+    {"role": "user", "content": [
+      {"type": "tool_result", "tool_use_id": "call_1", "content": "18C sunny"},
+      {"type": "tool_result", "tool_use_id": "call_2", "content": "25C rain"}
+    ]},
+    {"role": "assistant", "content": [
+      {"type": "text", "text": "Let me also check Berlin."},
+      {"type": "tool_use", "id": "call_3", "name": "get_weather", "input": {"city": "Berlin"}}
+    ]},
+    {"role": "user", "content": [
+      {"type": "tool_result", "tool_use_id": "call_3", "content": [{"type": "text", "text": "12C cloudy"}]}
+    ]}
+  ],
+  "tools": [{
+    "name": "get_weather",
+    "description": "Get current weather for a city",
+    "input_schema": {"type": "object", "properties": {"city": {"type": "string"}}, "required": ["city"]}
+  }],
+  "tool_choice": {"type": "auto"}
+}

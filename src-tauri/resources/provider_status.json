@@ -1,0 +1,804 @@
+{
+  "alicode-intl": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://coding-intl.dashscope.aliyuncs.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "alicode": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://coding.dashscope.aliyuncs.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "anthropic": {
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://api.anthropic.com/v1/messages",
+    "auth": "x-api-key",
+    "reason": null
+  },
+  "antigravity": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "assemblyai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "aws-polly": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "azure": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "Azure OpenAI 需按资源配置专属端点与部署名，待接入"
+  },
+  "black-forest-labs": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "blackbox": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.blackbox.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "brave-search": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "byteplus": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://ark.ap-southeast.bytepluses.com/api/coding/v3/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "cartesia": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "cerebras": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.cerebras.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "chutes": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://llm.chutes.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "claude": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "cline": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "clinepass": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "cloudflare-ai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "Cloudflare 端点需要账户 ID 参数，待接入"
+  },
+  "codebuddy-cn": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "codex": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "cohere": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.cohere.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "comfyui": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "commandcode": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "Command Code 专有协议待接入"
+  },
+  "coqui": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "cursor": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "deepgram": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "deepseek": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.deepseek.com/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "edge-tts": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "elevenlabs": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "exa": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "fal-ai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "featherless": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.featherless.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "firecrawl": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "fireworks": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.fireworks.ai/inference/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "gemini-cli": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "gemini": {
+    "adapter": "gemini",
+    "baseUrl": "https://generativelanguage.googleapis.com/v1beta/models",
+    "auth": {
+      "header": "x-goog-api-key"
+    },
+    "reason": null
+  },
+  "github": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "gitlab": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "glm-cn": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://open.bigmodel.cn/api/coding/paas/v4/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "glm": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "google-pse": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "google-tts": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "grok-cli": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "grok-web": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "网页会话类暂缓"
+  },
+  "groq": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.groq.com/openai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "huggingface": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "hyperbolic": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.hyperbolic.xyz/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "iflow": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "inworld": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "jina-ai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "嵌入适配器待接入"
+  },
+  "jina-reader": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "kilocode": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "kimchi": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "kimi": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "kiro": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "linkup": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "local-device": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "mimo-free": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "官方免费通道已结束"
+  },
+  "minimax-cn": {
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://api.minimaxi.com/anthropic/v1/messages",
+    "auth": "x-api-key",
+    "reason": null
+  },
+  "minimax": {
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://api.minimax.io/anthropic/v1/messages",
+    "auth": "x-api-key",
+    "reason": null
+  },
+  "mistral": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.mistral.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "mmf": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "官方免费通道已结束"
+  },
+  "nanobanana": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "nebius": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.studio.nebius.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "nvidia": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://integrate.api.nvidia.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "ollama-local": {
+    "adapter": "ollama",
+    "baseUrl": "http://localhost:11434/api/chat",
+    "auth": "bearer",
+    "reason": null
+  },
+  "ollama": {
+    "adapter": "ollama",
+    "baseUrl": "https://ollama.com/api/chat",
+    "auth": "bearer",
+    "reason": null
+  },
+  "ollama-search": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "qoder-cn": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "openai": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.openai.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "opencode-go": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://opencode.ai/zen/go/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "opencode-zen": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://opencode.ai/zen/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "opencode": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OpenCode Free 按模型使用不同的端点格式，待接入"
+  },
+  "openrouter": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://openrouter.ai/api/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "perplexity-web": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "网页会话类暂缓"
+  },
+  "perplexity": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.perplexity.ai/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "perplexity-agent": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OpenAI Responses 上游适配待接入"
+  },
+  "playht": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "qoder": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "recraft": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "runwayml": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "sdwebui": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "searchapi": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "searxng": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "serper": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "siliconflow": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.siliconflow.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "stability-ai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "tavily": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "together": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.together.xyz/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "topaz": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "tortoise": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "venice": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.venice.ai/api/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "vercel-ai-gateway": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://ai-gateway.vercel.sh/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "vertex-partner": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "Vertex 合作伙伴模型需要 Google 服务账号认证，待接入"
+  },
+  "vertex": {
+    "adapter": "vertex",
+    "baseUrl": "https://aiplatform.googleapis.com",
+    "auth": {
+      "header": "x-goog-api-key"
+    },
+    "reason": null
+  },
+  "volcengine-ark": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://ark.cn-beijing.volces.com/api/coding/v3/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "voyage-ai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "嵌入适配器待接入"
+  },
+  "xai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "xiaomi-mimo": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "xiaomi-tokenplan": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "端点按区域动态解析，待接入"
+  },
+  "youcom": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "alims-intl": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://dashscope-intl.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "codebuddy-intl": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "zed": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "api-airforce": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.airforce/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "baidu": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://qianfan.baidubce.com/v2/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "bazaarlink": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://bazaarlink.ai/api/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "bluesminds": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.bluesminds.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "kilo-gateway": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.kilo.ai/api/gateway/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "llm7": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.llm7.io/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "sambanova": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.sambanova.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "tencent": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.hunyuan.cloud.tencent.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "morph": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.morphllm.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "poolside": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://inference.poolside.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "tokenrouter": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.tokenrouter.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "selfhosted-stt": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "selfhosted-tts": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "selfhosted-embedding": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "嵌入适配器待接入"
+  },
+  "fish-audio": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "媒体适配器由媒体模块提供"
+  },
+  "alitp-intl": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://token-plan.ap-southeast-1.maas.aliyuncs.com/compatible-mode/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "xquik": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "tokenharbor": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://tokenharbor.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "dahl": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://inference.dahl.global/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "atria": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.atria-asi.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "agnes": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://apihub.agnes-ai.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "bai": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.b.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
+  "tinyfish": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "搜索/抓取适配器由 WebSearch 模块提供"
+  },
+  "v1m": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "System One 协议待接入"
+  },
+  "muse": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+  },
+  "minimax-code": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "minimax-code-global": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "OAuth 授权流程待接入"
+  },
+  "bedrock": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "AWS SigV4 签名认证待接入"
+  },
+  "bedrock-xai": {
+    "adapter": null,
+    "baseUrl": null,
+    "auth": null,
+    "reason": "AWS SigV4 签名认证待接入"
+  }
+}

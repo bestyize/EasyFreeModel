@@ -1,0 +1,5 @@
+{
+  "model": "llava",
+  "messages": [{"role": "user", "content": "Describe this", "images": ["iVBORw0KGgoAAAANSUhEUg=="]}],
+  "options": {"num_predict": 100}
+}

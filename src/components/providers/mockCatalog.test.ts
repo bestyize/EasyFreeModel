@@ -1,0 +1,132 @@
+import { beforeEach, describe, expect, it } from 'vitest'
+import catalogJson from '../../../src-tauri/resources/provider_catalog.json'
+import statusJson from '../../../src-tauri/resources/provider_status.json'
+import { __resetProvidersMock, __setProvidersMockLatency, providersMock as mock } from '@/api/mock/providers'
+
+const catalog = catalogJson as unknown as { id: string; category: string; serviceKinds: string[]; color: string | null }[]
+const status = statusJson as unknown as Record<string, { adapter: string | null; reason: string | null; baseUrl: string | null }>
+
+const SECRET = 'sk-mock-SUPERSECRET-0001'
+
+beforeEach(() => {
+  __setProvidersMockLatency(0)
+  __resetProvidersMock()
+})
+
+describe('mock 目录与真实资源一致', () => {
+  it('133 家，分组 23 / 23 / 87，顺序自定义 → OAuth → 免费 → API Key', async () => {
+    const list = await mock.listProviders()
+    expect(list).toHaveLength(133)
+    expect(list.filter((p) => p.group === 'oauth')).toHaveLength(23)
+    expect(list.filter((p) => p.group === 'free')).toHaveLength(23)
+    expect(list.filter((p) => p.group === 'apikey')).toHaveLength(87)
+    const rank = { custom: 0, oauth: 1, free: 2, apikey: 3 } as const
+    expect(list.every((p, i) => i === 0 || rank[list[i - 1].group] <= rank[p.group])).toBe(true)
+    expect(new Set(list.map((p) => p.id)).size).toBe(133)
+    expect(catalog.map((c) => c.id).sort()).toEqual(list.map((p) => p.id).sort())
+  })
+
+  it('adapterReady 与 provider_status.json 一致，待接入必有原因', async () => {
+    const list = await mock.listProviders()
+    for (const p of list) {
+      const st = status[p.id]
+      expect(p.adapterReady, p.id).toBe(st.adapter !== null)
+      if (p.adapterReady) {
+        expect(p.pendingReason, p.id).toBeNull()
+      } else {
+        expect(p.pendingReason, p.id).toBe(st.reason)
+        expect((p.pendingReason ?? '').trim(), p.id).not.toBe('')
+        expect(p.status).toBe('unsupported')
+      }
+    }
+    expect(list.filter((p) => p.adapterReady).length).toBe(Object.values(status).filter((s) => s.adapter).length)
+  })
+
+  it('目录元数据：颜色规范化、未声明服务类型按 llm、authModes 使用 apiKey 写法', async () => {
+    const byId = Object.fromEntries((await mock.listProviders()).map((p) => [p.id, p]))
+    expect(byId['chutes'].color).toBe('#FFFFFF')
+    expect(byId['alicode-intl'].color).toBe('#FF6A00')
+    expect(byId['alicode-intl'].textIcon).toBe('ALi')
+    expect(byId['azure'].serviceKinds).toEqual(['llm'])
+    expect(byId['openai'].authModes).toEqual(['apiKey'])
+    expect(byId['clinepass'].authModes).toEqual(['apiKey', 'oauth'])
+    expect(byId['edge-tts'].website).toBeNull()
+    for (const p of Object.values(byId)) expect(p.color === null || /^#[0-9A-F]{6}$/.test(p.color), p.id).toBe(true)
+  })
+
+  it('风险提示只给 OAuth/订阅类，且不是占位字符串', async () => {
+    expect((await mock.getProvider('openrouter')).riskNotice).toBeNull()
+    expect((await mock.getProvider('elevenlabs')).riskNotice).toBeNull()
+    for (const id of ['claude', 'gemini-cli']) {
+      const n = (await mock.getProvider(id)).riskNotice
+      expect(n).toContain('OAuth')
+      expect(n).not.toBe('RISK_NOTICE')
+    }
+  })
+})
+
+describe('mock 命令遵守同样的红线', () => {
+  it('addConnection：未就绪的提供商被拒绝并说明原因', async () => {
+    await expect(mock.addConnection({ providerId: 'claude', accountLabel: 'x', apiKey: SECRET })).rejects.toThrow(
+      'OAuth 授权流程待接入',
+    )
+    await expect(mock.addConnection({ providerId: 'elevenlabs', accountLabel: 'x', apiKey: SECRET })).rejects.toThrow(
+      '媒体适配器由媒体模块提供',
+    )
+  })
+
+  it('addConnection：校验输入，成功返回的 Connection 与后续任何读取都不含密钥', async () => {
+    await expect(mock.addConnection({ providerId: 'openai', accountLabel: 'x', apiKey: '   ' })).rejects.toThrow('API Key')
+    await expect(mock.addConnection({ providerId: 'openai', accountLabel: ' ', apiKey: SECRET })).rejects.toThrow('账户标识')
+    const conn = await mock.addConnection({ providerId: 'openai', accountLabel: '  work  ', apiKey: ` ${SECRET} ` })
+    expect(conn.accountLabel).toBe('work')
+    expect(conn.kind).toBe('apiKey')
+    const dump = JSON.stringify([conn, await mock.getProvider('openai'), await mock.listProviders()])
+    expect(dump).not.toContain('SUPERSECRET')
+    expect((await mock.listProviders()).find((p) => p.id === 'openai')?.connectionCount).toBe(1)
+  })
+
+  it('testProviders / testConnection 永远不伪造成功', async () => {
+    const conn = await mock.addConnection({ providerId: 'openai', accountLabel: 'k', apiKey: SECRET })
+    const res = await mock.testProviders(['claude', 'openai', 'mistral', 'openrouter', 'nope', 'claude'])
+    expect(res.every((r) => !r.ok)).toBe(true)
+    const of = (id: string) => res.filter((r) => r.providerId === id)
+    expect(of('claude')).toHaveLength(1)
+    expect(of('claude')[0].error).toContain('OAuth 授权流程待接入')
+    expect(of('openai')[0].connectionId).toBe(conn.id)
+    expect(of('openai')[0].error).toContain('无法确认可用')
+    expect(of('mistral')[0].error).toContain('尚未添加连接')
+    expect(of('nope')[0].error).toContain('不存在')
+    expect((await mock.testConnection(conn.id)).ok).toBe(false)
+    expect(JSON.stringify(res)).not.toContain('SUPERSECRET')
+  })
+
+  it('自定义提供商：校验协议与 URL，可创建、可保存、可删除；内置不可删', async () => {
+    await expect(mock.createCustomProvider({ name: '', protocol: 'openai-chat', baseUrl: 'https://a.example.com' })).rejects.toThrow('名称')
+    await expect(mock.createCustomProvider({ name: 'X', protocol: 'openai-chat', baseUrl: 'http://a.example.com' })).rejects.toThrow('https')
+    await expect(
+      mock.createCustomProvider({ name: 'X', protocol: 'openai-responses' as never, baseUrl: 'https://a.example.com' }),
+    ).rejects.toThrow('协议')
+
+    const d = await mock.createCustomProvider({ name: ' Mine ', protocol: 'anthropic-messages', baseUrl: 'https://a.example.com/v1/' })
+    expect(d.group).toBe('custom')
+    expect(d.name).toBe('Mine')
+    expect(d.adapterReady).toBe(true)
+    expect(d.baseUrl).toBe('https://a.example.com/v1')
+    expect((await mock.listProviders())[0].id).toBe(d.id)
+
+    await expect(mock.deleteCustomProvider('openrouter')).rejects.toThrow('自定义')
+    await mock.deleteCustomProvider(d.id)
+    await expect(mock.getProvider(d.id)).rejects.toThrow()
+  })
+
+  it('saveProvider 不接受待接入提供商的写入，也不允许客户端改写 adapterReady', async () => {
+    const claude = await mock.getProvider('claude')
+    await expect(mock.saveProvider({ ...claude, adapterReady: true })).rejects.toThrow('待接入')
+    const or = await mock.getProvider('openrouter')
+    const saved = await mock.saveProvider({ ...or, adapterReady: false, name: 'Hacked', customHeaders: [{ key: 'X-T', value: 'secret-value', secret: true }] })
+    expect(saved.adapterReady).toBe(true)
+    expect(saved.name).toBe('OpenRouter')
+    expect(JSON.stringify(saved)).not.toContain('secret-value')
+  })
+})

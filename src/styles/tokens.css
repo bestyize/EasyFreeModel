@@ -1,0 +1,36 @@
+/* 设计 token：来自 PRODUCT_DESIGN.md §1。不使用渐变色。 */
+:root {
+  --c-canvas: #ffffff;
+  --c-sidebar: #f7f8fa;
+  --c-surface-2: #f3f4f6;
+  --c-text: #16181d;
+  --c-text-2: #677084;
+  --c-border: #e7e9ed;
+  --c-brand: #ff2442;
+  --c-brand-soft: #fff0f2;
+  --c-success: #16a36b;
+  --c-warning: #f4a524;
+  --c-danger: #e44848;
+  --c-overlay: rgba(22, 24, 29, 0.45);
+
+  --sidebar-w: 224px;
+  --sidebar-w-collapsed: 68px;
+  --page-pad-x: 28px;
+  --header-h: 76px;
+  --section-gap: 24px;
+  --card-gap: 12px;
+  --radius: 10px;
+  --control-h: 34px;
+  --btn-primary-h: 36px;
+  --provider-card-h: 62px;
+
+  --fs-title: 24px;
+  --fs-section: 17px;
+  --fs-body: 14px;
+  --fs-small: 13px;
+  --fs-caption: 12px;
+
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Segoe UI',
+    'Microsoft YaHei', sans-serif;
+  --font-mono: 'SF Mono', Menlo, Consolas, monospace;
+}
