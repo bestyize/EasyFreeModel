@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, onActivated, onMounted, ref } from 'vue'
-import { Plus, RotateCw, ShieldAlert, Trash2 } from 'lucide-vue-next'
+import { Copy, Eye, EyeOff, Plus, RotateCw, ShieldAlert, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import StatusTag from '@/components/StatusTag.vue'
@@ -23,14 +23,38 @@ const ui = useUiStore()
 const createOpen = ref(false)
 const actionError = ref<string | null>(null)
 
-/** 仅用于“展示一次”。关闭弹窗后立即置 null；不写入 store、不输出日志。 */
-const revealed = ref<{ name: string; secret: string; mode: 'create' | 'rotate' } | null>(null)
+/** 用于创建、轮换及查看密钥弹窗展示 */
+const revealed = ref<{ name: string; secret: string; mode: 'create' | 'rotate' | 'view' } | null>(null)
 const revealOpen = computed({
   get: () => revealed.value !== null,
   set: (v) => {
     if (!v) revealed.value = null
   },
 })
+
+const showPlainMap = ref<Record<string, boolean>>({})
+const copiedId = ref<string | null>(null)
+
+function toggleShowPlain(id: string) {
+  showPlainMap.value[id] = !showPlainMap.value[id]
+}
+
+function viewKey(k: ApiKeyInfo) {
+  revealed.value = { name: k.name, secret: k.secret || k.masked, mode: 'view' }
+}
+
+async function copyKey(k: ApiKeyInfo) {
+  const text = k.secret || k.masked
+  try {
+    await navigator.clipboard.writeText(text)
+    copiedId.value = k.id
+    setTimeout(() => {
+      if (copiedId.value === k.id) copiedId.value = null
+    }, 1500)
+  } catch (e) {
+    actionError.value = `复制失败：${errorMessage(e)}`
+  }
+}
 
 const pending = ref<{ kind: 'rotate' | 'delete'; key: ApiKeyInfo } | null>(null)
 const confirmOpen = computed({
@@ -175,7 +199,34 @@ onActivated(() => {
               {{ k.name }}
               <div v-if="k.expiresAt" class="sub">到期 {{ formatDateTime(k.expiresAt) }}</div>
             </td>
-            <td><code class="mask">{{ k.masked }}</code></td>
+            <td>
+              <div class="key-cell">
+                <code class="mask" :title="k.secret || k.masked" :data-testid="`key-value-${k.id}`">
+                  {{ showPlainMap[k.id] && k.secret ? k.secret : k.masked }}
+                </code>
+                <button
+                  v-if="k.secret"
+                  class="mini-btn"
+                  type="button"
+                  :title="showPlainMap[k.id] ? '隐藏完整密钥' : '显示完整密钥'"
+                  :aria-label="showPlainMap[k.id] ? '隐藏完整密钥' : '显示完整密钥'"
+                  :data-testid="`toggle-plain-${k.id}`"
+                  @click="toggleShowPlain(k.id)"
+                >
+                  <component :is="showPlainMap[k.id] ? EyeOff : Eye" :size="14" aria-hidden="true" />
+                </button>
+                <button
+                  class="mini-btn"
+                  type="button"
+                  :title="copiedId === k.id ? '已复制' : '复制密钥'"
+                  :aria-label="copiedId === k.id ? '已复制' : '复制密钥'"
+                  :data-testid="`copy-${k.id}`"
+                  @click="copyKey(k)"
+                >
+                  <Copy :size="14" aria-hidden="true" />
+                </button>
+              </div>
+            </td>
             <td class="scope">
               <div :title="k.allowedModels.join('\n') || undefined">{{ scopeText(k).protocols }}</div>
               <div class="sub">{{ scopeText(k).models }} · {{ scopeText(k).limits }}</div>
@@ -186,6 +237,12 @@ onActivated(() => {
             <td><StatusTag :tone="statusOf(k).tone">{{ statusOf(k).label }}</StatusTag></td>
             <td>
               <div class="actions">
+                <button
+                  class="icon" type="button" :disabled="isBusy(k.id)" :aria-label="`查看 ${k.name}`" title="查看完整密钥"
+                  :data-testid="`view-${k.id}`" @click="viewKey(k)"
+                >
+                  <Eye :size="16" aria-hidden="true" />
+                </button>
                 <button class="btn" type="button" :disabled="isBusy(k.id)" :data-testid="`toggle-${k.id}`" @click="toggleDisabled(k)">
                   {{ k.disabled ? '启用' : '停用' }}
                 </button>
@@ -222,7 +279,7 @@ onActivated(() => {
       :title="pending?.kind === 'rotate' ? '轮换密钥' : '删除密钥'"
       :message="
         pending?.kind === 'rotate'
-          ? `轮换「${pending?.key.name}」后旧密钥会立即失效，所有正在使用它的客户端都需要换成新密钥。新密钥只显示一次。`
+          ? `轮换「${pending?.key.name}」后旧密钥会立即失效，所有正在使用它的客户端都需要换成新密钥。新密钥将保存并随时可查看。`
           : `删除「${pending?.key.name}」后无法恢复，使用它的客户端将立即无法访问。`
       "
       :confirm-text="pending?.kind === 'rotate' ? '确认轮换' : '确认删除'"
@@ -250,6 +307,9 @@ tbody tr:last-child td { border-bottom: 0; }
 .name { font-weight: 500; }
 .sub { margin-top: 2px; color: var(--c-text-2); font-size: var(--fs-caption); font-weight: 400; }
 .mask { font-family: var(--font-mono); }
+.key-cell { display: inline-flex; align-items: center; gap: 6px; }
+.mini-btn { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--c-border); border-radius: 6px; background: var(--c-canvas); color: var(--c-text-2); padding: 0; cursor: pointer; }
+.mini-btn:hover { background: var(--c-surface-2); color: var(--c-text); }
 .scope { max-width: 280px; }
 .actions { display: flex; align-items: center; gap: 6px; }
 .icon { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--c-border); border-radius: 8px; background: var(--c-canvas); color: var(--c-text-2); }

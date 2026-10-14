@@ -62,6 +62,7 @@ pub fn to_info(row: &ApiKeyRow) -> ApiKeyInfo {
         id: row.id.clone(),
         name: row.name.clone(),
         masked: mask(&row.key_suffix),
+        secret: row.key_secret.clone(),
         protocols: protocols.iter().filter_map(|p| Protocol::parse(p)).collect(),
         allowed_models: parse_list(&row.allowed_models_json),
         rpm_limit: row.rpm_limit,
@@ -134,6 +135,7 @@ async fn create_at(pool: &SqlitePool, input: CreateApiKeyInput, now: DateTime<Ut
         name,
         key_hash: hash_secret(&secret),
         key_suffix: suffix_of(&secret),
+        key_secret: Some(secret.clone()),
         protocols_json: serde_json::to_string(&protocols)?,
         allowed_models_json: serde_json::to_string(&models)?,
         rpm_limit: input.rpm_limit,
@@ -152,7 +154,7 @@ async fn create_at(pool: &SqlitePool, input: CreateApiKeyInput, now: DateTime<Ut
 /// 轮换：生成新密钥，旧密钥立即失效；名称、权限、调用次数等保留。
 pub async fn rotate(pool: &SqlitePool, id: &str) -> AppResult<ApiKeySecretResult> {
     let secret = generate_secret();
-    repo::replace_secret(pool, id, &hash_secret(&secret), &suffix_of(&secret)).await?;
+    repo::replace_secret(pool, id, &hash_secret(&secret), &suffix_of(&secret), Some(&secret)).await?;
     let row = repo::get(pool, id).await?.ok_or_else(|| AppError::NotFound(format!("api key {id}")))?;
     Ok(ApiKeySecretResult { key: to_info(&row), secret })
 }
@@ -340,26 +342,17 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn list_and_database_never_contain_the_secret() {
+    async fn list_and_database_persist_secret_for_re_viewing() {
         let pool = store::open_memory().await.unwrap();
         let k = create(&pool, input("dev")).await.unwrap();
-        let listed = serde_json::to_string(&list(&pool).await.unwrap()).unwrap();
-        assert!(!listed.contains(&k.secret));
-        assert!(!listed.contains(&k.secret[SECRET_PREFIX.len()..]));
-        assert!(listed.contains("\"masked\":\"sk-rd-…"));
-        assert!(k.key.masked.ends_with(&k.secret[k.secret.len() - 4..]));
+        let list_res = list(&pool).await.unwrap();
+        assert_eq!(list_res[0].secret.as_deref(), Some(k.secret.as_str()));
+        assert!(list_res[0].masked.ends_with(&k.secret[k.secret.len() - 4..]));
+        assert_eq!(list_res[0].masked, k.key.masked);
 
-        // 整库扫描：所有文本列都不含明文
-        let rows: Vec<(String, String, String)> =
-            sqlx::query_as("SELECT id, name, key_hash || key_suffix || protocols_json || allowed_models_json FROM api_keys")
-                .fetch_all(&pool)
-                .await
-                .unwrap();
-        for (a, b, c) in rows {
-            assert!(!a.contains(&k.secret) && !b.contains(&k.secret) && !c.contains(&k.secret));
-        }
-        // 创建返回值是唯一带 secret 的地方
-        assert!(serde_json::to_string(&k).unwrap().contains(&k.secret));
+        // 密钥字段在持久化表中有效保存
+        let row = repo::get(&pool, &k.key.id).await.unwrap().unwrap();
+        assert_eq!(row.key_secret.as_deref(), Some(k.secret.as_str()));
     }
 
     #[tokio::test]

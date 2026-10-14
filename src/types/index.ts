@@ -188,6 +188,8 @@ export interface ApiKeyInfo {
   name: string
   /** 仅含前后掩码，例如 sk-r…a9f2 */
   masked: string
+  /** 完整密钥，可供关闭后再次查看与复制 */
+  secret?: string | null
   protocols: Protocol[]
   allowedModels: string[]
   rpmLimit: number | null

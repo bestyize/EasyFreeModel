@@ -18,7 +18,6 @@ const h = vi.hoisted(() => ({
 vi.mock('@/api', () => ({ api: h.api }))
 
 import ApiKeysView from '@/views/ApiKeysView.vue'
-import { useApiKeysStore } from '@/stores/apiKeys'
 
 function keyInfo(over: Partial<ApiKeyInfo> = {}): ApiKeyInfo {
   return {
@@ -62,7 +61,7 @@ describe('ApiKeysView', () => {
     expect(body().textContent).not.toContain(SECRET)
   })
 
-  it('创建成功后展示一次完整密钥，关闭后组件状态与 DOM 中都被清除，且不进入 store', async () => {
+  it('创建成功后展示完整密钥，可关闭并提示可在列表中查看', async () => {
     await mountView()
     h.api.createApiKey.mockResolvedValue({ key: keyInfo({ id: 'k2', name: 'New', masked: 'sk-r…cdef' }), secret: SECRET })
 
@@ -75,18 +74,33 @@ describe('ApiKeysView', () => {
 
     expect(h.api.createApiKey).toHaveBeenCalledTimes(1)
     expect(q('[data-testid="secret-value"]')?.textContent).toBe(SECRET)
-    expect(body().textContent).toContain('关闭后无法再次查看')
-    // store 里没有任何 secret
-    expect(JSON.stringify(useApiKeysStore().$state)).not.toContain(SECRET)
+    expect(body().textContent).toContain('完整密钥已保存在本地数据库中')
 
     q('[data-testid="close-secret"]')!.click()
     await flushPromises()
 
     expect(q('[data-testid="secret-value"]')).toBeNull()
-    expect(body().textContent).not.toContain(SECRET)
-    const vm = wrapper.vm as unknown as { revealed: unknown }
-    expect(vm.revealed).toBeNull()
-    expect(JSON.stringify(useApiKeysStore().$state)).not.toContain(SECRET)
+  })
+
+  it('列表中的密钥支持切换显示完整密钥与再次弹窗查看', async () => {
+    await mountView('127.0.0.1', [keyInfo({ id: 'k1', masked: 'sk-r…a9f2', secret: SECRET })])
+    // 初始显示掩码
+    expect(wrapper.get('[data-testid="key-value-k1"]').text()).toBe('sk-r…a9f2')
+
+    // 点击小眼睛显示完整密钥
+    await wrapper.get('[data-testid="toggle-plain-k1"]').trigger('click')
+    expect(wrapper.get('[data-testid="key-value-k1"]').text()).toBe(SECRET)
+
+    // 再次点击隐藏
+    await wrapper.get('[data-testid="toggle-plain-k1"]').trigger('click')
+    expect(wrapper.get('[data-testid="key-value-k1"]').text()).toBe('sk-r…a9f2')
+
+    // 点击操作列的查看按钮打开弹窗再次查看
+    await wrapper.get('[data-testid="view-k1"]').trigger('click')
+    expect(q('[data-testid="secret-value"]')?.textContent).toBe(SECRET)
+    q('[data-testid="close-secret"]')!.click()
+    await flushPromises()
+    expect(q('[data-testid="secret-value"]')).toBeNull()
   })
 
   it('创建时限额非法则不提交并提示', async () => {

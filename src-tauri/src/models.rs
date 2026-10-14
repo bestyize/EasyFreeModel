@@ -190,6 +190,8 @@ pub struct ApiKeyInfo {
     pub id: String,
     pub name: String,
     pub masked: String,
+    #[serde(default)]
+    pub secret: Option<String>,
     pub protocols: Vec<Protocol>,
     pub allowed_models: Vec<String>,
     pub rpm_limit: Option<i64>,
@@ -463,6 +465,7 @@ mod tests {
                 id: "1".into(),
                 name: "n".into(),
                 masked: "sk-rd-…abcd".into(),
+                secret: None,
                 protocols: vec![],
                 allowed_models: vec![],
                 rpm_limit: None,

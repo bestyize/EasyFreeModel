@@ -10,6 +10,7 @@ pub struct ApiKeyRow {
     pub name: String,
     pub key_hash: String,
     pub key_suffix: String,
+    pub key_secret: Option<String>,
     pub protocols_json: String,
     pub allowed_models_json: String,
     pub rpm_limit: Option<i64>,
@@ -22,19 +23,20 @@ pub struct ApiKeyRow {
     pub disabled_at: Option<String>,
 }
 
-const COLS: &str = "id, name, key_hash, key_suffix, protocols_json, allowed_models_json, rpm_limit, tpm_limit, \
+const COLS: &str = "id, name, key_hash, key_suffix, key_secret, protocols_json, allowed_models_json, rpm_limit, tpm_limit, \
      total_limit, call_count, created_at, last_used_at, expires_at, disabled_at";
 
 pub async fn insert(pool: &SqlitePool, row: &ApiKeyRow) -> AppResult<()> {
     sqlx::query(
-        "INSERT INTO api_keys (id, name, key_hash, key_suffix, protocols_json, allowed_models_json, rpm_limit, \
+        "INSERT INTO api_keys (id, name, key_hash, key_suffix, key_secret, protocols_json, allowed_models_json, rpm_limit, \
                                tpm_limit, total_limit, call_count, created_at, last_used_at, expires_at, disabled_at) \
-         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)",
+         VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14, ?15)",
     )
     .bind(&row.id)
     .bind(&row.name)
     .bind(&row.key_hash)
     .bind(&row.key_suffix)
+    .bind(row.key_secret.as_deref())
     .bind(&row.protocols_json)
     .bind(&row.allowed_models_json)
     .bind(row.rpm_limit)
@@ -60,11 +62,12 @@ pub async fn get(pool: &SqlitePool, id: &str) -> AppResult<Option<ApiKeyRow>> {
     Ok(sqlx::query_as::<_, ApiKeyRow>(sqlx::AssertSqlSafe(sql)).bind(id).fetch_optional(pool).await?)
 }
 
-pub async fn replace_secret(pool: &SqlitePool, id: &str, key_hash: &str, key_suffix: &str) -> AppResult<()> {
-    let r = sqlx::query("UPDATE api_keys SET key_hash = ?2, key_suffix = ?3 WHERE id = ?1")
+pub async fn replace_secret(pool: &SqlitePool, id: &str, key_hash: &str, key_suffix: &str, key_secret: Option<&str>) -> AppResult<()> {
+    let r = sqlx::query("UPDATE api_keys SET key_hash = ?2, key_suffix = ?3, key_secret = ?4 WHERE id = ?1")
         .bind(id)
         .bind(key_hash)
         .bind(key_suffix)
+        .bind(key_secret)
         .execute(pool)
         .await?;
     ensure_found(r.rows_affected(), id)

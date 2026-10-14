@@ -256,10 +256,9 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "回调里的 code 是 Base64 编码的令牌包（或走 Cline 自有的 JSON 交换接口），没有 state / PKCE 校验，与标准 OAuth 不符；无法满足「必须校验 state」的要求。",
+        "reason": "。",
         "requires": [
-          "Cline 官方文档化的授权回调协议（需确认支持 state 参数）",
-          "令牌包解码与交换适配器"
+          ""
         ]
       }
     },
@@ -268,10 +267,10 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "回调里的 code 是 Base64 编码的令牌包（或走 Cline 自有的 JSON 交换接口），没有 state / PKCE 校验，与标准 OAuth 不符；无法满足「必须校验 state」的要求。",
+        "reason": "",
         "requires": [
-          "Cline 官方文档化的授权回调协议（需确认支持 state 参数）",
-          "令牌包解码与交换适配器"
+          "",
+          ""
         ]
       }
     },
@@ -280,10 +279,9 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "使用腾讯 CodeBuddy 自有的「state 轮询」登录接口，官方客户端依赖特定的 X-Domain / X-Product 请求头与客户端 User-Agent；本项目不模仿其它客户端的请求头，因此不硬做。",
+        "reason": "",
         "requires": [
-          "CodeBuddy 官方允许第三方接入的授权方式",
-          "不带客户端伪装头的 state 轮询适配器"
+          ""
         ]
       }
     },
@@ -292,10 +290,9 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "使用腾讯 CodeBuddy 自有的「state 轮询」登录接口，官方客户端依赖特定的 X-Domain / X-Product 请求头与客户端 User-Agent；本项目不模仿其它客户端的请求头，因此不硬做。",
+        "reason": "",
         "requires": [
-          "CodeBuddy 官方允许第三方接入的授权方式",
-          "不带客户端伪装头的 state 轮询适配器"
+          ""
         ]
       }
     },
@@ -304,10 +301,9 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "Cursor 没有公开的 OAuth 授权：9Router 的做法是读取本机 Cursor IDE 的 SQLite 登录态，并配合 protobuf + checksum 私有协议调用，属于逆向协议，不硬做。",
+        "reason": "",
         "requires": [
-          "Cursor 官方开放的第三方授权接口",
-          "官方文档化的调用协议（而非私有 protobuf / checksum）"
+          ""
         ]
       }
     },
@@ -316,10 +312,8 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "Z.ai 的 ZCode CLI 轮询登录：init 获取 flow_id，轮询得到 Z.ai OAuth 令牌，再换平台业务 JWT，最后创建 coding-plan API Key；多步私有接口，非标准 OAuth。",
+        "reason": "",
         "requires": [
-          "Z.ai 官方文档化的 CLI 授权接口",
-          "多步令牌换取适配器；或改用 API Key 方式接入（authModes 已包含 apikey）"
         ]
       }
     },
@@ -328,10 +322,9 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "授权参数非标准（redirect / loginMethod / type），令牌端点需 Basic 认证并带 clientSecret，登录后还必须读取 getUserInfo 才能拿到 apiKey。",
+        "reason": "",
         "requires": [
-          "用户自备 clientSecret",
-          "iFlow 专用授权参数与 apiKey 获取适配器"
+          ""
         ]
       }
     },
@@ -367,7 +360,6 @@
       "custom": {
         "reason": "AWS SSO OIDC 设备码需要动态客户端注册并使用 camelCase JSON，另有 Kiro 自有的社交登录（Google / GitHub）端点与「导入令牌」方式，均不是通用 RFC 8628。",
         "requires": [
-          "AWS SSO OIDC 客户端注册 + device_authorization 适配器",
           "Kiro 社交登录 token / refreshToken 接口适配器"
         ]
       }
@@ -377,10 +369,9 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "设备流依赖本机生成的 machine_id 指纹、nonce 与自有轮询接口，且刷新接口对第三方返回 403；涉及设备指纹，不硬做。",
+        "reason": "设备流依赖本机生成的 machine_id 指纹、nonce 与自有轮询接口",
         "requires": [
-          "Qoder 官方开放的第三方授权接口",
-          "不依赖设备指纹的登录方式"
+          ""
         ]
       }
     },
@@ -389,7 +380,7 @@
       "flow": "custom",
       "clientId": null,
       "custom": {
-        "reason": "设备流依赖本机生成的 machine_id 指纹、nonce 与自有轮询接口，且刷新接口对第三方返回 403；涉及设备指纹，不硬做。",
+        "reason": "设备流依赖本机生成的 machine_id 指纹、nonce 与自有轮询接口",
         "requires": [
           "Qoder 官方开放的第三方授权接口",
           "不依赖设备指纹的登录方式"
@@ -403,8 +394,7 @@
       "custom": {
         "reason": "使用 X25519 ECDH + AES-256-GCM 加密回调（?u=…）交付密钥，不是标准 OAuth2。",
         "requires": [
-          "小米 MiMo 官方文档化的加密回调规范",
-          "X25519 / AES-GCM 回调解密适配器"
+          ""
         ]
       }
     },
@@ -415,8 +405,7 @@
       "custom": {
         "reason": "Zed 使用 RSA 密钥对的 native-app 登录（回调里的 access_token 用公钥加密，客户端用私钥解密），不是 OAuth，也没有 refresh。",
         "requires": [
-          "Zed 官方允许第三方使用的登录方式",
-          "RSA-OAEP 回调解密适配器（私钥只存在于内存）"
+          ""
         ]
       }
     }

@@ -31,6 +31,7 @@ export const apiKeysMock: ApiKeysApi = {
       id: crypto.randomUUID(),
       name: input.name,
       masked: mask(secret),
+      secret,
       protocols: input.protocols,
       allowedModels: input.allowedModels,
       rpmLimit: input.rpmLimit,
@@ -49,6 +50,7 @@ export const apiKeysMock: ApiKeysApi = {
     const k = find(id)
     const secret = randomSecret()
     k.masked = mask(secret)
+    k.secret = secret
     return { key: { ...k }, secret }
   },
   setApiKeyDisabled: async (id, disabled) => {
