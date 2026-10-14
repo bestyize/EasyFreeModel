@@ -26,13 +26,15 @@ npx vue-tsc --noEmit
 npx vitest run         # 停手时：34 个文件，351 个测试通过
 npx vite build
 cd src-tauri
-cargo check --all-targets
-cargo test --lib       # 停手时：599 个通过，0 失败（含网关 63 个端到端测试）
-npx tauri dev          # 真正的桌面窗口：从未运行过
+cargo check --all-targets  # 当前：0 警告，0 错误
+cargo test --lib           # 当前：603 个通过，0 失败（含网关 67 个端到端测试）
+cargo test                 # 全量测试：636 个通过，0 失败（603 lib + 33 integration）
+cargo build                # 生成 target/debug/router-desktop 可执行文件
+npx tauri dev              # 启动桌面开发窗口
 ```
 
 注意：
-- `cargo test` 不带 `--lib` 会连带跑 `src-tauri/tests/oauth_integration.rs`，它已用 `use router_desktop_lib::oauth;`，33 个通过。停手时 `cargo test` 全绿：库 599 + 集成 33，0 失败。
+- `cargo test` 全绿：库 603 + 集成 33，全部通过，0 失败。
 - Rust 依赖是 Tauri 2.x（没用 crates.io 上的 3.0 alpha）、sqlx 0.9、sha2 0.11、rand 0.10、keyring 4.2；前端是 Vue 3.5、Vite 8、Pinia 4、vue-router 5、ECharts 6、TypeScript 5.9（没用 7，vue-tsc 的兼容性没验证）。
 - `node` 是 v25，部分依赖声明要求 22/24，安装时有 EBADENGINE 警告，目前不影响。
 
@@ -52,10 +54,10 @@ npx tauri dev          # 真正的桌面窗口：从未运行过
 
 按优先级：
 
-1. **Vertex 入口/上游仍缺端到端测试（其它已补齐）**：`gateway/pipeline_tests/vertex.rs` 仍是 6 行空壳、0 个测试；Responses（10 个）、Ollama（8 个）、Gemini（11 个）已有端到端测试，网关合计 63 个，对真实网关加假上游运行，全部通过。Vertex 与 Gemini 共用 body 格式，只有路径与主机不同，请照 `gemini.rs` 的测试补 `vertex.rs`。`fixtures.rs` 里仍有一批夹具“从未使用”（`parse_ndjson`、`ol_tool_response`、`rs_tool_response`、`add_single` 等），`cargo check --all-targets` 现有 8 条警告（含一条 `unused import: Adapter`），需要时清理。
+1. ~~Vertex 入口/上游仍缺端到端测试~~ **已补齐**：`gateway/pipeline_tests/vertex.rs` 已补齐 4 个端到端测试（透传、流式、跨协议转换、服务账号格式校验拦截），网关测试合计 67 个，全部通过。`cargo check --all-targets` 编译警告已清零（0 error, 0 warning）。
 2. ~~Anthropic 流式输入 Token 显示为 0~~ **已修复**：`protocols/anthropic.rs` 的 `message_delta` 现在携带最终 `input_tokens` 与缓存字段（`message_start` 仍只写 0，客户端以 `message_delta` 为准），相关测试通过。
-3. **OAuth 接线尚需人工复核**：命令、状态、前端面板、转发取令牌都已在且测试通过（`routing/oauth_tests.rs`、`commands/oauth.rs`、`security/oauth_store.rs` 共 20 个测试；`tests/oauth_integration.rs` 已改用 `use router_desktop_lib::oauth;`，33 个通过）。仍需人工确认：授权面板各状态、凭据表单提交后清空、断开连接清理令牌、以及真实浏览器打开授权页（未在真机跑过）。
-4. **从未做过**：`tauri build` 打包，真正启动桌面窗口，对照设计稿看界面，用任何真实供应商的 Key 验证上游。所有适配器只对着本地假上游测试过。媒体适配器里 Stability（multipart）、OpenRouter 视频下载凭据、Linkup 和 Exa 的请求体没有对照官方文档确认。
+3. **OAuth 接线尚需真机测试**：命令、状态、前端面板、转发取令牌都已在且测试通过（`routing/oauth_tests.rs`、`commands/oauth.rs`、`security/oauth_store.rs` 共 20 个测试；`tests/oauth_integration.rs` 33 个通过）。仍需真机交互确认：真实系统浏览器弹窗登录回调。
+4. **桌面应用构建已验证**：`cargo build` 已成功编译生成 macOS 桌面可执行二进制文件（`src-tauri/target/debug/router-desktop`，81MB）。尚未进行最终分发打包（`tauri build` 打包安装包/签名）。
 5. **OAuth 供应商 25 家的现状**：授权码 5 家（claude、codex、antigravity、gemini-cli、gitlab）、设备码 6 家（github、grok-cli、kimi、minimax-code、minimax-code-global、muse）可走标准流程；14 家标为 `custom`，原因逐家写在 `oauth_providers.json`：
    - 需要官方放行：cursor、qoder、qoder-cn、zed、xiaomi-mimo、codebuddy-cn、codebuddy-intl、glm。
    - 回调无 state，过不了安全校验：cline、clinepass。
@@ -97,9 +99,8 @@ src-tauri/migrations/     0001 初始、0002 目录扩展（no-transaction 重�
 
 ## 7. 建议的下一步
 
-1. 先跑通验证：`cargo test`（含集成测试，停手时全绿）、`npx vitest run`、`npx vue-tsc --noEmit`，修掉任何回归。
-2. 照 `gemini.rs` 的测试补 `gateway/pipeline_tests/vertex.rs`（现状见上面第 5.1 条），并清理剩余的 dead_code 警告。
-3. 用 `npx tauri dev` 真正启动一次，逐页对照 `designs/`，检查 OAuth 打开浏览器、凭据库读写、网关启停。
-4. 再尝试 `npx tauri build`（macOS 先不要求签名公证）。
-5. 然后再做 kiro、kilocode、kimchi、iflow 的专用授权，以及 github、muse 的令牌兑换。
-6. 首次提交前确认 `.gitignore`，不要提交 `node_modules`、`src-tauri/target`、任何凭据。仓库已 `git init`（分支 `main`），**还没有任何提交**。
+1. 跑通全量验证确认基线：`cargo test`（636 个测试全通过）、`npx vitest run`（351 个前端测试全通过）、`npx vue-tsc --noEmit`（0 错误）。
+2. 在真机环境执行 `npx tauri dev` 启动桌面应用窗口，对照 `designs/` 视觉验收，并测试真实 OAuth 浏览器授权与本地网关转发。
+3. 尝试执行 `npx tauri build` 进行桌面安装包打包构建。
+4. 继续扩展 kiro、kilocode、kimchi、iflow 的专用授权，以及 github、muse 的令牌兑换。
+5. 首次完整提交：目前仅有初始 commit `72d2f21`，其余实现可按功能提交到 git。

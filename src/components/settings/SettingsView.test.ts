@@ -165,9 +165,9 @@ describe('SettingsView', () => {
     expect(useSettingsStore().dirty).toBe(true)
   })
 
-  it('协议开关只展示，并标注尚未实现；备份 / 恢复 / 清空默认禁用并提示待实现', async () => {
+  it('协议开关展示已实现状态；备份 / 恢复 / 清空默认禁用并提示待实现', async () => {
     await mountView()
-    expect(wrapper.get('[data-testid="protocol-gemini"]').text()).toContain('尚未实现')
+    expect(wrapper.get('[data-testid="protocol-gemini"]').text()).toContain('已实现')
     for (const id of ['btn-backup', 'btn-restore', 'btn-clear']) {
       expect(wrapper.get(`[data-testid="${id}"]`).attributes('disabled')).toBeDefined()
     }

@@ -30,6 +30,8 @@ pub enum Adapter {
     Vertex,
     #[serde(rename = "ollama")]
     Ollama,
+    #[serde(rename = "openai-responses")]
+    OpenaiResponses,
 }
 
 impl Adapter {
@@ -40,13 +42,21 @@ impl Adapter {
             Self::Gemini => "gemini",
             Self::Vertex => "vertex",
             Self::Ollama => "ollama",
+            Self::OpenaiResponses => "openai-responses",
         }
     }
 
     pub fn parse(s: &str) -> Option<Self> {
-        [Self::OpenaiCompatible, Self::AnthropicCompatible, Self::Gemini, Self::Vertex, Self::Ollama]
-            .into_iter()
-            .find(|a| a.as_str() == s)
+        [
+            Self::OpenaiCompatible,
+            Self::AnthropicCompatible,
+            Self::Gemini,
+            Self::Vertex,
+            Self::Ollama,
+            Self::OpenaiResponses,
+        ]
+        .into_iter()
+        .find(|a| a.as_str() == s)
     }
 }
 
@@ -99,7 +109,7 @@ pub fn adapter_for_custom_protocol(protocol: crate::models::Protocol) -> Option<
 
 pub fn default_auth(adapter: Adapter) -> AuthSpec {
     match adapter {
-        Adapter::OpenaiCompatible | Adapter::Ollama => AuthSpec::Scheme(AuthScheme::Bearer),
+        Adapter::OpenaiCompatible | Adapter::Ollama | Adapter::OpenaiResponses => AuthSpec::Scheme(AuthScheme::Bearer),
         Adapter::AnthropicCompatible => AuthSpec::Scheme(AuthScheme::XApiKey),
         Adapter::Gemini | Adapter::Vertex => AuthSpec::Header { header: "x-goog-api-key".into() },
     }

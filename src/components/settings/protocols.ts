@@ -11,10 +11,10 @@ export interface ProtocolOption {
 }
 
 export const PROTOCOL_OPTIONS: ProtocolOption[] = [
-  { id: 'openai-chat', label: 'OpenAI Chat Completions', implemented: false },
-  { id: 'openai-responses', label: 'OpenAI Responses', implemented: false },
-  { id: 'anthropic-messages', label: 'Anthropic Messages', implemented: false },
-  { id: 'gemini', label: 'Gemini', implemented: false },
+  { id: 'openai-chat', label: 'OpenAI Chat Completions', implemented: true },
+  { id: 'openai-responses', label: 'OpenAI Responses', implemented: true },
+  { id: 'anthropic-messages', label: 'Anthropic Messages', implemented: true },
+  { id: 'gemini', label: 'Gemini', implemented: true },
 ]
 
 export function protocolLabel(id: Protocol): string {
