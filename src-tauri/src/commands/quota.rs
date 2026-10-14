@@ -12,7 +12,7 @@ pub async fn list_quota_accounts(state: State<'_, AppState>) -> AppResult<Vec<Qu
 
 #[tauri::command]
 pub async fn refresh_quota(state: State<'_, AppState>, connection_id: Option<String>) -> AppResult<Vec<QuotaAccount>> {
-    quota::refresh(&state.db, connection_id.as_deref()).await
+    quota::refresh(&state.db, &state.vault, &state.oauth, connection_id.as_deref()).await
 }
 
 #[tauri::command]

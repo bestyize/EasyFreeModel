@@ -591,13 +591,229 @@ pub enum ProbeOutcome {
     NotImplemented,
 }
 
-/// TODO(upstream-pipeline)：真实上游探测的接入点。
-///
-/// 上游转发管线接入后在这里按 `target.adapter` 分发，用 `credential` 按 `target.auth` 调用
-/// 一个最便宜的接口（例如 `GET /models`，或 1 token 的补全），返回 `Reachable{latency_ms}` 或
-/// `Unreachable(原因)`。在那之前一律返回 `NotImplemented`，让测试结果保持诚实（ok=false）。
-pub async fn probe_connection(_target: &UpstreamTarget, _credential: &str) -> ProbeOutcome {
-    ProbeOutcome::NotImplemented
+/// 真实上游探测接入点：对上游模型/账户接口发起轻量健康检查，测量延迟。
+pub async fn probe_connection(target: &UpstreamTarget, credential: &str) -> ProbeOutcome {
+    #[cfg(test)]
+    {
+        let _ = (target, credential);
+        ProbeOutcome::NotImplemented
+    }
+    #[cfg(not(test))]
+    {
+        probe_live(target, credential).await
+    }
+}
+
+pub async fn probe_live(target: &UpstreamTarget, credential: &str) -> ProbeOutcome {
+
+    let client = match reqwest::Client::builder()
+        .no_proxy()
+        .timeout(std::time::Duration::from_secs(6))
+        .build()
+    {
+        Ok(c) => c,
+        Err(e) => return ProbeOutcome::Unreachable(format!("构建 HTTP 客户端失败：{e}")),
+    };
+
+    let start = std::time::Instant::now();
+    let mut custom_body = None;
+    let mut extra_headers: Vec<(&str, &str)> = Vec::new();
+
+    let (url, method, auth_header, auth_val) = match target.provider_id.as_str() {
+        "openrouter" => (
+            "https://openrouter.ai/api/v1/auth/key".to_string(),
+            "GET",
+            "Authorization",
+            format!("Bearer {credential}"),
+        ),
+        "anthropic" => {
+            if credential.starts_with("sk-ant-") {
+                (
+                    "https://api.anthropic.com/v1/models".to_string(),
+                    "GET",
+                    "x-api-key",
+                    credential.to_string(),
+                )
+            } else {
+                extra_headers.push(("anthropic-beta", "oauth-2025-04-20"));
+                (
+                    "https://api.anthropic.com/api/oauth/usage".to_string(),
+                    "GET",
+                    "Authorization",
+                    format!("Bearer {credential}"),
+                )
+            }
+        }
+        "claude" => {
+            extra_headers.push(("anthropic-beta", "oauth-2025-04-20"));
+            (
+                "https://api.anthropic.com/api/oauth/usage".to_string(),
+                "GET",
+                "Authorization",
+                format!("Bearer {credential}"),
+            )
+        }
+        "antigravity" => {
+            extra_headers.push(("x-request-source", "local"));
+            extra_headers.push(("Content-Type", "application/json"));
+            custom_body = Some(r#"{"metadata":{"ideType":9,"platform":2,"pluginType":2},"mode":1}"#.to_string());
+            (
+                "https://cloudcode-pa.googleapis.com/v1internal:loadCodeAssist".to_string(),
+                "POST",
+                "Authorization",
+                format!("Bearer {credential}"),
+            )
+        }
+        "gemini-cli" => (
+            "https://cloudresourcemanager.googleapis.com/v1/projects?filter=lifecycleState:ACTIVE".to_string(),
+            "GET",
+            "Authorization",
+            format!("Bearer {credential}"),
+        ),
+        "gemini" => {
+            if credential.starts_with("ya29.") {
+                (
+                    "https://cloudresourcemanager.googleapis.com/v1/projects?filter=lifecycleState:ACTIVE".to_string(),
+                    "GET",
+                    "Authorization",
+                    format!("Bearer {credential}"),
+                )
+            } else {
+                (
+                    "https://generativelanguage.googleapis.com/v1beta/models".to_string(),
+                    "GET",
+                    "x-goog-api-key",
+                    credential.to_string(),
+                )
+            }
+        }
+        "codebuddy-cn" => {
+            extra_headers.push(("Host", "copilot.tencent.com"));
+            extra_headers.push(("Content-Type", "application/json"));
+            extra_headers.push(("User-Agent", "CLI/2.63.2 CodeBuddy/2.63.2"));
+            custom_body = Some("{}".to_string());
+            (
+                "https://copilot.tencent.com/v2/billing/meter/get-user-resource".to_string(),
+                "POST",
+                "Authorization",
+                format!("Bearer {credential}"),
+            )
+        }
+        "codebuddy-intl" => {
+            extra_headers.push(("Host", "www.codebuddy.ai"));
+            extra_headers.push(("Content-Type", "application/json"));
+            extra_headers.push(("User-Agent", "IDE/2.63.2 CodeBuddy/2.63.2"));
+            custom_body = Some("{}".to_string());
+            (
+                "https://www.codebuddy.ai/v2/billing/meter/get-user-resource".to_string(),
+                "POST",
+                "Authorization",
+                format!("Bearer {credential}"),
+            )
+        }
+        "codex" => (
+            "https://chatgpt.com/backend-api/wham/usage".to_string(),
+            "GET",
+            "Authorization",
+            format!("Bearer {credential}"),
+        ),
+        "github" => {
+            extra_headers.push(("Accept", "application/json"));
+            extra_headers.push(("X-GitHub-Api-Version", "2022-11-28"));
+            extra_headers.push(("User-Agent", "GitHubCopilotChat/0.26.7"));
+            (
+                "https://api.github.com/copilot_internal/user".to_string(),
+                "GET",
+                "Authorization",
+                format!("token {credential}"),
+            )
+        }
+        "deepseek" => (
+            "https://api.deepseek.com/models".to_string(),
+            "GET",
+            "Authorization",
+            format!("Bearer {credential}"),
+        ),
+        "groq" => (
+            "https://api.groq.com/openai/v1/models".to_string(),
+            "GET",
+            "Authorization",
+            format!("Bearer {credential}"),
+        ),
+        "ollama" | "ollama-local" => {
+            let u = target.base_url.trim_end_matches('/');
+            let tags = if let Some(p) = u.strip_suffix("/api/chat") {
+                format!("{p}/api/tags")
+            } else {
+                format!("{u}/api/tags")
+            };
+            (tags, "GET", "Authorization", format!("Bearer {credential}"))
+        }
+        _ => {
+            let u = target.base_url.trim_end_matches('/');
+            let m_url = if let Some(p) = u.strip_suffix("/chat/completions") {
+                format!("{p}/models")
+            } else if let Some(p) = u.strip_suffix("/messages") {
+                format!("{p}/models")
+            } else if let Some(p) = u.strip_suffix("/responses") {
+                format!("{p}/models")
+            } else {
+                format!("{u}/models")
+            };
+            let (h, v) = match &target.auth {
+                AuthSpec::Scheme(status::AuthScheme::Bearer) => ("Authorization", format!("Bearer {credential}")),
+                AuthSpec::Scheme(status::AuthScheme::XApiKey) => ("x-api-key", credential.to_string()),
+                AuthSpec::Header { header } => (header.as_str(), credential.to_string()),
+            };
+            (m_url, "GET", h, v)
+        }
+    };
+
+    let mut req = if method == "POST" {
+        client.post(&url)
+    } else {
+        client.get(&url)
+    };
+    req = req.header("User-Agent", "RouterDesktop/0.5.99");
+    for (k, v) in extra_headers {
+        req = req.header(k, v);
+    }
+    if let Some(body) = custom_body {
+        req = req.body(body);
+    }
+    if target.auth == AuthSpec::Scheme(status::AuthScheme::XApiKey) || target.provider_id == "anthropic" {
+        req = req.header("anthropic-version", "2023-06-01");
+    }
+    if !auth_val.is_empty() && target.provider_id != "ollama-local" {
+        req = req.header(auth_header, auth_val);
+    }
+
+    match req.send().await {
+        Ok(resp) => {
+            let latency_ms = start.elapsed().as_millis() as u64;
+            let status = resp.status();
+            if status.is_success() {
+                ProbeOutcome::Reachable { latency_ms }
+            } else if status.as_u16() == 401 {
+                ProbeOutcome::Unreachable("上游返回 401：API Key 或令牌无效".to_string())
+            } else if status.as_u16() == 403 {
+                ProbeOutcome::Unreachable("上游返回 403：凭据无权访问该服务".to_string())
+            } else if status.as_u16() == 429 {
+                ProbeOutcome::Unreachable("上游返回 429：触发频率限制".to_string())
+            } else {
+                ProbeOutcome::Unreachable(format!("上游返回 HTTP {status}"))
+            }
+        }
+        Err(e) => {
+            if e.is_timeout() {
+                ProbeOutcome::Unreachable("连接上游超时 (6s)".to_string())
+            } else if e.is_connect() {
+                ProbeOutcome::Unreachable("无法连接到上游服务器".to_string())
+            } else {
+                ProbeOutcome::Unreachable(format!("网络请求失败：{e}"))
+            }
+        }
+    }
 }
 
 fn test_fail(connection_id: &str, provider_id: &str, error: impl Into<String>) -> TestResult {
@@ -648,7 +864,23 @@ async fn check_oauth_connection(
     if !provider.adapter_ready {
         return fail(format!("授权令牌已保存，但{ADAPTER_NOT_READY}（{}）", pending_text(provider)));
     }
-    fail("授权令牌已保存，但上游连通性探测尚未接入，无法确认可用".to_string())
+    let target = match target_for_row(provider) {
+        Ok(t) => t,
+        Err(_) => return fail("该提供商尚未配置上游端点，无法探测".to_string()),
+    };
+    match probe_connection(&target, tokens.access_token.expose()).await {
+        ProbeOutcome::Reachable { latency_ms } => TestResult {
+            connection_id: conn.id.clone(),
+            provider_id: Some(provider.id.clone()),
+            ok: true,
+            latency_ms: Some(latency_ms),
+            error: None,
+        },
+        ProbeOutcome::Unreachable(msg) => fail(msg),
+        ProbeOutcome::NotImplemented => {
+            fail("授权令牌已保存，但上游连通性探测尚未接入，无法确认可用".to_string())
+        }
+    }
 }
 
 /// 单个连接：先做配置与凭据完整性检查，再交给 `probe_connection`。

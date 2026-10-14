@@ -5,7 +5,7 @@
   "identifier": "app.routerdesktop.client",
   "build": {
     "beforeDevCommand": "npm run dev",
-    "devUrl": "http://localhost:1420",
+    "devUrl": "http://localhost:20140",
     "beforeBuildCommand": "npm run build",
     "frontendDist": "../dist"
   },

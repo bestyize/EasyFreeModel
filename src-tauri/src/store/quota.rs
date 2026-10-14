@@ -56,6 +56,48 @@ pub async fn latest_snapshots(pool: &SqlitePool) -> AppResult<Vec<SnapshotRow>> 
     .await?)
 }
 
+/// 保存成功抓取到的一批快照：清空该连接之前的错误，并写入新的配额周期/余额。
+pub async fn save_snapshots(
+    pool: &SqlitePool,
+    connection_id: &str,
+    snapshots: &[SnapshotRow],
+) -> AppResult<()> {
+    let mut tx = pool.begin().await?;
+    // 成功同步时清除错误快照
+    sqlx::query("DELETE FROM quota_snapshots WHERE connection_id = ?1 AND kind = 'error'")
+        .bind(connection_id)
+        .execute(&mut *tx)
+        .await?;
+    // 如果有新的配额行，先清除旧的 period / balance 快照以保证最新状态一致
+    if !snapshots.is_empty() {
+        sqlx::query("DELETE FROM quota_snapshots WHERE connection_id = ?1 AND kind IN ('period', 'balance')")
+            .bind(connection_id)
+            .execute(&mut *tx)
+            .await?;
+        for s in snapshots {
+            sqlx::query(
+                "INSERT INTO quota_snapshots (connection_id, kind, quota_name, unit, used, total, remaining, resets_at, checked_at, source, error) \
+                 VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11)",
+            )
+            .bind(&s.connection_id)
+            .bind(&s.kind)
+            .bind(&s.quota_name)
+            .bind(&s.unit)
+            .bind(s.used)
+            .bind(s.total)
+            .bind(s.remaining)
+            .bind(s.resets_at.as_deref())
+            .bind(&s.checked_at)
+            .bind(&s.source)
+            .bind(s.error.as_deref())
+            .execute(&mut *tx)
+            .await?;
+        }
+    }
+    tx.commit().await?;
+    Ok(())
+}
+
 /// 记录一次刷新失败。同一连接只保留最近一条错误快照，避免反复点击刷新使表无限增长。
 pub async fn record_error(pool: &SqlitePool, connection_id: &str, error: &str, checked_at: &str) -> AppResult<()> {
     let mut tx = pool.begin().await?;
