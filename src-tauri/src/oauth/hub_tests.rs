@@ -79,6 +79,36 @@ async fn code_flow_start_then_poll_creates_an_oauth_connection() {
 }
 
 #[tokio::test]
+async fn state_poll_flow_opens_a_url_and_succeeds_after_login() {
+    use std::sync::atomic::Ordering;
+    let env = env().await;
+
+    let started = env.hub.start("t-state", "work").await.unwrap();
+    assert_eq!(started.flow, FlowKind::StatePoll);
+    // state-poll 把上游返回的 authUrl 交给浏览器打开
+    assert_eq!(started.authorize_url.as_deref(), Some("https://example.com/mock-auth"));
+    assert!(started.user_code.is_none());
+    // state 是机密，不在返回值里
+    assert_no_leak(&serde_json::to_string(&started).unwrap());
+    // platform 查询参数确实带上了（CLI）
+    assert_eq!(env.fake.last_platform.lock().unwrap().as_deref(), Some("CLI"));
+
+    // 登录未完成：轮询保持 pending
+    assert_eq!(env.hub.poll(&started.session_id), PollResult::Pending);
+
+    env.fake.state_approved.store(true, Ordering::SeqCst);
+    let PollResult::Succeeded { connection_id } = wait_done(&env.hub, &started.session_id).await else {
+        panic!("state-poll flow should succeed")
+    };
+    let conn = repo::get_connection(&env.db, &connection_id).await.unwrap().unwrap();
+    assert_eq!(conn.account_label, "work");
+    assert_eq!(conn.kind, "oauth");
+    // 令牌写进了凭据库，且凭据引用不含明文
+    let cref = conn.credential_ref.unwrap();
+    assert!(!cref.contains("ACCESS-STATE"));
+}
+
+#[tokio::test]
 async fn device_flow_shows_the_user_code_and_succeeds_after_approval() {
     let env = env().await;
     *env.fake.id_token.lock().unwrap() = Some(fake_jwt_with_email("person@example.com"));
@@ -238,7 +268,7 @@ async fn custom_unknown_and_unconfigured_providers_are_rejected_without_binding_
 async fn provider_listing_reflects_flow_status_and_client_credentials() {
     let env = env().await;
     let list = env.hub.list_providers().await.unwrap();
-    assert_eq!(list.len(), 9);
+    assert_eq!(list.len(), 10);
     let info = |id: &str| serde_json::to_value(list.iter().find(|p| p.provider_id == id).unwrap()).unwrap();
 
     let code = info("t-code");
@@ -246,6 +276,10 @@ async fn provider_listing_reflects_flow_status_and_client_credentials() {
     assert_eq!(code["riskNotice"], "risk text");
     assert_eq!(code["clientConfigured"], false);
     assert_eq!(info("t-device")["flow"], "device");
+    // state-poll：不使用 clientId，直接 ready
+    let state_poll = info("t-state");
+    assert_eq!((state_poll["flow"].as_str(), state_poll["status"].as_str()), (Some("state-poll"), Some("ready")));
+    assert_eq!(state_poll["clientIdRequired"], false);
 
     let custom = info("t-custom");
     assert_eq!((custom["flow"].as_str(), custom["status"].as_str()), (Some("custom"), Some("custom")));

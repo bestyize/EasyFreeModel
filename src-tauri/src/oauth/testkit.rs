@@ -41,6 +41,13 @@ pub struct Fake {
     device_counter: AtomicUsize,
     challenges: Mutex<HashMap<String, Option<String>>>,
     pub device_approved: AtomicBool,
+    /// state-poll：已发放的 state 集合；state_approved 置位后返回令牌。
+    pub states: Mutex<std::collections::HashSet<String>>,
+    pub state_approved: AtomicBool,
+    state_counter: AtomicUsize,
+    state_token_counter: AtomicUsize,
+    /// 最近一次 state 请求带的 platform 查询参数（测试断言用）。
+    pub last_platform: Mutex<Option<String>>,
     /// 授权码 / 设备码换令牌时附带的 id_token（用于账户标识）。
     pub id_token: Mutex<Option<String>>,
     /// 令牌端点要求的 client_secret（None = 不校验）。
@@ -49,6 +56,34 @@ pub struct Fake {
 
 fn json_reply(status: u16, body: Value) -> Response {
     (StatusCode::from_u16(status).unwrap(), Json(body)).into_response()
+}
+
+/// state 端点：POST ?platform=… 返回 { code: 0, data: { state, authUrl } }。
+async fn state_endpoint(State(f): State<Arc<Fake>>, Query(q): Query<HashMap<String, String>>) -> Response {
+    let n = f.state_counter.fetch_add(1, Ordering::SeqCst);
+    let state = format!("STATE-{n}");
+    f.states.lock().unwrap().insert(state.clone());
+    // 记录 platform，供测试断言查询参数确实带上了。
+    *f.last_platform.lock().unwrap() = q.get("platform").cloned();
+    json_reply(200, json!({"code": 0, "data": {"state": state, "authUrl": "https://example.com/mock-auth"}}))
+}
+
+/// state 轮询：GET ?state=… → 0 表示成功，11217 表示仍在登录。
+async fn state_token(State(f): State<Arc<Fake>>, Query(q): Query<HashMap<String, String>>) -> Response {
+    let Some(state) = q.get("state") else {
+        return json_reply(200, json!({"code": -1, "msg": "missing state"}));
+    };
+    if !f.states.lock().unwrap().contains(state) {
+        return json_reply(200, json!({"code": -1, "msg": "unknown state"}));
+    }
+    if !f.state_approved.load(Ordering::SeqCst) {
+        return json_reply(200, json!({"code": 11217, "msg": "waiting for login"}));
+    }
+    let n = f.state_token_counter.fetch_add(1, Ordering::SeqCst);
+    json_reply(
+        200,
+        json!({"code": 0, "data": {"accessToken": format!("ACCESS-STATE-{n}"), "refreshToken": format!("REFRESH-STATE-{n}"), "expiresIn": 3600}}),
+    )
 }
 
 async fn authorize(State(f): State<Arc<Fake>>, Query(q): Query<HashMap<String, String>>) -> Response {
@@ -117,8 +152,7 @@ async fn device_code() -> Response {
 async fn device_token(State(f): State<Arc<Fake>>) -> Response {
     if !f.device_approved.load(Ordering::SeqCst) {
         return json_reply(400, json!({"error": "authorization_pending"}));
-    }
-    let n = f.device_counter.fetch_add(1, Ordering::SeqCst);
+    }    let n = f.device_counter.fetch_add(1, Ordering::SeqCst);
     json_reply(200, tokens_body(&f, format!("ACCESS-DEV-{n}"), format!("REFRESH-DEV-{n}")))
 }
 
@@ -140,6 +174,14 @@ pub fn catalog_json(base: &str) -> String {
             "refreshUrl": format!("{base}/token"), "clientId": "dcid", "scopes": ["x"], "pkce": false
         })
     };
+    let state_poll = |id: &str| {
+        json!({
+            "id": id, "flow": "state-poll",
+            "stateUrl": format!("{base}/state"), "tokenUrl": format!("{base}/state/token"),
+            "refreshUrl": format!("{base}/token"), "noClientId": true,
+            "statePollPlatform": "CLI", "statePollIntervalMs": 20, "scopes": []
+        })
+    };
     let mut secret = code("t-secret");
     secret["clientId"] = Value::Null;
     secret["requiresClientSecret"] = json!(true);
@@ -150,7 +192,7 @@ pub fn catalog_json(base: &str) -> String {
     let custom = json!({"id": "t-custom", "flow": "custom", "custom": {"reason": "proprietary protocol", "requires": ["official API"]}});
     json!({"schemaVersion": 1, "providers": [
         code("t-code"), code("t-code2"), device("t-device"), device("t-device2"), secret, hosted, custom,
-        device("github"), device("muse")
+        device("github"), device("muse"), state_poll("t-state")
     ]})
     .to_string()
 }
@@ -164,8 +206,8 @@ pub fn fast_tuning() -> OAuthTuning {
     }
 }
 
-pub const PROVIDER_IDS: [&str; 9] =
-    ["t-code", "t-code2", "t-device", "t-device2", "t-secret", "t-hosted", "t-custom", "github", "muse"];
+pub const PROVIDER_IDS: [&str; 10] =
+    ["t-code", "t-code2", "t-device", "t-device2", "t-secret", "t-hosted", "t-custom", "github", "muse", "t-state"];
 
 pub struct Env {
     pub base: String,
@@ -188,6 +230,8 @@ pub async fn env_with(tuning: OAuthTuning, limits: HubLimits) -> Env {
         .route("/token", post(token))
         .route("/device/code", post(device_code))
         .route("/device/token", post(device_token))
+        .route("/state", post(state_endpoint))
+        .route("/state/token", get(state_token))
         .with_state(fake.clone());
     let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
     let base = format!("http://{}", listener.local_addr().unwrap());

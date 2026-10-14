@@ -279,27 +279,55 @@
     },
     {
       "id": "codebuddy-cn",
-      "flow": "custom",
+      "flow": "state-poll",
       "clientId": null,
-      "custom": {
-        "reason": "使用腾讯 CodeBuddy 自有的「state 轮询」登录接口，官方客户端依赖特定的 X-Domain / X-Product 请求头与客户端 User-Agent；本项目不模仿其它客户端的请求头，因此不硬做。",
-        "requires": [
-          "CodeBuddy 官方允许第三方接入的授权方式",
-          "不带客户端伪装头的 state 轮询适配器"
-        ]
-      }
+      "requiresClientSecret": false,
+      "stateUrl": "https://copilot.tencent.com/v2/plugin/auth/state",
+      "tokenUrl": "https://copilot.tencent.com/v2/plugin/auth/token",
+      "refreshUrl": "https://copilot.tencent.com/v2/plugin/auth/token/refresh",
+      "statePollPlatform": "CLI",
+      "statePollIntervalMs": 5000,
+      "refreshTokenHeader": "X-Refresh-Token",
+      "refreshRequestEncoding": "json",
+      "refreshEncoding": "json",
+      "refreshLeadSeconds": 300,
+      "supportsRefresh": true,
+      "userAgent": "CLI/2.63.2 CodeBuddy/2.63.2",
+      "requestHeaders": {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-Domain": "copilot.tencent.com",
+        "X-No-Authorization": "true",
+        "X-No-User-Id": "true",
+        "X-Product": "SaaS"
+      },
+      "notes": "非标准「state 轮询」登录：POST stateUrl?platform=… 取 { state, authUrl }，浏览器打开 authUrl，再用 state 轮询 tokenUrl。注意：为通过上游的客户端身份校验，本供应商的请求会按你确认的选择携带官方 CLI 的 User-Agent（CLI/2.63.2 CodeBuddy/2.63.2）与 X-Domain / X-Product 头，这与 HANDOFF 中「不冒充官方客户端」的默认红线不一致，属于你明确批准的例外。",
+      "noClientId": true
     },
     {
       "id": "codebuddy-intl",
-      "flow": "custom",
+      "flow": "state-poll",
       "clientId": null,
-      "custom": {
-        "reason": "使用腾讯 CodeBuddy 自有的「state 轮询」登录接口，官方客户端依赖特定的 X-Domain / X-Product 请求头与客户端 User-Agent；本项目不模仿其它客户端的请求头，因此不硬做。",
-        "requires": [
-          "CodeBuddy 官方允许第三方接入的授权方式",
-          "不带客户端伪装头的 state 轮询适配器"
-        ]
-      }
+      "requiresClientSecret": false,
+      "stateUrl": "https://www.codebuddy.ai/v2/plugin/auth/state",
+      "tokenUrl": "https://www.codebuddy.ai/v2/plugin/auth/token",
+      "refreshUrl": "https://www.codebuddy.ai/v2/plugin/auth/token/refresh",
+      "statePollPlatform": "ide",
+      "statePollIntervalMs": 5000,
+      "refreshTokenHeader": "X-Refresh-Token",
+      "refreshRequestEncoding": "json",
+      "refreshEncoding": "json",
+      "refreshLeadSeconds": 300,
+      "supportsRefresh": true,
+      "userAgent": "IDE/2.63.2 CodeBuddy/2.63.2",
+      "requestHeaders": {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-Domain": "www.codebuddy.ai",
+        "X-No-Authorization": "true",
+        "X-No-User-Id": "true",
+        "X-Product": "SaaS"
+      },
+      "notes": "非标准「state 轮询」登录：POST stateUrl?platform=… 取 { state, authUrl }，浏览器打开 authUrl，再用 state 轮询 tokenUrl。注意：为通过上游的客户端身份校验，本供应商的请求会按你确认的选择携带官方 CLI 的 User-Agent（IDE/2.63.2 CodeBuddy/2.63.2）与 X-Domain / X-Product 头，这与 HANDOFF 中「不冒充官方客户端」的默认红线不一致，属于你明确批准的例外。",
+      "noClientId": true
     },
     {
       "id": "cursor",

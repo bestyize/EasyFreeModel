@@ -35,6 +35,8 @@ interface OAuthJsonEntry {
   verificationUri?: string
   baseUrlDefault?: string
   clientId: string | null
+  /** true：流程不使用 clientId（如 CodeBuddy 的 state 轮询），缺少 clientId 不算缺凭据 */
+  noClientId?: boolean
   requiresClientSecret?: boolean
   riskNotice?: string
   custom?: { reason: string; requires: string[] }
@@ -115,7 +117,8 @@ function entryOf(providerId: string): OAuthJsonEntry {
 function clientSecretMode(e: OAuthJsonEntry): 'none' | 'optional' | 'required' {
   if (e.flow === 'custom') return 'none'
   if (e.requiresClientSecret) return 'required'
-  // 没有内置 clientId 的（如 GitLab）由用户注册应用，机密应用才需要 secret：可选
+  // 不使用 clientId 的流程无需 secret；没有内置 clientId 的（如 GitLab）由用户注册应用，可选
+  if (e.noClientId) return 'none'
   return e.clientId === null ? 'optional' : 'none'
 }
 
@@ -141,7 +144,7 @@ function infoOf(e: OAuthJsonEntry): OAuthProviderInfo {
     }
   }
   const secretMode = clientSecretMode(e)
-  const missingId = e.clientId === null && !flags?.clientId
+  const missingId = !e.noClientId && e.clientId === null && !flags?.clientId
   const missingSecret = !!e.requiresClientSecret && !flags?.secret
   const st = STATUS[e.id]
   const exchangePending = TOKEN_EXCHANGE_PENDING.has(e.id)
@@ -153,7 +156,7 @@ function infoOf(e: OAuthJsonEntry): OAuthProviderInfo {
     requires: [],
     limitation,
     tokenExchangePending: exchangePending,
-    clientIdRequired: e.clientId === null,
+    clientIdRequired: !e.noClientId && e.clientId === null,
     clientSecret: secretMode,
     supportsBaseUrl: !!e.baseUrlDefault,
     clientConfigured: !!flags && (flags.clientId || flags.secret || flags.baseUrl),
@@ -197,6 +200,17 @@ function newSession(e: OAuthJsonEntry, label: string, reauthId: string | null): 
       authorizeUrl: null,
       userCode: MOCK_USER_CODE,
       verificationUri: e.verificationUri ?? FALLBACK_DEVICE_URI,
+      expiresAt,
+    }
+  }
+  if (e.flow === 'state-poll') {
+    // state 轮询：POST state 端点会拿到上游生成的 authUrl；预览里用一个明显的占位地址。
+    return {
+      sessionId,
+      flow: 'state-poll',
+      authorizeUrl: `https://example.com/mock-state-auth?provider=${e.id}`,
+      userCode: null,
+      verificationUri: null,
       expiresAt,
     }
   }

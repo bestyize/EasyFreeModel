@@ -14,6 +14,7 @@ use super::error::OAuthError;
 use super::flow::{self, AuthSession};
 use super::http;
 use super::refresh;
+use super::state_poll::{self, StateSession};
 use super::token::{TokenSet, TokenStore};
 
 /// 超时与轮询节奏。默认值面向生产；测试可缩短。
@@ -170,6 +171,13 @@ impl OAuthService {
         let cfg = self.provider(provider_id, FlowKind::Device)?.clone();
         let creds = self.credentials.credentials_for(provider_id).await?;
         device::start(self.http.clone(), cfg, creds, &self.tuning, CancelHandle::new()).await
+    }
+
+    /// 启动 state-poll 流程（CodeBuddy）：POST state 端点拿到 authUrl，后台轮询令牌。
+    pub async fn start_state_poll(&self, provider_id: &str) -> Result<StateSession, OAuthError> {
+        let cfg = self.provider(provider_id, FlowKind::StatePoll)?.clone();
+        let creds = self.credentials.credentials_for(provider_id).await?;
+        state_poll::start(self.http.clone(), cfg, creds, &self.tuning, CancelHandle::new()).await
     }
 
     /// 取得可用的令牌：未到刷新窗口直接返回；否则刷新（并发去重）并写回存储。

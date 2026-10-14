@@ -24,6 +24,7 @@ pub mod pkce;
 pub mod refresh;
 pub mod secret;
 pub mod service;
+pub mod state_poll;
 pub mod token;
 
 #[cfg(test)]

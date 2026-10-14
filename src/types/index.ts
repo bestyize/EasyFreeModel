@@ -117,7 +117,7 @@ export interface TestResult {
 // 提交的瞬间清空，且只作为 oauth_set_client_credentials 这一次调用的入参。
 
 /** 授权流程类型；custom = 依赖专有协议，本版本不实现（按钮置灰并显示原因） */
-export type OAuthFlow = 'authorization-code' | 'device' | 'custom'
+export type OAuthFlow = 'authorization-code' | 'device' | 'state-poll' | 'custom'
 /**
  * ready：可以直接开始授权；
  * need_client_credentials：需要用户先配置客户端凭据（界面文案「需要配置客户端凭据」）；
@@ -155,12 +155,12 @@ export interface OAuthProviderInfo {
 
 export interface OAuthStartResult {
   sessionId: string
-  flow: 'authorization-code' | 'device'
-  /** authorization-code：交给系统浏览器打开的授权地址；device 为 null */
+  flow: 'authorization-code' | 'device' | 'state-poll'
+  /** authorization-code / state-poll：交给系统浏览器打开的授权地址；device 为 null */
   authorizeUrl: string | null
-  /** device：展示给用户输入的短码；authorization-code 为 null */
+  /** device：展示给用户输入的短码；其余为 null */
   userCode: string | null
-  /** device：用户要打开的验证页面；authorization-code 为 null */
+  /** device：用户要打开的验证页面；其余为 null */
   verificationUri: string | null
   /** 会话过期时间（ISO 8601） */
   expiresAt: string

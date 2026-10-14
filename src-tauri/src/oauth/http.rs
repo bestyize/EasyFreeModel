@@ -11,9 +11,38 @@ use super::error::{sanitize_code, sanitize_text, OAuthError};
 
 const MAX_BODY_BYTES: usize = 1024 * 1024;
 
-/// 所有 OAuth 出站请求的 User-Agent，固定为 `RouterDesktop/<版本>`，不模仿任何其它客户端。
+/// 所有 OAuth 出站请求的默认 User-Agent，固定为 `RouterDesktop/<版本>`。
+/// 个别按客户端身份校验的上游可在配置里用 `userAgent` 显式覆盖（见 `request_headers`）。
 pub fn user_agent() -> String {
     format!("RouterDesktop/{}", env!("CARGO_PKG_VERSION"))
+}
+
+/// 一次出站请求要附带的额外请求头（来自配置的 `requestHeaders`；
+/// 其中 `userAgent` 单独覆盖 UA）。值不参与任何凭据逻辑。
+#[derive(Debug, Clone, Default)]
+pub struct ExtraHeaders(pub Vec<(String, String)>);
+
+impl ExtraHeaders {
+    /// 把配置里的 requestHeaders / userAgent 转成可以直接加到请求上的头。
+    pub fn from_config(headers: &std::collections::BTreeMap<String, String>, user_agent: Option<&str>) -> Self {
+        let mut out: Vec<(String, String)> = headers.iter().map(|(k, v)| (k.clone(), v.clone())).collect();
+        if let Some(ua) = user_agent {
+            out.push(("User-Agent".to_owned(), ua.to_owned()));
+        }
+        ExtraHeaders(out)
+    }
+
+    fn apply(&self, mut rb: reqwest::RequestBuilder) -> reqwest::RequestBuilder {
+        for (k, v) in &self.0 {
+            rb = rb.header(k.as_str(), v.as_str());
+        }
+        rb
+    }
+
+    /// 供错误信息脱敏使用：这些值不是凭据，无需抹除。
+    pub fn is_empty(&self) -> bool {
+        self.0.is_empty()
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Deserialize, Serialize)]
@@ -83,8 +112,19 @@ pub async fn post(
     encoding: Encoding,
     fields: &[(String, String)],
 ) -> Result<Reply, OAuthError> {
+    post_with(client, url, encoding, fields, &ExtraHeaders::default()).await
+}
+
+/// 同 [`post`]，但附带额外请求头（个别供应商的私有协议需要）。
+pub async fn post_with(
+    client: &Client,
+    url: &str,
+    encoding: Encoding,
+    fields: &[(String, String)],
+    headers: &ExtraHeaders,
+) -> Result<Reply, OAuthError> {
     let url = ensure_secure_endpoint(url)?;
-    let request = client.post(url).header(ACCEPT, "application/json");
+    let request = headers.apply(client.post(url).header(ACCEPT, "application/json"));
     let request = match encoding {
         Encoding::Form => request
             .header(CONTENT_TYPE, "application/x-www-form-urlencoded")
@@ -97,6 +137,16 @@ pub async fn post(
             request.json(&map)
         }
     };
+    finish(request).await
+}
+
+/// GET 请求（CodeBuddy 的令牌轮询以 GET + 查询串进行）。
+pub async fn get_with(client: &Client, url: &str, headers: &ExtraHeaders) -> Result<Reply, OAuthError> {
+    let url = ensure_secure_endpoint(url)?;
+    finish(headers.apply(client.get(url).header(ACCEPT, "application/json"))).await
+}
+
+async fn finish(request: reqwest::RequestBuilder) -> Result<Reply, OAuthError> {
     let response = request.send().await.map_err(map_reqwest)?;
     let status = response.status().as_u16();
     if response.content_length().is_some_and(|n| n as usize > MAX_BODY_BYTES) {

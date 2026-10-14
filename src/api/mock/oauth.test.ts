@@ -26,15 +26,23 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers())
 
 describe('oauth mock：能力信息取自 oauth_providers.json', () => {
-  it('25 家，14 家 custom，ids / flow 与 JSON 一致', async () => {
+  it('25 家，12 家 custom、2 家 state-poll，ids / flow 与 JSON 一致', async () => {
     const list = await mock.oauthListProviders()
     expect(list.map((i) => i.providerId)).toEqual(entries.map((e) => e.id))
     expect(list).toHaveLength(25)
-    expect(list.filter((i) => i.status === 'custom')).toHaveLength(14)
+    expect(list.filter((i) => i.status === 'custom')).toHaveLength(12)
+    expect(list.filter((i) => i.flow === 'state-poll').map((i) => i.providerId)).toEqual(['codebuddy-cn', 'codebuddy-intl'])
     for (const i of list) expect(i.flow, i.providerId).toBe(entries.find((e) => e.id === i.providerId)!.flow)
     for (const i of list.filter((x) => x.status === 'custom')) {
       expect(i.reason, i.providerId).toBeTruthy()
       expect(i.requires.length, i.providerId).toBeGreaterThan(0)
+    }
+  })
+
+  it('CodeBuddy：state 轮询流程为 ready、无需 clientId', async () => {
+    const by = Object.fromEntries((await mock.oauthListProviders()).map((i) => [i.providerId, i]))
+    for (const id of ['codebuddy-cn', 'codebuddy-intl']) {
+      expect(by[id]).toMatchObject({ flow: 'state-poll', status: 'ready', clientIdRequired: false, clientSecret: 'none' })
     }
   })
 

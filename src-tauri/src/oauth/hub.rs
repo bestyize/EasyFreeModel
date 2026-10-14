@@ -474,10 +474,10 @@ impl OAuthHub {
             limitation,
             token_exchange_pending: exchange_note.is_some(),
             risk_notice: cfg.risk_notice.clone(),
-            client_id_required: cfg.client_id.is_none(),
+            client_id_required: cfg.client_id.is_none() && !cfg.no_client_id,
             client_secret: if cfg.requires_client_secret && cfg.client_secret.is_none() {
                 SecretRequirement::Required
-            } else if cfg.client_id.is_none() {
+            } else if cfg.client_id.is_none() && !cfg.no_client_id {
                 SecretRequirement::Optional
             } else {
                 SecretRequirement::None
@@ -626,6 +626,20 @@ impl OAuthHub {
                     expires_at,
                 };
                 (result, cancel, Box::pin(dev.wait()) as FlowFuture, expires_at)
+            }),
+            FlowKind::StatePoll => inner.service.start_state_poll(provider_id).await.map(|st| {
+                let cancel = st.cancel_handle();
+                let expires_at = st.info.expires_at;
+                let result = StartResult {
+                    session_id: session_id.clone(),
+                    flow: FlowKind::StatePoll,
+                    // 面板会把这个地址在系统浏览器里打开（与 authorization-code 相同）
+                    authorize_url: Some(st.info.authorize_url.clone()),
+                    user_code: None,
+                    verification_uri: None,
+                    expires_at,
+                };
+                (result, cancel, Box::pin(st.wait()) as FlowFuture, expires_at)
             }),
             FlowKind::Custom => Err(OAuthError::UnknownProvider(provider_id.to_owned())),
         };

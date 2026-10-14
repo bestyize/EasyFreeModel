@@ -199,18 +199,25 @@ mod tests {
         let list = state.oauth_hub.list_providers().await.unwrap();
         assert_eq!(list.len(), 25);
         let custom: Vec<_> = list.iter().filter(|p| p.flow == FlowKind::Custom).collect();
-        assert_eq!(custom.len(), 14);
+        assert_eq!(custom.len(), 12);
         for p in &custom {
             let v = serde_json::to_value(p).unwrap();
             assert_eq!(v["status"], "custom", "{}", p.provider_id);
             assert!(!v["reason"].as_str().unwrap().is_empty(), "{} shows why it is not supported", p.provider_id);
             assert!(!v["requires"].as_array().unwrap().is_empty(), "{}", p.provider_id);
         }
+        // CodeBuddy 的 state 轮询流程：可授权、状态 ready
+        let state_poll: Vec<&str> = list
+            .iter()
+            .filter(|p| p.flow == FlowKind::StatePoll)
+            .map(|p| p.provider_id.as_str())
+            .collect();
+        assert_eq!(state_poll, ["codebuddy-cn", "codebuddy-intl"]);
         let status = |id: &str| serde_json::to_value(list.iter().find(|p| p.provider_id == id).unwrap()).unwrap();
         for id in ["gitlab"] {
             assert_eq!(status(id)["status"], "need_client_credentials", "{id}");
         }
-        for id in ["antigravity", "gemini-cli", "claude", "codex", "github", "grok-cli", "kimi", "muse", "minimax-code", "minimax-code-global"] {
+        for id in ["antigravity", "gemini-cli", "claude", "codex", "github", "grok-cli", "kimi", "muse", "minimax-code", "minimax-code-global", "codebuddy-cn", "codebuddy-intl"] {
             assert_eq!(status(id)["status"], "ready", "{id}");
         }
         for id in ["github", "muse"] {

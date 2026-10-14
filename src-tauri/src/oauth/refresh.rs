@@ -3,9 +3,10 @@
 use chrono::Utc;
 use reqwest::Client;
 
-use super::config::{ClientCredentials, OAuthProviderConfig};
+use super::config::{ClientCredentials, FlowKind, OAuthProviderConfig};
 use super::error::OAuthError;
 use super::http;
+use super::state_poll;
 use super::token::{tokens_from_reply, TokenSet};
 
 /// 这些 error 码表示 refresh token 已不可用，重试没有意义。
@@ -40,19 +41,29 @@ pub async fn refresh_tokens(
     };
     let client = cfg.resolve_client(creds)?;
 
-    let mut fields: Vec<(String, String)> = vec![
-        ("grant_type".into(), "refresh_token".into()),
-        ("refresh_token".into(), refresh_token.expose().to_owned()),
-        ("client_id".into(), client.client_id.clone()),
-    ];
-    if let Some(secret) = &client.client_secret {
-        fields.push(("client_secret".into(), secret.expose().to_owned()));
-    }
-    if let Some(scope) = &cfg.refresh_scope {
-        fields.push(("scope".into(), scope.clone()));
+    let mut headers = http::ExtraHeaders::from_config(&cfg.request_headers, cfg.user_agent.as_deref());
+    let encoding = cfg.refresh_request_encoding.unwrap_or(cfg.refresh_encoding);
+
+    let mut fields: Vec<(String, String)> = vec![];
+    match cfg.refresh_token_header.as_deref() {
+        // 个别上游（CodeBuddy）把 refresh token 放在请求头里，请求体为空对象。
+        Some(header) => {
+            headers.0.push((header.to_owned(), refresh_token.expose().to_owned()));
+        }
+        None => {
+            fields.push(("grant_type".into(), "refresh_token".into()));
+            fields.push(("refresh_token".into(), refresh_token.expose().to_owned()));
+            fields.push(("client_id".into(), client.client_id.clone()));
+            if let Some(secret) = &client.client_secret {
+                fields.push(("client_secret".into(), secret.expose().to_owned()));
+            }
+            if let Some(scope) = &cfg.refresh_scope {
+                fields.push(("scope".into(), scope.clone()));
+            }
+        }
     }
 
-    let reply = http::post(http, &url, cfg.refresh_encoding, &fields).await?;
+    let reply = http::post_with(http, &url, encoding, &fields, &headers).await?;
 
     let mut secrets: Vec<&str> = vec![refresh_token.expose()];
     if let Some(s) = &client.client_secret {
@@ -60,6 +71,11 @@ pub async fn refresh_tokens(
     }
     let mut fresh = match tokens_from_reply(&reply, &current.scopes, &secrets) {
         Ok(tokens) => tokens,
+        // state-poll 类上游把令牌包在 `{ code, data: { accessToken } }` 里，
+        // `tokens_from_reply` 认不出，这里补一次。
+        Err(_) if cfg.flow == FlowKind::StatePoll => {
+            state_poll::token_from_envelope_reply(&reply, &current.scopes).map_err(|_| reauth(cfg, "invalid refresh response"))?
+        }
         Err(OAuthError::TokenEndpoint { status, code, .. })
             if status == 401 || REAUTH_CODES.contains(&code.as_str()) =>
         {

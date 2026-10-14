@@ -22,6 +22,9 @@ const BASE_URL_PLACEHOLDER: &str = "{base_url}";
 pub enum FlowKind {
     AuthorizationCode,
     Device,
+    /// 非标准「state 轮询」：POST state 端点拿到 `{ state, authUrl }`，浏览器打开 authUrl，
+    /// 再用 state 轮询 token 端点直到返回令牌（CodeBuddy CN / Intl 使用）。
+    StatePoll,
     /// 依赖专有协议、指纹或私有登录：本框架不实现，配置里说明需要什么。
     Custom,
 }
@@ -31,6 +34,7 @@ impl FlowKind {
         match self {
             FlowKind::AuthorizationCode => "authorization-code",
             FlowKind::Device => "device",
+            FlowKind::StatePoll => "state-poll",
             FlowKind::Custom => "custom",
         }
     }
@@ -93,6 +97,23 @@ pub struct OAuthProviderConfig {
     /// 设备码响应没有给出 verification_uri 时使用的回退地址。
     #[serde(default)]
     pub verification_uri: Option<String>,
+    /// state-poll：POST 该地址（带 `?platform=<state_poll_platform>`）换取 `{ state, authUrl }`。
+    #[serde(default)]
+    pub state_url: Option<String>,
+    /// state-poll：`platform` 查询参数（CodeBuddy CN 用 "CLI"，Intl 用 "ide"）。
+    #[serde(default)]
+    pub state_poll_platform: Option<String>,
+    /// state-poll：轮询间隔（毫秒，上游给的 pollInterval）。
+    #[serde(default)]
+    pub state_poll_interval_ms: Option<u64>,
+    /// 上游要求的附加请求头（例如 CodeBuddy 的 X-Product / X-Domain）。
+    /// 仅用于个别供应商的私有协议；值会原样发送，不参与任何凭据逻辑。
+    #[serde(default)]
+    pub request_headers: BTreeMap<String, String>,
+    /// 该供应商要求的 User-Agent。缺省时用本项目固定的 `RouterDesktop/<版本>`；
+    /// 个别上游（如 CodeBuddy）按客户端身份校验，需要填写它们要求的 UA。
+    #[serde(default)]
+    pub user_agent: Option<String>,
     /// URL 中 `{base_url}` 占位符的默认值（例如 GitLab 自托管实例）。
     #[serde(default)]
     pub base_url_default: Option<String>,
@@ -100,6 +121,10 @@ pub struct OAuthProviderConfig {
     /// 公开的 PKCE / 设备码 clientId；None 表示必须由用户提供。
     #[serde(default)]
     pub client_id: Option<String>,
+    /// true：该流程不使用 clientId（例如 CodeBuddy 的 state 轮询登录由上游自行识别），
+    /// 因此缺少 clientId 不算缺凭据。
+    #[serde(default)]
+    pub no_client_id: bool,
     #[serde(default)]
     pub client_secret: Option<Secret>,
     #[serde(default)]
@@ -129,6 +154,13 @@ pub struct OAuthProviderConfig {
     /// false 表示上游不支持 refresh_token 授权（过期即需重新授权）。
     #[serde(default = "default_true")]
     pub supports_refresh: bool,
+    /// Some(name)：刷新时把 refresh token 放进该请求头而不是请求体
+    /// （CodeBuddy 用 `X-Refresh-Token`）。
+    #[serde(default)]
+    pub refresh_token_header: Option<String>,
+    /// 刷新请求体编码（默认跟 `refreshEncoding`）。
+    #[serde(default)]
+    pub refresh_request_encoding: Option<Encoding>,
 
     #[serde(default)]
     pub extra_authorize_params: BTreeMap<String, String>,
@@ -255,6 +287,7 @@ impl OAuthProviderConfig {
             .clone()
             .filter(|s| !s.trim().is_empty())
             .or_else(|| self.client_id.clone())
+            .or_else(|| self.no_client_id.then(String::new))
             .ok_or_else(|| OAuthError::MissingClientCredential { provider: self.id.clone(), field: "client_id" })?;
         let client_secret = creds
             .client_secret
@@ -297,6 +330,11 @@ impl OAuthProviderConfig {
         self.required(&self.device_code_url, "deviceCodeUrl", creds)
     }
 
+    /// state-poll：换取 state 与 authUrl 的端点。
+    pub fn state_endpoint(&self, creds: &ClientCredentials) -> Result<String, OAuthError> {
+        self.required(&self.state_url, "stateUrl", creds)
+    }
+
     pub fn token_endpoint(&self, creds: &ClientCredentials) -> Result<String, OAuthError> {
         self.required(&self.token_url, "tokenUrl", creds)
     }
@@ -324,6 +362,7 @@ impl OAuthProviderConfig {
         let url_fields = [
             ("authorizeUrl", &self.authorize_url),
             ("deviceCodeUrl", &self.device_code_url),
+            ("stateUrl", &self.state_url),
             ("tokenUrl", &self.token_url),
             ("refreshUrl", &self.refresh_url),
             ("verificationUri", &self.verification_uri),
@@ -363,6 +402,11 @@ impl OAuthProviderConfig {
             FlowKind::Device => {
                 if self.device_code_url.is_none() || self.token_url.is_none() {
                     return Err(format!("{id}: device flow needs deviceCodeUrl and tokenUrl"));
+                }
+            }
+            FlowKind::StatePoll => {
+                if self.state_url.is_none() || self.token_url.is_none() {
+                    return Err(format!("{id}: state-poll flow needs stateUrl and tokenUrl"));
                 }
             }
             FlowKind::Custom => {
@@ -490,7 +534,7 @@ mod tests {
         assert_eq!(
             custom,
             [
-                "cline", "clinepass", "codebuddy-cn", "codebuddy-intl", "cursor", "glm", "iflow", "kilocode",
+                "cline", "clinepass", "cursor", "glm", "iflow", "kilocode",
                 "kimchi", "kiro", "qoder", "qoder-cn", "xiaomi-mimo", "zed"
             ]
         );
@@ -498,13 +542,23 @@ mod tests {
             let info = p.custom.as_ref().unwrap();
             assert!(!info.reason.is_empty() && !info.requires.is_empty(), "{} must say what it needs", p.id);
         }
+        // state-poll：非标准 state 轮询（CodeBuddy CN / Intl）
+        let mut state_poll: Vec<&str> = catalog
+            .all()
+            .iter()
+            .filter(|p| p.flow == FlowKind::StatePoll)
+            .map(|p| p.id.as_str())
+            .collect();
+        state_poll.sort_unstable();
+        assert_eq!(state_poll, ["codebuddy-cn", "codebuddy-intl"]);
         let standard: Vec<&str> = catalog
             .all()
             .iter()
             .filter(|p| p.flow != FlowKind::Custom)
             .map(|p| p.id.as_str())
             .collect();
-        assert_eq!(standard.len(), 11);
+        // 标准流程（authorization-code + device + state-poll）；13 = 11 + 2 家 state-poll
+        assert_eq!(standard.len(), 13);
     }
 
     #[test]

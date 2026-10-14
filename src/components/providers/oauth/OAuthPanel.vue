@@ -229,7 +229,10 @@ async function begin() {
     now.value = Date.now()
     stage.value = 'running'
     tickTimer = setTimeout(tick, 1000)
-    if (res.flow === 'authorization-code' && res.authorizeUrl) void open(res.authorizeUrl)
+    // authorization-code 与 state-poll 都把授权地址交给系统浏览器打开；device 由用户手动输码。
+    if (res.authorizeUrl && (res.flow === 'authorization-code' || res.flow === 'state-poll')) {
+      void open(res.authorizeUrl)
+    }
     schedulePoll()
   } catch (e) {
     if (disposed) return
