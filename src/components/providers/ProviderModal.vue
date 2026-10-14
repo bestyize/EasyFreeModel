@@ -285,6 +285,34 @@ function errText(e: unknown): string {
   return e instanceof Error ? e.message : String(e)
 }
 
+/** 拉取模型：把后端合并后的最新列表并入草稿，保留用户已改的别名与启用状态 */
+const modelsBusy = ref(false)
+const modelsError = ref<string | null>(null)
+async function onFetchModels() {
+  const d = draft.value
+  if (!d || modelsBusy.value) return
+  modelsError.value = null
+  modelsBusy.value = true
+  try {
+    const fresh = await store.fetchModels(d.id)
+    const byId = new Map(d.models.map((m) => [m.id, m]))
+    d.models = fresh
+      .map((m) => {
+        const prev = byId.get(m.id)
+        return prev ? { ...m, publicAlias: prev.publicAlias, enabled: prev.enabled } : m
+      })
+      .concat(
+        // 保留用户手动添加、但上游本次未返回的模型（例如自定义别名）
+        d.models.filter((m) => !fresh.some((f) => f.id === m.id)),
+      )
+    if (!fresh.length) modelsError.value = '上游与内置模型库都没有返回模型'
+  } catch (e) {
+    modelsError.value = `拉取模型失败：${errText(e)}`
+  } finally {
+    modelsBusy.value = false
+  }
+}
+
 /** 把后端刚刷新的摘要（状态、连接数）同步进弹窗里的快照，保持“未修改”状态 */
 function syncSummary() {
   const id = draft.value?.id
@@ -679,7 +707,10 @@ function cancel() {
         v-model:thinking-level="draft.thinkingLevel"
         :conflict-ids="conflictIds"
         :readonly="readonly"
+        :fetching="modelsBusy"
+        @fetch="onFetchModels"
       />
+      <p v-if="modelsError" class="issues" role="alert" data-testid="models-error">{{ modelsError }}</p>
     </div>
 
     <template #footer>

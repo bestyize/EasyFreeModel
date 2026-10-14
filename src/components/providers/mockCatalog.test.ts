@@ -1,10 +1,12 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 import catalogJson from '../../../src-tauri/resources/provider_catalog.json'
 import statusJson from '../../../src-tauri/resources/provider_status.json'
+import modelsJson from '../../../src-tauri/resources/provider_models.json'
 import { __resetProvidersMock, __setProvidersMockLatency, providersMock as mock } from '@/api/mock/providers'
 
 const catalog = catalogJson as unknown as { id: string; category: string; serviceKinds: string[]; color: string | null }[]
 const status = statusJson as unknown as Record<string, { adapter: string | null; reason: string | null; baseUrl: string | null }>
+const curated = modelsJson as unknown as Record<string, { id: string; upstreamModelId: string; publicAlias: string }[]>
 
 const SECRET = 'sk-mock-SUPERSECRET-0001'
 
@@ -128,5 +130,45 @@ describe('mock 命令遵守同样的红线', () => {
     expect(saved.adapterReady).toBe(true)
     expect(saved.name).toBe('OpenRouter')
     expect(JSON.stringify(saved)).not.toContain('secret-value')
+  })
+})
+
+describe('预设模型与拉取模型', () => {
+  it('绝大多数提供商预置了可用模型（与内置模型库一致）', async () => {
+    const withModels = Object.entries(curated).filter(([, ms]) => ms.length)
+    expect(withModels.length).toBeGreaterThan(60)
+    // 抽样核对：预设模型与 mock 详情一致
+    for (const id of ['antigravity', 'openai', 'claude', 'gemini']) {
+      const d = await mock.getProvider(id)
+      expect(d.models.length, id).toBe(curated[id].length)
+      expect(d.models.map((m) => m.publicAlias)).toEqual(curated[id].map((m) => m.publicAlias))
+    }
+  })
+
+  it('fetchProviderModels 合并内置模型库，且保留用户已改的启用状态与别名', async () => {
+    const before = await mock.getProvider('antigravity')
+    expect(before.models.length).toBeGreaterThan(0)
+
+    // 用户把第一个模型改名并禁用
+    const first = before.models[0]
+    await mock.saveProvider({
+      ...before,
+      models: [{ ...first, publicAlias: 'my-alias', enabled: false }, ...before.models.slice(1)],
+    })
+
+    const fetched = await mock.fetchProviderModels('antigravity')
+    const kept = fetched.find((m) => m.id === first.id)!
+    expect(kept.publicAlias).toBe('my-alias')
+    expect(kept.enabled).toBe(false)
+    expect(fetched.length).toBe(curated['antigravity'].length)
+  })
+
+  it('没有预设模型的提供商：拉取后仍为空数组，不伪造模型', async () => {
+    // 找一个既没有预设模型、也没有连接的提供商
+    const empty = catalog.find((c) => !curated[c.id] && status[c.id].adapter)?.id
+    if (empty) {
+      const list = await mock.fetchProviderModels(empty)
+      expect(list).toEqual([])
+    }
   })
 })

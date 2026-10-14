@@ -1,0 +1,5193 @@
+{
+  "agnes": [
+    {
+      "id": "agnes/agnes-2.5-flash",
+      "upstreamModelId": "agnes-2.5-flash",
+      "publicAlias": "agnes/agnes-2.5-flash",
+      "description": "Agnes 2.5 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "agnes/agnes-2.5-pro",
+      "upstreamModelId": "agnes-2.5-pro",
+      "publicAlias": "agnes/agnes-2.5-pro",
+      "description": "Agnes 2.5 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "agnes/agnes-2.5-pro-beta",
+      "upstreamModelId": "agnes-2.5-pro-beta",
+      "publicAlias": "agnes/agnes-2.5-pro-beta",
+      "description": "Agnes 2.5 Pro Beta",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "agnes/agnes-3.0-flash",
+      "upstreamModelId": "agnes-3.0-flash",
+      "publicAlias": "agnes/agnes-3.0-flash",
+      "description": "Agnes 3.0 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    }
+  ],
+  "anthropic": [
+    {
+      "id": "anthropic/claude-sonnet-4-20250514",
+      "upstreamModelId": "claude-sonnet-4-20250514",
+      "publicAlias": "anthropic/claude-sonnet-4-20250514",
+      "description": "Claude Sonnet 4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "anthropic/claude-opus-4-20250514",
+      "upstreamModelId": "claude-opus-4-20250514",
+      "publicAlias": "anthropic/claude-opus-4-20250514",
+      "description": "Claude Opus 4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "anthropic/claude-3-5-sonnet-20241022",
+      "upstreamModelId": "claude-3-5-sonnet-20241022",
+      "publicAlias": "anthropic/claude-3-5-sonnet-20241022",
+      "description": "Claude 3.5 Sonnet",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    }
+  ],
+  "antigravity": [
+    {
+      "id": "antigravity/gemini-3.8-flash-high",
+      "upstreamModelId": "gemini-3.8-flash-high(high)",
+      "publicAlias": "ag/gemini-3.8-flash-high",
+      "description": "Gemini 3.8 Flash (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "antigravity/gemini-3.8-flash-medium",
+      "upstreamModelId": "gemini-3.8-flash-medium(medium)",
+      "publicAlias": "ag/gemini-3.8-flash-medium",
+      "description": "Gemini 3.8 Flash (Medium)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "antigravity/gemini-3.8-flash-low",
+      "upstreamModelId": "gemini-3.8-flash-low(low)",
+      "publicAlias": "ag/gemini-3.8-flash-low",
+      "description": "Gemini 3.8 Flash (Low)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "antigravity/gemini-3.8-flash",
+      "upstreamModelId": "gemini-3.8-flash-medium(medium)",
+      "publicAlias": "ag/gemini-3.8-flash",
+      "description": "Gemini 3.8 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "antigravity/gemini-3.7-flash-high",
+      "upstreamModelId": "gemini-3.7-flash-tiered(high)",
+      "publicAlias": "ag/gemini-3.7-flash-high",
+      "description": "Gemini 3.7 Flash (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "antigravity/gemini-3.7-flash-medium",
+      "upstreamModelId": "gemini-3.7-flash-tiered(medium)",
+      "publicAlias": "ag/gemini-3.7-flash-medium",
+      "description": "Gemini 3.7 Flash (Medium)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "antigravity/gemini-3.7-flash-low",
+      "upstreamModelId": "gemini-3.7-flash-tiered(low)",
+      "publicAlias": "ag/gemini-3.7-flash-low",
+      "description": "Gemini 3.7 Flash (Low)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "antigravity/gemini-3.6-flash-high",
+      "upstreamModelId": "gemini-3.6-flash-tiered(high)",
+      "publicAlias": "ag/gemini-3.6-flash-high",
+      "description": "Gemini 3.6 Flash (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "antigravity/gemini-3.6-flash-medium",
+      "upstreamModelId": "gemini-3.6-flash-tiered(medium)",
+      "publicAlias": "ag/gemini-3.6-flash-medium",
+      "description": "Gemini 3.6 Flash (Medium)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "antigravity/gemini-3.6-flash-low",
+      "upstreamModelId": "gemini-3.6-flash-tiered(low)",
+      "publicAlias": "ag/gemini-3.6-flash-low",
+      "description": "Gemini 3.6 Flash (Low)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "antigravity/gemini-3.1-pro-high",
+      "upstreamModelId": "gemini-pro-agent",
+      "publicAlias": "ag/gemini-3.1-pro-high",
+      "description": "Gemini 3.1 Pro (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "antigravity/gemini-pro-agent",
+      "upstreamModelId": "gemini-pro-agent",
+      "publicAlias": "ag/gemini-pro-agent",
+      "description": "Gemini 3.1 Pro (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "antigravity/gemini-3.1-pro-low",
+      "upstreamModelId": "gemini-3.1-pro-low(low)",
+      "publicAlias": "ag/gemini-3.1-pro-low",
+      "description": "Gemini 3.1 Pro (Low)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "antigravity/claude-sonnet-5-5-high",
+      "upstreamModelId": "claude-sonnet-5-5-high(high)",
+      "publicAlias": "ag/claude-sonnet-5-5-high",
+      "description": "Claude Sonnet 5.5 (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "antigravity/claude-sonnet-5-5-medium",
+      "upstreamModelId": "claude-sonnet-5-5-medium(medium)",
+      "publicAlias": "ag/claude-sonnet-5-5-medium",
+      "description": "Claude Sonnet 5.5 (Medium)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "antigravity/claude-sonnet-5-5-low",
+      "upstreamModelId": "claude-sonnet-5-5-low(low)",
+      "publicAlias": "ag/claude-sonnet-5-5-low",
+      "description": "Claude Sonnet 5.5 (Low)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    },
+    {
+      "id": "antigravity/claude-sonnet-5-5",
+      "upstreamModelId": "claude-sonnet-5-5-high(high)",
+      "publicAlias": "ag/claude-sonnet-5-5",
+      "description": "Claude Sonnet 5.5 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 16
+    },
+    {
+      "id": "antigravity/claude-opus-5-5-high",
+      "upstreamModelId": "claude-opus-5-5-high(high)",
+      "publicAlias": "ag/claude-opus-5-5-high",
+      "description": "Claude Opus 5.5 (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 17
+    },
+    {
+      "id": "antigravity/claude-opus-5-5-medium",
+      "upstreamModelId": "claude-opus-5-5-medium(medium)",
+      "publicAlias": "ag/claude-opus-5-5-medium",
+      "description": "Claude Opus 5.5 (Medium)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 18
+    },
+    {
+      "id": "antigravity/claude-opus-5-5-low",
+      "upstreamModelId": "claude-opus-5-5-low(low)",
+      "publicAlias": "ag/claude-opus-5-5-low",
+      "description": "Claude Opus 5.5 (Low)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 19
+    },
+    {
+      "id": "antigravity/claude-opus-5-5",
+      "upstreamModelId": "claude-opus-5-5-high(high)",
+      "publicAlias": "ag/claude-opus-5-5",
+      "description": "Claude Opus 5.5 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 20
+    },
+    {
+      "id": "antigravity/claude-sonnet-4-6",
+      "upstreamModelId": "claude-sonnet-4-6",
+      "publicAlias": "ag/claude-sonnet-4-6",
+      "description": "Claude Sonnet 4.6 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 21
+    },
+    {
+      "id": "antigravity/claude-opus-4-6-thinking",
+      "upstreamModelId": "claude-opus-4-6-thinking",
+      "publicAlias": "ag/claude-opus-4-6-thinking",
+      "description": "Claude Opus 4.6 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 22
+    },
+    {
+      "id": "antigravity/gpt-oss-120b-medium",
+      "upstreamModelId": "gpt-oss-120b-medium",
+      "publicAlias": "ag/gpt-oss-120b-medium",
+      "description": "GPT-OSS 120B (Medium)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 23
+    }
+  ],
+  "assemblyai": [
+    {
+      "id": "assemblyai/universal-3-pro",
+      "upstreamModelId": "universal-3-pro",
+      "publicAlias": "assemblyai/universal-3-pro",
+      "description": "Universal 3 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "atria": [
+    {
+      "id": "atria/Atria-Dawn-Preview",
+      "upstreamModelId": "Atria-Dawn-Preview",
+      "publicAlias": "atria/Atria-Dawn-Preview",
+      "description": "Atria Dawn Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "aws-polly": [
+    {
+      "id": "aws-polly/standard",
+      "upstreamModelId": "standard",
+      "publicAlias": "polly/standard",
+      "description": "Standard",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "aws-polly/neural",
+      "upstreamModelId": "neural",
+      "publicAlias": "polly/neural",
+      "description": "Neural",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "aws-polly/long-form",
+      "upstreamModelId": "long-form",
+      "publicAlias": "polly/long-form",
+      "description": "Long-form",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "aws-polly/generative",
+      "upstreamModelId": "generative",
+      "publicAlias": "polly/generative",
+      "description": "Generative",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    }
+  ],
+  "bedrock-xai": [
+    {
+      "id": "bedrock-xai/us.xai.grok-4.6",
+      "upstreamModelId": "us.xai.grok-4.6",
+      "publicAlias": "brx/us.xai.grok-4.6",
+      "description": "Grok 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "bedrock-xai/global.xai.grok-4.6",
+      "upstreamModelId": "global.xai.grok-4.6",
+      "publicAlias": "brx/global.xai.grok-4.6",
+      "description": "Grok 4.6 (global)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    }
+  ],
+  "bedrock": [
+    {
+      "id": "bedrock/us.anthropic.claude-opus-5",
+      "upstreamModelId": "us.anthropic.claude-opus-5",
+      "publicAlias": "br/us.anthropic.claude-opus-5",
+      "description": "Claude Opus 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-sonnet-5",
+      "upstreamModelId": "us.anthropic.claude-sonnet-5",
+      "publicAlias": "br/us.anthropic.claude-sonnet-5",
+      "description": "Claude Sonnet 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-fable-5",
+      "upstreamModelId": "us.anthropic.claude-fable-5",
+      "publicAlias": "br/us.anthropic.claude-fable-5",
+      "description": "Claude Fable 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-opus-4-8",
+      "upstreamModelId": "us.anthropic.claude-opus-4-8",
+      "publicAlias": "br/us.anthropic.claude-opus-4-8",
+      "description": "Claude Opus 4.8",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-opus-4-7",
+      "upstreamModelId": "us.anthropic.claude-opus-4-7",
+      "publicAlias": "br/us.anthropic.claude-opus-4-7",
+      "description": "Claude Opus 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-sonnet-4-6",
+      "upstreamModelId": "us.anthropic.claude-sonnet-4-6",
+      "publicAlias": "br/us.anthropic.claude-sonnet-4-6",
+      "description": "Claude Sonnet 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-opus-4-5-20251101-v1:0",
+      "upstreamModelId": "us.anthropic.claude-opus-4-5-20251101-v1:0",
+      "publicAlias": "br/us.anthropic.claude-opus-4-5-20251101-v1:0",
+      "description": "Claude Opus 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "upstreamModelId": "us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "publicAlias": "br/us.anthropic.claude-sonnet-4-5-20250929-v1:0",
+      "description": "Claude Sonnet 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-opus-4-1-20250805-v1:0",
+      "upstreamModelId": "us.anthropic.claude-opus-4-1-20250805-v1:0",
+      "publicAlias": "br/us.anthropic.claude-opus-4-1-20250805-v1:0",
+      "description": "Claude Opus 4.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "upstreamModelId": "us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "publicAlias": "br/us.anthropic.claude-sonnet-4-20250514-v1:0",
+      "description": "Claude Sonnet 4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "bedrock/us.anthropic.claude-3-haiku-20240307-v1:0",
+      "upstreamModelId": "us.anthropic.claude-3-haiku-20240307-v1:0",
+      "publicAlias": "br/us.anthropic.claude-3-haiku-20240307-v1:0",
+      "description": "Claude 3 Haiku",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    }
+  ],
+  "black-forest-labs": [
+    {
+      "id": "black-forest-labs/flux-pro-1.1",
+      "upstreamModelId": "flux-pro-1.1",
+      "publicAlias": "black-forest-labs/flux-pro-1.1",
+      "description": "FLUX Pro 1.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "byteplus": [
+    {
+      "id": "byteplus/seed-2-0-pro-260328",
+      "upstreamModelId": "seed-2-0-pro-260328",
+      "publicAlias": "byteplus/seed-2-0-pro-260328",
+      "description": "Seed 2.0 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "byteplus/seed-2-0-code-preview-260328",
+      "upstreamModelId": "seed-2-0-code-preview-260328",
+      "publicAlias": "byteplus/seed-2-0-code-preview-260328",
+      "description": "Seed 2.0 Code Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "byteplus/seed-2-0-mini-260215",
+      "upstreamModelId": "seed-2-0-mini-260215",
+      "publicAlias": "byteplus/seed-2-0-mini-260215",
+      "description": "Seed 2.0 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "byteplus/seed-2-0-lite-260228",
+      "upstreamModelId": "seed-2-0-lite-260228",
+      "publicAlias": "byteplus/seed-2-0-lite-260228",
+      "description": "Seed 2.0 Lite",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "byteplus/kimi-k2-thinking-251104",
+      "upstreamModelId": "kimi-k2-thinking-251104",
+      "publicAlias": "byteplus/kimi-k2-thinking-251104",
+      "description": "Kimi K2 Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "byteplus/glm-4-7-251222",
+      "upstreamModelId": "glm-4-7-251222",
+      "publicAlias": "byteplus/glm-4-7-251222",
+      "description": "GLM 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "byteplus/gpt-oss-120b-250805",
+      "upstreamModelId": "gpt-oss-120b-250805",
+      "publicAlias": "byteplus/gpt-oss-120b-250805",
+      "description": "GPT-OSS-120B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    }
+  ],
+  "cartesia": [
+    {
+      "id": "cartesia/sonic-2",
+      "upstreamModelId": "sonic-2",
+      "publicAlias": "cartesia/sonic-2",
+      "description": "Sonic 2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "cartesia/sonic-3",
+      "upstreamModelId": "sonic-3",
+      "publicAlias": "cartesia/sonic-3",
+      "description": "Sonic 3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    }
+  ],
+  "claude": [
+    {
+      "id": "claude/claude-opus-5-5",
+      "upstreamModelId": "claude-opus-5-5",
+      "publicAlias": "cc/claude-opus-5-5",
+      "description": "Claude Opus 5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "claude/claude-opus-5",
+      "upstreamModelId": "claude-opus-5",
+      "publicAlias": "cc/claude-opus-5",
+      "description": "Claude Opus 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "claude/claude-fable-5-1",
+      "upstreamModelId": "claude-fable-5-1",
+      "publicAlias": "cc/claude-fable-5-1",
+      "description": "Claude Fable 5.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "claude/claude-fable-5",
+      "upstreamModelId": "claude-fable-5",
+      "publicAlias": "cc/claude-fable-5",
+      "description": "Claude Fable 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "claude/claude-sonnet-5-5",
+      "upstreamModelId": "claude-sonnet-5-5",
+      "publicAlias": "cc/claude-sonnet-5-5",
+      "description": "Claude Sonnet 5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "claude/claude-sonnet-5",
+      "upstreamModelId": "claude-sonnet-5",
+      "publicAlias": "cc/claude-sonnet-5",
+      "description": "Claude Sonnet 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "claude/claude-haiku-4-5-20251001",
+      "upstreamModelId": "claude-haiku-4-5-20251001",
+      "publicAlias": "cc/claude-haiku-4-5-20251001",
+      "description": "Claude 4.5 Haiku",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    }
+  ],
+  "cline": [
+    {
+      "id": "cline/anthropic/claude-opus-4.7",
+      "upstreamModelId": "anthropic/claude-opus-4.7",
+      "publicAlias": "cl/anthropic/claude-opus-4.7",
+      "description": "Claude Opus 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "cline/anthropic/claude-sonnet-4.6",
+      "upstreamModelId": "anthropic/claude-sonnet-4.6",
+      "publicAlias": "cl/anthropic/claude-sonnet-4.6",
+      "description": "Claude Sonnet 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "cline/anthropic/claude-opus-4.6",
+      "upstreamModelId": "anthropic/claude-opus-4.6",
+      "publicAlias": "cl/anthropic/claude-opus-4.6",
+      "description": "Claude Opus 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "cline/openai/gpt-5.3-codex",
+      "upstreamModelId": "openai/gpt-5.3-codex",
+      "publicAlias": "cl/openai/gpt-5.3-codex",
+      "description": "GPT-5.3 Codex",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "cline/openai/gpt-5.4",
+      "upstreamModelId": "openai/gpt-5.4",
+      "publicAlias": "cl/openai/gpt-5.4",
+      "description": "GPT-5.4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "cline/google/gemini-3.1-pro-preview",
+      "upstreamModelId": "google/gemini-3.1-pro-preview",
+      "publicAlias": "cl/google/gemini-3.1-pro-preview",
+      "description": "Gemini 3.1 Pro Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "cline/google/gemini-3.1-flash-lite-preview",
+      "upstreamModelId": "google/gemini-3.1-flash-lite-preview",
+      "publicAlias": "cl/google/gemini-3.1-flash-lite-preview",
+      "description": "Gemini 3.1 Flash Lite Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "cline/kwaipilot/kat-coder-pro",
+      "upstreamModelId": "kwaipilot/kat-coder-pro",
+      "publicAlias": "cl/kwaipilot/kat-coder-pro",
+      "description": "KAT Coder Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    }
+  ],
+  "clinepass": [
+    {
+      "id": "clinepass/cline-pass/glm-5.2",
+      "upstreamModelId": "cline-pass/glm-5.2",
+      "publicAlias": "clinepass/cline-pass/glm-5.2",
+      "description": "GLM-5.2 (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "clinepass/cline-pass/kimi-k2.7-code",
+      "upstreamModelId": "cline-pass/kimi-k2.7-code",
+      "publicAlias": "clinepass/cline-pass/kimi-k2.7-code",
+      "description": "Kimi K2.7 Code (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "clinepass/cline-pass/kimi-k2.6",
+      "upstreamModelId": "cline-pass/kimi-k2.6",
+      "publicAlias": "clinepass/cline-pass/kimi-k2.6",
+      "description": "Kimi K2.6 (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "clinepass/cline-pass/deepseek-v4-pro",
+      "upstreamModelId": "cline-pass/deepseek-v4-pro",
+      "publicAlias": "clinepass/cline-pass/deepseek-v4-pro",
+      "description": "DeepSeek V4 Pro (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "clinepass/cline-pass/deepseek-v4-flash",
+      "upstreamModelId": "cline-pass/deepseek-v4-flash",
+      "publicAlias": "clinepass/cline-pass/deepseek-v4-flash",
+      "description": "DeepSeek V4 Flash (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "clinepass/cline-pass/mimo-v2.5",
+      "upstreamModelId": "cline-pass/mimo-v2.5",
+      "publicAlias": "clinepass/cline-pass/mimo-v2.5",
+      "description": "MiMo-V2.5 (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "clinepass/cline-pass/mimo-v2.5-pro",
+      "upstreamModelId": "cline-pass/mimo-v2.5-pro",
+      "publicAlias": "clinepass/cline-pass/mimo-v2.5-pro",
+      "description": "MiMo-V2.5-Pro (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "clinepass/cline-pass/minimax-m3",
+      "upstreamModelId": "cline-pass/minimax-m3",
+      "publicAlias": "clinepass/cline-pass/minimax-m3",
+      "description": "MiniMax M3 (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "clinepass/cline-pass/qwen3.7-max",
+      "upstreamModelId": "cline-pass/qwen3.7-max",
+      "publicAlias": "clinepass/cline-pass/qwen3.7-max",
+      "description": "Qwen3.7 Max (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "clinepass/cline-pass/qwen3.7-plus",
+      "upstreamModelId": "cline-pass/qwen3.7-plus",
+      "publicAlias": "clinepass/cline-pass/qwen3.7-plus",
+      "description": "Qwen3.7 Plus (ClinePass)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    }
+  ],
+  "cloudflare-ai": [
+    {
+      "id": "cloudflare-ai/@cf/cloudflare/clef-flash",
+      "upstreamModelId": "clef-flash",
+      "publicAlias": "cloudflare-ai/@cf/cloudflare/clef-flash",
+      "description": "Clef Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "cloudflare-ai/@cf/meta/llama-3.2-1b-instruct",
+      "upstreamModelId": "@cf/meta/llama-3.2-1b-instruct",
+      "publicAlias": "cloudflare-ai/@cf/meta/llama-3.2-1b-instruct",
+      "description": "Llama 3.2 1B Instruct",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "cloudflare-ai/@cf/meta/llama-3.2-3b-instruct",
+      "upstreamModelId": "@cf/meta/llama-3.2-3b-instruct",
+      "publicAlias": "cloudflare-ai/@cf/meta/llama-3.2-3b-instruct",
+      "description": "Llama 3.2 3B Instruct",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "cloudflare-ai/@cf/meta/llama-3.1-8b-instruct-fp8-fast",
+      "upstreamModelId": "@cf/meta/llama-3.1-8b-instruct-fp8-fast",
+      "publicAlias": "cloudflare-ai/@cf/meta/llama-3.1-8b-instruct-fp8-fast",
+      "description": "Llama 3.1 8B Instruct FP8 Fast",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "cloudflare-ai/@cf/meta/llama-3.1-8b-instruct-awq",
+      "upstreamModelId": "@cf/meta/llama-3.1-8b-instruct-awq",
+      "publicAlias": "cloudflare-ai/@cf/meta/llama-3.1-8b-instruct-awq",
+      "description": "Llama 3.1 8B Instruct AWQ",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "cloudflare-ai/@cf/mistralai/mistral-small-3.1-24b-instruct",
+      "upstreamModelId": "@cf/mistralai/mistral-small-3.1-24b-instruct",
+      "publicAlias": "cloudflare-ai/@cf/mistralai/mistral-small-3.1-24b-instruct",
+      "description": "Mistral Small 3.1 24B Instruct",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "cloudflare-ai/@cf/meta/llama-3.1-70b-instruct-fp8-fast",
+      "upstreamModelId": "@cf/meta/llama-3.1-70b-instruct-fp8-fast",
+      "publicAlias": "cloudflare-ai/@cf/meta/llama-3.1-70b-instruct-fp8-fast",
+      "description": "Llama 3.1 70B Instruct FP8 Fast",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "cloudflare-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "upstreamModelId": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "publicAlias": "cloudflare-ai/@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+      "description": "Llama 3.3 70B Instruct FP8 Fast",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "cloudflare-ai/@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+      "upstreamModelId": "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+      "publicAlias": "cloudflare-ai/@cf/deepseek-ai/deepseek-r1-distill-qwen-32b",
+      "description": "DeepSeek R1 Distill Qwen 32B",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "cloudflare-ai/@cf/moonshotai/kimi-k2.5",
+      "upstreamModelId": "@cf/moonshotai/kimi-k2.5",
+      "publicAlias": "cloudflare-ai/@cf/moonshotai/kimi-k2.5",
+      "description": "Kimi K2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "cloudflare-ai/@cf/moonshotai/kimi-k2.6",
+      "upstreamModelId": "@cf/moonshotai/kimi-k2.6",
+      "publicAlias": "cloudflare-ai/@cf/moonshotai/kimi-k2.6",
+      "description": "Kimi K2.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "cloudflare-ai/@cf/zai-org/glm-4.7-flash",
+      "upstreamModelId": "@cf/zai-org/glm-4.7-flash",
+      "publicAlias": "cloudflare-ai/@cf/zai-org/glm-4.7-flash",
+      "description": "GLM 4.7 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "cloudflare-ai/@cf/qwen/qwq-32b",
+      "upstreamModelId": "@cf/qwen/qwq-32b",
+      "publicAlias": "cloudflare-ai/@cf/qwen/qwq-32b",
+      "description": "QwQ 32B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "cloudflare-ai/@cf/qwen/qwen2.5-coder-32b-instruct",
+      "upstreamModelId": "@cf/qwen/qwen2.5-coder-32b-instruct",
+      "publicAlias": "cloudflare-ai/@cf/qwen/qwen2.5-coder-32b-instruct",
+      "description": "Qwen 2.5 Coder 32B Instruct",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "cloudflare-ai/@cf/black-forest-labs/flux-2-klein-9b",
+      "upstreamModelId": "@cf/black-forest-labs/flux-2-klein-9b",
+      "publicAlias": "cloudflare-ai/@cf/black-forest-labs/flux-2-klein-9b",
+      "description": "FLUX.2 Klein 9B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    }
+  ],
+  "codebuddy-cn": [
+    {
+      "id": "codebuddy-cn/glm-5.2",
+      "upstreamModelId": "glm-5.2",
+      "publicAlias": "cbcn/glm-5.2",
+      "description": "GLM-5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "codebuddy-cn/glm-5.1",
+      "upstreamModelId": "glm-5.1",
+      "publicAlias": "cbcn/glm-5.1",
+      "description": "GLM-5.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "codebuddy-cn/minimax-m3",
+      "upstreamModelId": "minimax-m3",
+      "publicAlias": "cbcn/minimax-m3",
+      "description": "MiniMax-M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "codebuddy-cn/hy3",
+      "upstreamModelId": "hy3",
+      "publicAlias": "cbcn/hy3",
+      "description": "Hy3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "codebuddy-cn/hy4-preview",
+      "upstreamModelId": "hy4-preview",
+      "publicAlias": "cbcn/hy4-preview",
+      "description": "Hy4-Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "codebuddy-cn/glm-5.3",
+      "upstreamModelId": "glm-5.3",
+      "publicAlias": "cbcn/glm-5.3",
+      "description": "GLM-5.3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "codebuddy-cn/glm-5.3-flash",
+      "upstreamModelId": "glm-5.3-flash",
+      "publicAlias": "cbcn/glm-5.3-flash",
+      "description": "GLM-5.3-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "codebuddy-cn/kimi-k3-1",
+      "upstreamModelId": "kimi-k3-1",
+      "publicAlias": "cbcn/kimi-k3-1",
+      "description": "Kimi-K3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "codebuddy-cn/kimi-k2.8-preview",
+      "upstreamModelId": "kimi-k2.8-preview",
+      "publicAlias": "cbcn/kimi-k2.8-preview",
+      "description": "Kimi-K2.8-Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "codebuddy-cn/deepseek-v4-pro",
+      "upstreamModelId": "deepseek-v4-pro",
+      "publicAlias": "cbcn/deepseek-v4-pro",
+      "description": "DeepSeek-V4-Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "codebuddy-cn/deepseek-v4.1-flash",
+      "upstreamModelId": "deepseek-v4.1-flash",
+      "publicAlias": "cbcn/deepseek-v4.1-flash",
+      "description": "DeepSeek-V4.1-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    }
+  ],
+  "codebuddy-intl": [
+    {
+      "id": "codebuddy-intl/glm-5.2",
+      "upstreamModelId": "glm-5.2",
+      "publicAlias": "cbai/glm-5.2",
+      "description": "GLM-5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "codebuddy-intl/glm-5.1",
+      "upstreamModelId": "glm-5.1",
+      "publicAlias": "cbai/glm-5.1",
+      "description": "GLM-5.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "codebuddy-intl/glm-5.0",
+      "upstreamModelId": "glm-5.0",
+      "publicAlias": "cbai/glm-5.0",
+      "description": "GLM-5.0",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "codebuddy-intl/glm-5.0-turbo",
+      "upstreamModelId": "glm-5.0-turbo",
+      "publicAlias": "cbai/glm-5.0-turbo",
+      "description": "GLM-5.0-Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "codebuddy-intl/glm-5v-turbo",
+      "upstreamModelId": "glm-5v-turbo",
+      "publicAlias": "cbai/glm-5v-turbo",
+      "description": "GLM-5v-Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "codebuddy-intl/glm-4.7",
+      "upstreamModelId": "glm-4.7",
+      "publicAlias": "cbai/glm-4.7",
+      "description": "GLM-4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "codebuddy-intl/minimax-m3",
+      "upstreamModelId": "minimax-m3",
+      "publicAlias": "cbai/minimax-m3",
+      "description": "MiniMax-M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "codebuddy-intl/minimax-m2.7",
+      "upstreamModelId": "minimax-m2.7",
+      "publicAlias": "cbai/minimax-m2.7",
+      "description": "MiniMax-M2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "codebuddy-intl/kimi-k2.7",
+      "upstreamModelId": "kimi-k2.7",
+      "publicAlias": "cbai/kimi-k2.7",
+      "description": "Kimi-K2.7-Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "codebuddy-intl/kimi-k2.6",
+      "upstreamModelId": "kimi-k2.6",
+      "publicAlias": "cbai/kimi-k2.6",
+      "description": "Kimi-K2.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "codebuddy-intl/kimi-k2.5",
+      "upstreamModelId": "kimi-k2.5",
+      "publicAlias": "cbai/kimi-k2.5",
+      "description": "Kimi-K2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "codebuddy-intl/hy3-preview",
+      "upstreamModelId": "hy3-preview",
+      "publicAlias": "cbai/hy3-preview",
+      "description": "Hy3 Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "codebuddy-intl/deepseek-v4-pro",
+      "upstreamModelId": "deepseek-v4-pro",
+      "publicAlias": "cbai/deepseek-v4-pro",
+      "description": "DeepSeek-V4-Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "codebuddy-intl/deepseek-v4.1-flash",
+      "upstreamModelId": "deepseek-v4.1-flash",
+      "publicAlias": "cbai/deepseek-v4.1-flash",
+      "description": "DeepSeek-V4.1-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "codebuddy-intl/deepseek-v3-2-volc",
+      "upstreamModelId": "deepseek-v3-2-volc",
+      "publicAlias": "cbai/deepseek-v3-2-volc",
+      "description": "DeepSeek-V3.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    }
+  ],
+  "codex": [
+    {
+      "id": "codex/gpt-6.1-sol",
+      "upstreamModelId": "gpt-6.1-sol",
+      "publicAlias": "cx/gpt-6.1-sol",
+      "description": "GPT 6.1 Sol",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "codex/gpt-6-astra",
+      "upstreamModelId": "gpt-6-astra",
+      "publicAlias": "cx/gpt-6-astra",
+      "description": "GPT 6.0 Astra",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "codex/gpt-6-astra[1m]",
+      "upstreamModelId": "gpt-6-astra",
+      "publicAlias": "cx/gpt-6-astra[1m]",
+      "description": "GPT 6.0 Astra (extended context)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "codex/gpt-6-sol",
+      "upstreamModelId": "gpt-6-sol",
+      "publicAlias": "cx/gpt-6-sol",
+      "description": "GPT 6.0 Sol",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "codex/gpt-6-sol[1m]",
+      "upstreamModelId": "gpt-6-sol",
+      "publicAlias": "cx/gpt-6-sol[1m]",
+      "description": "GPT 6.0 Sol (extended context)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "codex/gpt-6-luna",
+      "upstreamModelId": "gpt-6-luna",
+      "publicAlias": "cx/gpt-6-luna",
+      "description": "GPT 6.0 Luna",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "codex/gpt-6-luna[1m]",
+      "upstreamModelId": "gpt-6-luna",
+      "publicAlias": "cx/gpt-6-luna[1m]",
+      "description": "GPT 6.0 Luna (extended context)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "codex/gpt-5.6-sol",
+      "upstreamModelId": "gpt-5.6-sol",
+      "publicAlias": "cx/gpt-5.6-sol",
+      "description": "GPT 5.6 Sol",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "codex/gpt-5.6-sol[1m]",
+      "upstreamModelId": "gpt-5.6-sol",
+      "publicAlias": "cx/gpt-5.6-sol[1m]",
+      "description": "GPT 5.6 Sol (extended context)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "codex/gpt-5.6-sol-review",
+      "upstreamModelId": "gpt-5.6-sol",
+      "publicAlias": "cx/gpt-5.6-sol-review",
+      "description": "GPT 5.6 Sol Review",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "codex/gpt-5.6-terra",
+      "upstreamModelId": "gpt-5.6-terra",
+      "publicAlias": "cx/gpt-5.6-terra",
+      "description": "GPT 5.6 Terra",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "codex/gpt-5.6-terra[1m]",
+      "upstreamModelId": "gpt-5.6-terra",
+      "publicAlias": "cx/gpt-5.6-terra[1m]",
+      "description": "GPT 5.6 Terra (extended context)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "codex/gpt-5.6-terra-review",
+      "upstreamModelId": "gpt-5.6-terra",
+      "publicAlias": "cx/gpt-5.6-terra-review",
+      "description": "GPT 5.6 Terra Review",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "codex/gpt-5.6-luna",
+      "upstreamModelId": "gpt-5.6-luna",
+      "publicAlias": "cx/gpt-5.6-luna",
+      "description": "GPT 5.6 Luna",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "codex/gpt-5.6-luna[1m]",
+      "upstreamModelId": "gpt-5.6-luna",
+      "publicAlias": "cx/gpt-5.6-luna[1m]",
+      "description": "GPT 5.6 Luna (extended context)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "codex/gpt-5.6-luna-review",
+      "upstreamModelId": "gpt-5.6-luna",
+      "publicAlias": "cx/gpt-5.6-luna-review",
+      "description": "GPT 5.6 Luna Review",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    },
+    {
+      "id": "codex/gpt-5.5",
+      "upstreamModelId": "gpt-5.5",
+      "publicAlias": "cx/gpt-5.5",
+      "description": "GPT 5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 16
+    },
+    {
+      "id": "codex/gpt-5.5-review",
+      "upstreamModelId": "gpt-5.5",
+      "publicAlias": "cx/gpt-5.5-review",
+      "description": "GPT 5.5 Review",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 17
+    },
+    {
+      "id": "codex/gpt-reserve",
+      "upstreamModelId": "codex-auto-review",
+      "publicAlias": "cx/gpt-reserve",
+      "description": "GPT Reserve",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 18
+    },
+    {
+      "id": "codex/gpt-image-2.5",
+      "upstreamModelId": "gpt-image-2.5",
+      "publicAlias": "cx/gpt-image-2.5",
+      "description": "GPT Image 2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 19
+    }
+  ],
+  "comfyui": [
+    {
+      "id": "comfyui/flux-dev",
+      "upstreamModelId": "flux-dev",
+      "publicAlias": "comfyui/flux-dev",
+      "description": "FLUX Dev",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "commandcode": [
+    {
+      "id": "commandcode/deepseek/deepseek-v4-pro",
+      "upstreamModelId": "deepseek/deepseek-v4-pro",
+      "publicAlias": "commandcode/deepseek/deepseek-v4-pro",
+      "description": "DeepSeek V4 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "commandcode/deepseek/deepseek-v4-flash",
+      "upstreamModelId": "deepseek/deepseek-v4-flash",
+      "publicAlias": "commandcode/deepseek/deepseek-v4-flash",
+      "description": "DeepSeek V4 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "commandcode/moonshotai/Kimi-K2.7-Code",
+      "upstreamModelId": "moonshotai/Kimi-K2.7-Code",
+      "publicAlias": "commandcode/moonshotai/Kimi-K2.7-Code",
+      "description": "Kimi K2.7 Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "commandcode/moonshotai/Kimi-K2.7-Code-Highspeed",
+      "upstreamModelId": "moonshotai/Kimi-K2.7-Code-Highspeed",
+      "publicAlias": "commandcode/moonshotai/Kimi-K2.7-Code-Highspeed",
+      "description": "Kimi K2.7 Code HighSpeed",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "commandcode/moonshotai/Kimi-K2.6",
+      "upstreamModelId": "moonshotai/Kimi-K2.6",
+      "publicAlias": "commandcode/moonshotai/Kimi-K2.6",
+      "description": "Kimi K2.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "commandcode/moonshotai/Kimi-K2.5",
+      "upstreamModelId": "moonshotai/Kimi-K2.5",
+      "publicAlias": "commandcode/moonshotai/Kimi-K2.5",
+      "description": "Kimi K2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "commandcode/zai-org/GLM-5.2",
+      "upstreamModelId": "zai-org/GLM-5.2",
+      "publicAlias": "commandcode/zai-org/GLM-5.2",
+      "description": "GLM 5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "commandcode/zai-org/GLM-5.2-Fast",
+      "upstreamModelId": "zai-org/GLM-5.2-Fast",
+      "publicAlias": "commandcode/zai-org/GLM-5.2-Fast",
+      "description": "GLM 5.2 Fast",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "commandcode/zai-org/GLM-5.1",
+      "upstreamModelId": "zai-org/GLM-5.1",
+      "publicAlias": "commandcode/zai-org/GLM-5.1",
+      "description": "GLM 5.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "commandcode/zai-org/GLM-5",
+      "upstreamModelId": "zai-org/GLM-5",
+      "publicAlias": "commandcode/zai-org/GLM-5",
+      "description": "GLM 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "commandcode/MiniMaxAI/MiniMax-M3",
+      "upstreamModelId": "MiniMaxAI/MiniMax-M3",
+      "publicAlias": "commandcode/MiniMaxAI/MiniMax-M3",
+      "description": "MiniMax M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "commandcode/MiniMaxAI/MiniMax-M2.7",
+      "upstreamModelId": "MiniMaxAI/MiniMax-M2.7",
+      "publicAlias": "commandcode/MiniMaxAI/MiniMax-M2.7",
+      "description": "MiniMax M2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "commandcode/MiniMaxAI/MiniMax-M2.5",
+      "upstreamModelId": "MiniMaxAI/MiniMax-M2.5",
+      "publicAlias": "commandcode/MiniMaxAI/MiniMax-M2.5",
+      "description": "MiniMax M2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "commandcode/xiaomi/mimo-v2.5-pro",
+      "upstreamModelId": "xiaomi/mimo-v2.5-pro",
+      "publicAlias": "commandcode/xiaomi/mimo-v2.5-pro",
+      "description": "MiMo V2.5 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "commandcode/xiaomi/mimo-v2.5",
+      "upstreamModelId": "xiaomi/mimo-v2.5",
+      "publicAlias": "commandcode/xiaomi/mimo-v2.5",
+      "description": "MiMo V2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "commandcode/Qwen/Qwen3.6-Max-Preview",
+      "upstreamModelId": "Qwen/Qwen3.6-Max-Preview",
+      "publicAlias": "commandcode/Qwen/Qwen3.6-Max-Preview",
+      "description": "Qwen 3.6 Max Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    },
+    {
+      "id": "commandcode/Qwen/Qwen3.6-Plus",
+      "upstreamModelId": "Qwen/Qwen3.6-Plus",
+      "publicAlias": "commandcode/Qwen/Qwen3.6-Plus",
+      "description": "Qwen 3.6 Plus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 16
+    },
+    {
+      "id": "commandcode/Qwen/Qwen3.7-Max",
+      "upstreamModelId": "Qwen/Qwen3.7-Max",
+      "publicAlias": "commandcode/Qwen/Qwen3.7-Max",
+      "description": "Qwen 3.7 Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 17
+    },
+    {
+      "id": "commandcode/Qwen/Qwen3.7-Plus",
+      "upstreamModelId": "Qwen/Qwen3.7-Plus",
+      "publicAlias": "commandcode/Qwen/Qwen3.7-Plus",
+      "description": "Qwen 3.7 Plus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 18
+    },
+    {
+      "id": "commandcode/stepfun/Step-3.7-Flash",
+      "upstreamModelId": "stepfun/Step-3.7-Flash",
+      "publicAlias": "commandcode/stepfun/Step-3.7-Flash",
+      "description": "Step 3.7 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 19
+    },
+    {
+      "id": "commandcode/stepfun/Step-3.5-Flash",
+      "upstreamModelId": "stepfun/Step-3.5-Flash",
+      "publicAlias": "commandcode/stepfun/Step-3.5-Flash",
+      "description": "Step 3.5 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 20
+    },
+    {
+      "id": "commandcode/nvidia/nemotron-3-ultra-550b-a55b",
+      "upstreamModelId": "nvidia/nemotron-3-ultra-550b-a55b",
+      "publicAlias": "commandcode/nvidia/nemotron-3-ultra-550b-a55b",
+      "description": "Nemotron 3 Ultra",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 21
+    }
+  ],
+  "coqui": [
+    {
+      "id": "coqui/tts_models/en/ljspeech/tacotron2-DDC",
+      "upstreamModelId": "tts_models/en/ljspeech/tacotron2-DDC",
+      "publicAlias": "coqui/tts_models/en/ljspeech/tacotron2-DDC",
+      "description": "Tacotron2 DDC (LJSpeech)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "cursor": [
+    {
+      "id": "cursor/default",
+      "upstreamModelId": "default",
+      "publicAlias": "cu/default",
+      "description": "Auto (Server Picks)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "cursor/claude-4.5-opus-high-thinking",
+      "upstreamModelId": "claude-4.5-opus-high-thinking",
+      "publicAlias": "cu/claude-4.5-opus-high-thinking",
+      "description": "Claude 4.5 Opus High Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "cursor/claude-4.5-opus-high",
+      "upstreamModelId": "claude-4.5-opus-high",
+      "publicAlias": "cu/claude-4.5-opus-high",
+      "description": "Claude 4.5 Opus High",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "cursor/claude-4.5-sonnet-thinking",
+      "upstreamModelId": "claude-4.5-sonnet-thinking",
+      "publicAlias": "cu/claude-4.5-sonnet-thinking",
+      "description": "Claude 4.5 Sonnet Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "cursor/claude-4.5-sonnet",
+      "upstreamModelId": "claude-4.5-sonnet",
+      "publicAlias": "cu/claude-4.5-sonnet",
+      "description": "Claude 4.5 Sonnet",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "cursor/claude-4.5-haiku",
+      "upstreamModelId": "claude-4.5-haiku",
+      "publicAlias": "cu/claude-4.5-haiku",
+      "description": "Claude 4.5 Haiku",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "cursor/claude-4.5-opus",
+      "upstreamModelId": "claude-4.5-opus",
+      "publicAlias": "cu/claude-4.5-opus",
+      "description": "Claude 4.5 Opus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "cursor/gpt-5.2-codex",
+      "upstreamModelId": "gpt-5.2-codex",
+      "publicAlias": "cu/gpt-5.2-codex",
+      "description": "GPT 5.2 Codex",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "cursor/claude-4.6-opus-max",
+      "upstreamModelId": "claude-4.6-opus-max",
+      "publicAlias": "cu/claude-4.6-opus-max",
+      "description": "Claude 4.6 Opus Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "cursor/claude-4.6-sonnet-medium-thinking",
+      "upstreamModelId": "claude-4.6-sonnet-medium-thinking",
+      "publicAlias": "cu/claude-4.6-sonnet-medium-thinking",
+      "description": "Claude 4.6 Sonnet Medium Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "cursor/kimi-k2.5",
+      "upstreamModelId": "kimi-k2.5",
+      "publicAlias": "cu/kimi-k2.5",
+      "description": "Kimi K2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "cursor/gemini-3-flash-preview",
+      "upstreamModelId": "gemini-3-flash-preview",
+      "publicAlias": "cu/gemini-3-flash-preview",
+      "description": "Gemini 3 Flash Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "cursor/gpt-5.2",
+      "upstreamModelId": "gpt-5.2",
+      "publicAlias": "cu/gpt-5.2",
+      "description": "GPT 5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "cursor/gpt-5.3-codex",
+      "upstreamModelId": "gpt-5.3-codex",
+      "publicAlias": "cu/gpt-5.3-codex",
+      "description": "GPT 5.3 Codex",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    }
+  ],
+  "dahl": [
+    {
+      "id": "dahl/zai-org/GLM-5.3-Flash",
+      "upstreamModelId": "zai-org/GLM-5.3-Flash",
+      "publicAlias": "dahl/zai-org/GLM-5.3-Flash",
+      "description": "GLM-5.3 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "dahl/deepseek-ai/DeepSeek-V4-Flash-0731",
+      "upstreamModelId": "deepseek-ai/DeepSeek-V4-Flash-0731",
+      "publicAlias": "dahl/deepseek-ai/DeepSeek-V4-Flash-0731",
+      "description": "DeepSeek V4 Flash 0731",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "dahl/MiniMaxAI/MiniMax-M2.7",
+      "upstreamModelId": "MiniMaxAI/MiniMax-M2.7",
+      "publicAlias": "dahl/MiniMaxAI/MiniMax-M2.7",
+      "description": "MiniMax M2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    }
+  ],
+  "deepgram": [
+    {
+      "id": "deepgram/nova-3",
+      "upstreamModelId": "nova-3",
+      "publicAlias": "deepgram/nova-3",
+      "description": "Nova 3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "deepseek": [
+    {
+      "id": "deepseek/deepseek-v4-pro",
+      "upstreamModelId": "deepseek-v4-pro",
+      "publicAlias": "deepseek/deepseek-v4-pro",
+      "description": "DeepSeek V4 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "deepseek/deepseek-v4-pro-max",
+      "upstreamModelId": "deepseek-v4-pro",
+      "publicAlias": "deepseek/deepseek-v4-pro-max",
+      "description": "DeepSeek V4 Pro Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "deepseek/deepseek-v4-pro-none",
+      "upstreamModelId": "deepseek-v4-pro",
+      "publicAlias": "deepseek/deepseek-v4-pro-none",
+      "description": "DeepSeek V4 Pro No Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "deepseek/deepseek-v4.1-flash",
+      "upstreamModelId": "deepseek-v4.1-flash",
+      "publicAlias": "deepseek/deepseek-v4.1-flash",
+      "description": "DeepSeek V4.1 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "deepseek/deepseek-v4-flash",
+      "upstreamModelId": "deepseek-v4-flash",
+      "publicAlias": "deepseek/deepseek-v4-flash",
+      "description": "DeepSeek V4 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "deepseek/deepseek-v4-flash-vision-exp",
+      "upstreamModelId": "deepseek-v4-flash-vision-exp",
+      "publicAlias": "deepseek/deepseek-v4-flash-vision-exp",
+      "description": "DeepSeek V4 Flash Vision (Exp)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "deepseek/deepseek-chat",
+      "upstreamModelId": "deepseek-chat",
+      "publicAlias": "deepseek/deepseek-chat",
+      "description": "DeepSeek V3.2 Chat",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "deepseek/deepseek-reasoner",
+      "upstreamModelId": "deepseek-reasoner",
+      "publicAlias": "deepseek/deepseek-reasoner",
+      "description": "DeepSeek V3.2 Reasoner",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    }
+  ],
+  "elevenlabs": [
+    {
+      "id": "elevenlabs/scribe_v1",
+      "upstreamModelId": "scribe_v1",
+      "publicAlias": "el/scribe_v1",
+      "description": "Scribe v1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "fal-ai": [
+    {
+      "id": "fal-ai/fal-ai/flux/schnell",
+      "upstreamModelId": "fal-ai/flux/schnell",
+      "publicAlias": "fal-ai/fal-ai/flux/schnell",
+      "description": "FLUX Schnell",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "fireworks": [
+    {
+      "id": "fireworks/accounts/fireworks/models/deepseek-v3p1",
+      "upstreamModelId": "accounts/fireworks/models/deepseek-v3p1",
+      "publicAlias": "fireworks/accounts/fireworks/models/deepseek-v3p1",
+      "description": "DeepSeek V3.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "fireworks/accounts/fireworks/models/llama-v3p3-70b-instruct",
+      "upstreamModelId": "accounts/fireworks/models/llama-v3p3-70b-instruct",
+      "publicAlias": "fireworks/accounts/fireworks/models/llama-v3p3-70b-instruct",
+      "description": "Llama 3.3 70B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "fireworks/accounts/fireworks/models/qwen3-235b-a22b",
+      "upstreamModelId": "accounts/fireworks/models/qwen3-235b-a22b",
+      "publicAlias": "fireworks/accounts/fireworks/models/qwen3-235b-a22b",
+      "description": "Qwen3 235B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "fireworks/nomic-ai/nomic-embed-text-v1.5",
+      "upstreamModelId": "nomic-ai/nomic-embed-text-v1.5",
+      "publicAlias": "fireworks/nomic-ai/nomic-embed-text-v1.5",
+      "description": "Nomic Embed Text v1.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    }
+  ],
+  "gemini-cli": [
+    {
+      "id": "gemini-cli/gemini-3.1-pro-preview",
+      "upstreamModelId": "gemini-3.1-pro-preview",
+      "publicAlias": "gc/gemini-3.1-pro-preview",
+      "description": "Gemini 3.1 Pro Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "gemini-cli/gemini-3-pro-preview",
+      "upstreamModelId": "gemini-3-pro-preview",
+      "publicAlias": "gc/gemini-3-pro-preview",
+      "description": "Gemini 3 Pro Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "gemini-cli/gemini-3-flash-preview",
+      "upstreamModelId": "gemini-3-flash-preview",
+      "publicAlias": "gc/gemini-3-flash-preview",
+      "description": "Gemini 3 Flash Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "gemini-cli/gemini-3.1-flash-lite-preview",
+      "upstreamModelId": "gemini-3.1-flash-lite-preview",
+      "publicAlias": "gc/gemini-3.1-flash-lite-preview",
+      "description": "Gemini 3.1 Flash Lite Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "gemini-cli/gemini-2.5-pro",
+      "upstreamModelId": "gemini-2.5-pro",
+      "publicAlias": "gc/gemini-2.5-pro",
+      "description": "Gemini 2.5 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "gemini-cli/gemini-2.5-flash",
+      "upstreamModelId": "gemini-2.5-flash",
+      "publicAlias": "gc/gemini-2.5-flash",
+      "description": "Gemini 2.5 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "gemini-cli/gemini-2.5-flash-lite",
+      "upstreamModelId": "gemini-2.5-flash-lite",
+      "publicAlias": "gc/gemini-2.5-flash-lite",
+      "description": "Gemini 2.5 Flash Lite",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    }
+  ],
+  "gemini": [
+    {
+      "id": "gemini/gemini-3.8-flash",
+      "upstreamModelId": "gemini-3.8-flash",
+      "publicAlias": "gemini/gemini-3.8-flash",
+      "description": "Gemini 3.8 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "gemini/gemini-3.7-flash",
+      "upstreamModelId": "gemini-3.7-flash",
+      "publicAlias": "gemini/gemini-3.7-flash",
+      "description": "Gemini 3.7 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "gemini/gemini-3.6-flash",
+      "upstreamModelId": "gemini-3.6-flash",
+      "publicAlias": "gemini/gemini-3.6-flash",
+      "description": "Gemini 3.6 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "gemini/gemini-3.5-flash-lite",
+      "upstreamModelId": "gemini-3.5-flash-lite",
+      "publicAlias": "gemini/gemini-3.5-flash-lite",
+      "description": "Gemini 3.5 Flash Lite",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "gemini/gemini-3.1-pro-preview",
+      "upstreamModelId": "gemini-3.1-pro-preview",
+      "publicAlias": "gemini/gemini-3.1-pro-preview",
+      "description": "Gemini 3.1 Pro Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "gemini/gemini-3.1-flash-lite-preview",
+      "upstreamModelId": "gemini-3.1-flash-lite-preview",
+      "publicAlias": "gemini/gemini-3.1-flash-lite-preview",
+      "description": "Gemini 3.1 Flash Lite Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "gemini/gemini-3-flash-preview",
+      "upstreamModelId": "gemini-3-flash-preview",
+      "publicAlias": "gemini/gemini-3-flash-preview",
+      "description": "Gemini 3 Flash Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "gemini/gemini-2.5-pro",
+      "upstreamModelId": "gemini-2.5-pro",
+      "publicAlias": "gemini/gemini-2.5-pro",
+      "description": "Gemini 2.5 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "gemini/gemini-2.5-flash",
+      "upstreamModelId": "gemini-2.5-flash",
+      "publicAlias": "gemini/gemini-2.5-flash",
+      "description": "Gemini 2.5 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "gemini/gemini-2.5-flash-lite",
+      "upstreamModelId": "gemini-2.5-flash-lite",
+      "publicAlias": "gemini/gemini-2.5-flash-lite",
+      "description": "Gemini 2.5 Flash Lite",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "gemini/gemma-4-31b-it",
+      "upstreamModelId": "gemma-4-31b-it",
+      "publicAlias": "gemini/gemma-4-31b-it",
+      "description": "Gemma 4 31B IT",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "gemini/gemini-embedding-2-preview",
+      "upstreamModelId": "gemini-embedding-2-preview",
+      "publicAlias": "gemini/gemini-embedding-2-preview",
+      "description": "Gemini Embedding 2 Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "gemini/gemini-embedding-001",
+      "upstreamModelId": "gemini-embedding-001",
+      "publicAlias": "gemini/gemini-embedding-001",
+      "description": "Gemini Embedding 001",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "gemini/text-embedding-005",
+      "upstreamModelId": "text-embedding-005",
+      "publicAlias": "gemini/text-embedding-005",
+      "description": "Text Embedding 005",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "gemini/text-embedding-004",
+      "upstreamModelId": "text-embedding-004",
+      "publicAlias": "gemini/text-embedding-004",
+      "description": "Text Embedding 004 (Legacy)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "gemini/gemini-3.1-flash-image-preview",
+      "upstreamModelId": "gemini-3.1-flash-image-preview",
+      "publicAlias": "gemini/gemini-3.1-flash-image-preview",
+      "description": "Gemini 3.1 Flash Image (Nano Banana 2)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    }
+  ],
+  "github": [
+    {
+      "id": "github/gpt-5.2",
+      "upstreamModelId": "gpt-5.2",
+      "publicAlias": "gh/gpt-5.2",
+      "description": "GPT-5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "github/gpt-5.2-codex",
+      "upstreamModelId": "gpt-5.2-codex",
+      "publicAlias": "gh/gpt-5.2-codex",
+      "description": "GPT-5.2 Codex",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "github/gpt-5.3-codex",
+      "upstreamModelId": "gpt-5.3-codex",
+      "publicAlias": "gh/gpt-5.3-codex",
+      "description": "GPT-5.3 Codex",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "github/gpt-5.4",
+      "upstreamModelId": "gpt-5.4",
+      "publicAlias": "gh/gpt-5.4",
+      "description": "GPT-5.4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "github/gpt-5.4-mini",
+      "upstreamModelId": "gpt-5.4-mini",
+      "publicAlias": "gh/gpt-5.4-mini",
+      "description": "GPT-5.4 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "github/claude-haiku-4.5",
+      "upstreamModelId": "claude-haiku-4.5",
+      "publicAlias": "gh/claude-haiku-4.5",
+      "description": "Claude Haiku 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "github/claude-opus-4.5",
+      "upstreamModelId": "claude-opus-4.5",
+      "publicAlias": "gh/claude-opus-4.5",
+      "description": "Claude Opus 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "github/claude-sonnet-4.5",
+      "upstreamModelId": "claude-sonnet-4.5",
+      "publicAlias": "gh/claude-sonnet-4.5",
+      "description": "Claude Sonnet 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "github/claude-sonnet-4.6",
+      "upstreamModelId": "claude-sonnet-4.6",
+      "publicAlias": "gh/claude-sonnet-4.6",
+      "description": "Claude Sonnet 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "github/claude-opus-4.6",
+      "upstreamModelId": "claude-opus-4.6",
+      "publicAlias": "gh/claude-opus-4.6",
+      "description": "Claude Opus 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "github/claude-opus-4.7",
+      "upstreamModelId": "claude-opus-4.7",
+      "publicAlias": "gh/claude-opus-4.7",
+      "description": "Claude Opus 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "github/gemini-2.5-pro",
+      "upstreamModelId": "gemini-2.5-pro",
+      "publicAlias": "gh/gemini-2.5-pro",
+      "description": "Gemini 2.5 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "github/gemini-3-flash-preview",
+      "upstreamModelId": "gemini-3-flash-preview",
+      "publicAlias": "gh/gemini-3-flash-preview",
+      "description": "Gemini 3 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "github/gemini-3.1-pro-preview",
+      "upstreamModelId": "gemini-3.1-pro-preview",
+      "publicAlias": "gh/gemini-3.1-pro-preview",
+      "description": "Gemini 3.1 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "github/grok-code-fast-1",
+      "upstreamModelId": "grok-code-fast-1",
+      "publicAlias": "gh/grok-code-fast-1",
+      "description": "Grok Code Fast 1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "github/oswe-vscode-prime",
+      "upstreamModelId": "oswe-vscode-prime",
+      "publicAlias": "gh/oswe-vscode-prime",
+      "description": "Raptor Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    },
+    {
+      "id": "github/goldeneye-free-auto",
+      "upstreamModelId": "goldeneye-free-auto",
+      "publicAlias": "gh/goldeneye-free-auto",
+      "description": "GoldenEye",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 16
+    },
+    {
+      "id": "github/text-embedding-3-small",
+      "upstreamModelId": "text-embedding-3-small",
+      "publicAlias": "gh/text-embedding-3-small",
+      "description": "Text Embedding 3 Small (GitHub)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 17
+    },
+    {
+      "id": "github/text-embedding-3-large",
+      "upstreamModelId": "text-embedding-3-large",
+      "publicAlias": "gh/text-embedding-3-large",
+      "description": "Text Embedding 3 Large (GitHub)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 18
+    }
+  ],
+  "glm-cn": [
+    {
+      "id": "glm-cn/glm-5.3",
+      "upstreamModelId": "glm-5.3",
+      "publicAlias": "glm-cn/glm-5.3",
+      "description": "GLM 5.3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "glm-cn/glm-5.3-flash",
+      "upstreamModelId": "glm-5.3-flash",
+      "publicAlias": "glm-cn/glm-5.3-flash",
+      "description": "GLM 5.3 Flash (Vision)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "glm-cn/glm-5.2",
+      "upstreamModelId": "glm-5.2",
+      "publicAlias": "glm-cn/glm-5.2",
+      "description": "GLM 5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "glm-cn/glm-5.1",
+      "upstreamModelId": "glm-5.1",
+      "publicAlias": "glm-cn/glm-5.1",
+      "description": "GLM 5.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "glm-cn/glm-5-turbo",
+      "upstreamModelId": "glm-5-turbo",
+      "publicAlias": "glm-cn/glm-5-turbo",
+      "description": "GLM 5 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "glm-cn/glm-5",
+      "upstreamModelId": "glm-5",
+      "publicAlias": "glm-cn/glm-5",
+      "description": "GLM 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "glm-cn/glm-4.7",
+      "upstreamModelId": "glm-4.7",
+      "publicAlias": "glm-cn/glm-4.7",
+      "description": "GLM-4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "glm-cn/glm-4.6v",
+      "upstreamModelId": "glm-4.6v",
+      "publicAlias": "glm-cn/glm-4.6v",
+      "description": "GLM 4.6V (Vision)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "glm-cn/glm-4.6",
+      "upstreamModelId": "glm-4.6",
+      "publicAlias": "glm-cn/glm-4.6",
+      "description": "GLM-4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "glm-cn/glm-4.5-air",
+      "upstreamModelId": "glm-4.5-air",
+      "publicAlias": "glm-cn/glm-4.5-air",
+      "description": "GLM-4.5-Air",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    }
+  ],
+  "glm": [
+    {
+      "id": "glm/glm-5.3",
+      "upstreamModelId": "glm-5.3",
+      "publicAlias": "glm/glm-5.3",
+      "description": "GLM 5.3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "glm/glm-5.3-flash",
+      "upstreamModelId": "glm-5.3-flash",
+      "publicAlias": "glm/glm-5.3-flash",
+      "description": "GLM 5.3 Flash (Vision)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "glm/glm-5.2",
+      "upstreamModelId": "glm-5.2",
+      "publicAlias": "glm/glm-5.2",
+      "description": "GLM 5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "glm/glm-5.1",
+      "upstreamModelId": "glm-5.1",
+      "publicAlias": "glm/glm-5.1",
+      "description": "GLM 5.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "glm/glm-5-turbo",
+      "upstreamModelId": "glm-5-turbo",
+      "publicAlias": "glm/glm-5-turbo",
+      "description": "GLM 5 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "glm/glm-5",
+      "upstreamModelId": "glm-5",
+      "publicAlias": "glm/glm-5",
+      "description": "GLM 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "glm/glm-4.7",
+      "upstreamModelId": "glm-4.7",
+      "publicAlias": "glm/glm-4.7",
+      "description": "GLM 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "glm/glm-4.6v",
+      "upstreamModelId": "glm-4.6v",
+      "publicAlias": "glm/glm-4.6v",
+      "description": "GLM 4.6V (Vision)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    }
+  ],
+  "grok-cli": [
+    {
+      "id": "grok-cli/grok-4.5",
+      "upstreamModelId": "grok-4.5",
+      "publicAlias": "gcli/grok-4.5",
+      "description": "Grok 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "grok-cli/grok-4.5-high",
+      "upstreamModelId": "grok-4.5",
+      "publicAlias": "gcli/grok-4.5-high",
+      "description": "Grok 4.5 (High)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "grok-cli/grok-4.5-medium",
+      "upstreamModelId": "grok-4.5",
+      "publicAlias": "gcli/grok-4.5-medium",
+      "description": "Grok 4.5 (Medium)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "grok-cli/grok-4.5-low",
+      "upstreamModelId": "grok-4.5",
+      "publicAlias": "gcli/grok-4.5-low",
+      "description": "Grok 4.5 (Low)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    }
+  ],
+  "grok-web": [
+    {
+      "id": "grok-web/grok-3",
+      "upstreamModelId": "grok-3",
+      "publicAlias": "grok-web/grok-3",
+      "description": "Grok 3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "grok-web/grok-3-mini",
+      "upstreamModelId": "grok-3-mini",
+      "publicAlias": "grok-web/grok-3-mini",
+      "description": "Grok 3 Mini (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "grok-web/grok-3-thinking",
+      "upstreamModelId": "grok-3-thinking",
+      "publicAlias": "grok-web/grok-3-thinking",
+      "description": "Grok 3 Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "grok-web/grok-4",
+      "upstreamModelId": "grok-4",
+      "publicAlias": "grok-web/grok-4",
+      "description": "Grok 4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "grok-web/grok-4-mini",
+      "upstreamModelId": "grok-4-mini",
+      "publicAlias": "grok-web/grok-4-mini",
+      "description": "Grok 4 Mini (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "grok-web/grok-4-thinking",
+      "upstreamModelId": "grok-4-thinking",
+      "publicAlias": "grok-web/grok-4-thinking",
+      "description": "Grok 4 Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "grok-web/grok-4-heavy",
+      "upstreamModelId": "grok-4-heavy",
+      "publicAlias": "grok-web/grok-4-heavy",
+      "description": "Grok 4 Heavy (SuperGrok)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "grok-web/grok-4.1-mini",
+      "upstreamModelId": "grok-4.1-mini",
+      "publicAlias": "grok-web/grok-4.1-mini",
+      "description": "Grok 4.1 Mini (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "grok-web/grok-4.1-fast",
+      "upstreamModelId": "grok-4.1-fast",
+      "publicAlias": "grok-web/grok-4.1-fast",
+      "description": "Grok 4.1 Fast",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "grok-web/grok-4.1-expert",
+      "upstreamModelId": "grok-4.1-expert",
+      "publicAlias": "grok-web/grok-4.1-expert",
+      "description": "Grok 4.1 Expert",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "grok-web/grok-4.1-thinking",
+      "upstreamModelId": "grok-4.1-thinking",
+      "publicAlias": "grok-web/grok-4.1-thinking",
+      "description": "Grok 4.1 Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "grok-web/grok-4.2",
+      "upstreamModelId": "grok-4.2",
+      "publicAlias": "grok-web/grok-4.2",
+      "description": "Grok 4.2 (4.20 Beta)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    }
+  ],
+  "groq": [
+    {
+      "id": "groq/llama-3.3-70b-versatile",
+      "upstreamModelId": "llama-3.3-70b-versatile",
+      "publicAlias": "groq/llama-3.3-70b-versatile",
+      "description": "Llama 3.3 70B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "groq/meta-llama/llama-4-maverick-17b-128e-instruct",
+      "upstreamModelId": "meta-llama/llama-4-maverick-17b-128e-instruct",
+      "publicAlias": "groq/meta-llama/llama-4-maverick-17b-128e-instruct",
+      "description": "Llama 4 Maverick",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "groq/qwen/qwen3-32b",
+      "upstreamModelId": "qwen/qwen3-32b",
+      "publicAlias": "groq/qwen/qwen3-32b",
+      "description": "Qwen3 32B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "groq/openai/gpt-oss-120b",
+      "upstreamModelId": "openai/gpt-oss-120b",
+      "publicAlias": "groq/openai/gpt-oss-120b",
+      "description": "GPT-OSS 120B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "groq/whisper-large-v3",
+      "upstreamModelId": "whisper-large-v3",
+      "publicAlias": "groq/whisper-large-v3",
+      "description": "Whisper Large v3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    }
+  ],
+  "huggingface": [
+    {
+      "id": "huggingface/black-forest-labs/FLUX.1-schnell",
+      "upstreamModelId": "black-forest-labs/FLUX.1-schnell",
+      "publicAlias": "huggingface/black-forest-labs/FLUX.1-schnell",
+      "description": "FLUX.1 Schnell",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "iflow": [
+    {
+      "id": "iflow/qwen3-coder-plus",
+      "upstreamModelId": "qwen3-coder-plus",
+      "publicAlias": "if/qwen3-coder-plus",
+      "description": "Qwen3 Coder Plus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "iflow/qwen3-max",
+      "upstreamModelId": "qwen3-max",
+      "publicAlias": "if/qwen3-max",
+      "description": "Qwen3 Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "iflow/qwen3-vl-plus",
+      "upstreamModelId": "qwen3-vl-plus",
+      "publicAlias": "if/qwen3-vl-plus",
+      "description": "Qwen3 VL Plus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "iflow/qwen3-max-preview",
+      "upstreamModelId": "qwen3-max-preview",
+      "publicAlias": "if/qwen3-max-preview",
+      "description": "Qwen3 Max Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "iflow/qwen3-235b",
+      "upstreamModelId": "qwen3-235b",
+      "publicAlias": "if/qwen3-235b",
+      "description": "Qwen3 235B A22B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "iflow/qwen3-235b-a22b-instruct",
+      "upstreamModelId": "qwen3-235b-a22b-instruct",
+      "publicAlias": "if/qwen3-235b-a22b-instruct",
+      "description": "Qwen3 235B A22B Instruct",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "iflow/qwen3-235b-a22b-thinking-2507",
+      "upstreamModelId": "qwen3-235b-a22b-thinking-2507",
+      "publicAlias": "if/qwen3-235b-a22b-thinking-2507",
+      "description": "Qwen3 235B A22B Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "iflow/qwen3-32b",
+      "upstreamModelId": "qwen3-32b",
+      "publicAlias": "if/qwen3-32b",
+      "description": "Qwen3 32B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "iflow/kimi-k2",
+      "upstreamModelId": "kimi-k2",
+      "publicAlias": "if/kimi-k2",
+      "description": "Kimi K2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "iflow/deepseek-v3.2",
+      "upstreamModelId": "deepseek-v3.2",
+      "publicAlias": "if/deepseek-v3.2",
+      "description": "DeepSeek V3.2 Exp",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "iflow/deepseek-v3.1",
+      "upstreamModelId": "deepseek-v3.1",
+      "publicAlias": "if/deepseek-v3.1",
+      "description": "DeepSeek V3.1 Terminus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "iflow/deepseek-v3",
+      "upstreamModelId": "deepseek-v3",
+      "publicAlias": "if/deepseek-v3",
+      "description": "DeepSeek V3 671B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "iflow/deepseek-r1",
+      "upstreamModelId": "deepseek-r1",
+      "publicAlias": "if/deepseek-r1",
+      "description": "DeepSeek R1",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "iflow/glm-4.7",
+      "upstreamModelId": "glm-4.7",
+      "publicAlias": "if/glm-4.7",
+      "description": "GLM 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "iflow/iflow-rome-30ba3b",
+      "upstreamModelId": "iflow-rome-30ba3b",
+      "publicAlias": "if/iflow-rome-30ba3b",
+      "description": "iFlow ROME",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    }
+  ],
+  "inworld": [
+    {
+      "id": "inworld/inworld-tts-1.5-mini",
+      "upstreamModelId": "inworld-tts-1.5-mini",
+      "publicAlias": "inworld/inworld-tts-1.5-mini",
+      "description": "Inworld TTS 1.5 Mini ($0.01/min)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "inworld/inworld-tts-1.5-max",
+      "upstreamModelId": "inworld-tts-1.5-max",
+      "publicAlias": "inworld/inworld-tts-1.5-max",
+      "description": "Inworld TTS 1.5 Max ($0.025/min)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    }
+  ],
+  "jina-ai": [
+    {
+      "id": "jina-ai/jina-embeddings-v3",
+      "upstreamModelId": "jina-embeddings-v3",
+      "publicAlias": "jina/jina-embeddings-v3",
+      "description": "Jina Embeddings v3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "jina-ai/jina-embeddings-v2-base-en",
+      "upstreamModelId": "jina-embeddings-v2-base-en",
+      "publicAlias": "jina/jina-embeddings-v2-base-en",
+      "description": "Jina Embeddings v2 Base EN",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "jina-ai/jina-embeddings-v2-base-code",
+      "upstreamModelId": "jina-embeddings-v2-base-code",
+      "publicAlias": "jina/jina-embeddings-v2-base-code",
+      "description": "Jina Embeddings v2 Base Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    }
+  ],
+  "kimchi": [
+    {
+      "id": "kimchi/minimax-m3",
+      "upstreamModelId": "minimax-m3",
+      "publicAlias": "kimchi/minimax-m3",
+      "description": "MiniMax-M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "kimchi/kimi-k2.7",
+      "upstreamModelId": "kimi-k2.7",
+      "publicAlias": "kimchi/kimi-k2.7",
+      "description": "Kimi-K2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "kimchi/kimi-k2.6",
+      "upstreamModelId": "kimi-k2.6",
+      "publicAlias": "kimchi/kimi-k2.6",
+      "description": "Kimi-K2.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "kimchi/kimi-k2.5",
+      "upstreamModelId": "kimi-k2.5",
+      "publicAlias": "kimchi/kimi-k2.5",
+      "description": "Kimi-K2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "kimchi/nemotron-3-ultra-fp4",
+      "upstreamModelId": "nemotron-3-ultra-fp4",
+      "publicAlias": "kimchi/nemotron-3-ultra-fp4",
+      "description": "Nemotron 3 Ultra FP4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "kimchi/minimax-m2.7",
+      "upstreamModelId": "minimax-m2.7",
+      "publicAlias": "kimchi/minimax-m2.7",
+      "description": "MiniMax-M2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "kimchi/claude-opus-4-6",
+      "upstreamModelId": "claude-opus-4-6",
+      "publicAlias": "kimchi/claude-opus-4-6",
+      "description": "Claude Opus 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "kimchi/claude-sonnet-4-6",
+      "upstreamModelId": "claude-sonnet-4-6",
+      "publicAlias": "kimchi/claude-sonnet-4-6",
+      "description": "Claude Sonnet 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    }
+  ],
+  "kimi": [
+    {
+      "id": "kimi/kimi-k3",
+      "upstreamModelId": "kimi-k3",
+      "publicAlias": "kimi/kimi-k3",
+      "description": "Kimi K3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "kimi/k3",
+      "upstreamModelId": "k3",
+      "publicAlias": "kimi/k3",
+      "description": "Kimi K3 (Code)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "kimi/kimi-for-coding",
+      "upstreamModelId": "kimi-for-coding",
+      "publicAlias": "kimi/kimi-for-coding",
+      "description": "Kimi for Coding",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "kimi/kimi-for-coding-highspeed",
+      "upstreamModelId": "kimi-for-coding-highspeed",
+      "publicAlias": "kimi/kimi-for-coding-highspeed",
+      "description": "Kimi for Coding Highspeed",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "kimi/kimi-k2.7-code",
+      "upstreamModelId": "kimi-k2.7-code",
+      "publicAlias": "kimi/kimi-k2.7-code",
+      "description": "Kimi K2.7 Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "kimi/kimi-k2.7-code-highspeed",
+      "upstreamModelId": "kimi-k2.7-code-highspeed",
+      "publicAlias": "kimi/kimi-k2.7-code-highspeed",
+      "description": "Kimi K2.7 Code Highspeed",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "kimi/kimi-k2.6",
+      "upstreamModelId": "kimi-k2.6",
+      "publicAlias": "kimi/kimi-k2.6",
+      "description": "Kimi K2.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "kimi/kimi-k2.5",
+      "upstreamModelId": "kimi-k2.5",
+      "publicAlias": "kimi/kimi-k2.5",
+      "description": "Kimi K2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "kimi/kimi-k2.5-thinking",
+      "upstreamModelId": "kimi-k2.5-thinking",
+      "publicAlias": "kimi/kimi-k2.5-thinking",
+      "description": "Kimi K2.5 Thinking",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "kimi/kimi-latest",
+      "upstreamModelId": "kimi-latest",
+      "publicAlias": "kimi/kimi-latest",
+      "description": "Kimi Latest",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    }
+  ],
+  "kiro": [
+    {
+      "id": "kiro/claude-opus-5.5",
+      "upstreamModelId": "claude-opus-5.5",
+      "publicAlias": "kr/claude-opus-5.5",
+      "description": "Claude Opus 5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "kiro/claude-opus-5.5-thinking",
+      "upstreamModelId": "claude-opus-5.5-thinking",
+      "publicAlias": "kr/claude-opus-5.5-thinking",
+      "description": "Claude Opus 5.5 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "kiro/claude-opus-5.5-agentic",
+      "upstreamModelId": "claude-opus-5.5-agentic",
+      "publicAlias": "kr/claude-opus-5.5-agentic",
+      "description": "Claude Opus 5.5 (Agentic)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "kiro/claude-opus-5.5-thinking-agentic",
+      "upstreamModelId": "claude-opus-5.5-thinking-agentic",
+      "publicAlias": "kr/claude-opus-5.5-thinking-agentic",
+      "description": "Claude Opus 5.5 (Thinking + Agentic)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "kiro/claude-opus-5-thinking",
+      "upstreamModelId": "claude-opus-5-thinking",
+      "publicAlias": "kr/claude-opus-5-thinking",
+      "description": "Claude Opus 5 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "kiro/claude-opus-5-agentic",
+      "upstreamModelId": "claude-opus-5-agentic",
+      "publicAlias": "kr/claude-opus-5-agentic",
+      "description": "Claude Opus 5 (Agentic)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "kiro/claude-opus-5-thinking-agentic",
+      "upstreamModelId": "claude-opus-5-thinking-agentic",
+      "publicAlias": "kr/claude-opus-5-thinking-agentic",
+      "description": "Claude Opus 5 (Thinking + Agentic)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "kiro/claude-opus-4.8",
+      "upstreamModelId": "claude-opus-4.8",
+      "publicAlias": "kr/claude-opus-4.8",
+      "description": "Claude Opus 4.8",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "kiro/claude-opus-4.8-thinking",
+      "upstreamModelId": "claude-opus-4.8-thinking",
+      "publicAlias": "kr/claude-opus-4.8-thinking",
+      "description": "Claude Opus 4.8 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "kiro/claude-opus-4.8-agentic",
+      "upstreamModelId": "claude-opus-4.8-agentic",
+      "publicAlias": "kr/claude-opus-4.8-agentic",
+      "description": "Claude Opus 4.8 (Agentic)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "kiro/claude-opus-4.8-thinking-agentic",
+      "upstreamModelId": "claude-opus-4.8-thinking-agentic",
+      "publicAlias": "kr/claude-opus-4.8-thinking-agentic",
+      "description": "Claude Opus 4.8 (Thinking + Agentic)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "kiro/claude-opus-4.7",
+      "upstreamModelId": "claude-opus-4.7",
+      "publicAlias": "kr/claude-opus-4.7",
+      "description": "Claude Opus 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "kiro/claude-opus-4.7-thinking",
+      "upstreamModelId": "claude-opus-4.7-thinking",
+      "publicAlias": "kr/claude-opus-4.7-thinking",
+      "description": "Claude Opus 4.7 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "kiro/claude-opus-4.7-agentic",
+      "upstreamModelId": "claude-opus-4.7-agentic",
+      "publicAlias": "kr/claude-opus-4.7-agentic",
+      "description": "Claude Opus 4.7 (Agentic)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "kiro/claude-opus-4.7-thinking-agentic",
+      "upstreamModelId": "claude-opus-4.7-thinking-agentic",
+      "publicAlias": "kr/claude-opus-4.7-thinking-agentic",
+      "description": "Claude Opus 4.7 (Thinking + Agentic)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "kiro/claude-opus-4.5",
+      "upstreamModelId": "claude-opus-4.5",
+      "publicAlias": "kr/claude-opus-4.5",
+      "description": "Claude Opus 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    },
+    {
+      "id": "kiro/claude-opus-4.5-thinking",
+      "upstreamModelId": "claude-opus-4.5-thinking",
+      "publicAlias": "kr/claude-opus-4.5-thinking",
+      "description": "Claude Opus 4.5 (Thinking)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 16
+    },
+    {
+      "id": "kiro/claude-opus-4.5-agentic",
+      "upstreamModelId": "claude-opus-4.5-agentic",
+      "publicAlias": "kr/claude-opus-4.5-agentic",
+      "description": "Claude Opus 4.5 (Agentic)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 17
+    },
+    {
+      "id": "kiro/claude-opus-4.5-thinking-agentic",
+      "upstreamModelId": "claude-opus-4.5-thinking-agentic",
+      "publicAlias": "kr/claude-opus-4.5-thinking-agentic",
+      "description": "Claude Opus 4.5 (Thinking + Agentic)",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 18
+    },
+    {
+      "id": "kiro/claude-sonnet-4.5",
+      "upstreamModelId": "claude-sonnet-4.5",
+      "publicAlias": "kr/claude-sonnet-4.5",
+      "description": "Claude Sonnet 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 19
+    }
+  ],
+  "llm7": [
+    {
+      "id": "llm7/gpt-5.5",
+      "upstreamModelId": "gpt-5.5",
+      "publicAlias": "llm7/gpt-5.5",
+      "description": "GPT-5.5 (LLM7)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "llm7/claude-opus-5",
+      "upstreamModelId": "claude-opus-5",
+      "publicAlias": "llm7/claude-opus-5",
+      "description": "Claude Opus 5 (LLM7)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "llm7/deepseek-v4-flash",
+      "upstreamModelId": "deepseek-v4-flash",
+      "publicAlias": "llm7/deepseek-v4-flash",
+      "description": "DeepSeek V4 Flash (LLM7)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "llm7/grok-4.5",
+      "upstreamModelId": "grok-4.5",
+      "publicAlias": "llm7/grok-4.5",
+      "description": "Grok 4.5 (LLM7)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "llm7/kimi-k3",
+      "upstreamModelId": "kimi-k3",
+      "publicAlias": "llm7/kimi-k3",
+      "description": "Kimi K3 (LLM7)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    }
+  ],
+  "mimo-free": [
+    {
+      "id": "mimo-free/mimo-auto",
+      "upstreamModelId": "mimo-auto",
+      "publicAlias": "mmf/mimo-auto",
+      "description": "MiMo Auto",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "minimax-cn": [
+    {
+      "id": "minimax-cn/MiniMax-M3",
+      "upstreamModelId": "MiniMax-M3",
+      "publicAlias": "minimax-cn/MiniMax-M3",
+      "description": "MiniMax M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "minimax-cn/MiniMax-M2.7",
+      "upstreamModelId": "MiniMax-M2.7",
+      "publicAlias": "minimax-cn/MiniMax-M2.7",
+      "description": "MiniMax M2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "minimax-cn/MiniMax-M2.5",
+      "upstreamModelId": "MiniMax-M2.5",
+      "publicAlias": "minimax-cn/MiniMax-M2.5",
+      "description": "MiniMax M2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "minimax-cn/MiniMax-M2.1",
+      "upstreamModelId": "MiniMax-M2.1",
+      "publicAlias": "minimax-cn/MiniMax-M2.1",
+      "description": "MiniMax M2.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "minimax-cn/speech-2.8-hd",
+      "upstreamModelId": "speech-2.8-hd",
+      "publicAlias": "minimax-cn/speech-2.8-hd",
+      "description": "Speech 2.8 HD",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "minimax-cn/speech-2.8-turbo",
+      "upstreamModelId": "speech-2.8-turbo",
+      "publicAlias": "minimax-cn/speech-2.8-turbo",
+      "description": "Speech 2.8 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "minimax-cn/speech-2.6-hd",
+      "upstreamModelId": "speech-2.6-hd",
+      "publicAlias": "minimax-cn/speech-2.6-hd",
+      "description": "Speech 2.6 HD",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "minimax-cn/speech-2.6-turbo",
+      "upstreamModelId": "speech-2.6-turbo",
+      "publicAlias": "minimax-cn/speech-2.6-turbo",
+      "description": "Speech 2.6 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "minimax-cn/speech-02-hd",
+      "upstreamModelId": "speech-02-hd",
+      "publicAlias": "minimax-cn/speech-02-hd",
+      "description": "Speech 02 HD",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "minimax-cn/speech-02-turbo",
+      "upstreamModelId": "speech-02-turbo",
+      "publicAlias": "minimax-cn/speech-02-turbo",
+      "description": "Speech 02 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "minimax-cn/speech-01-hd",
+      "upstreamModelId": "speech-01-hd",
+      "publicAlias": "minimax-cn/speech-01-hd",
+      "description": "Speech 01 HD",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "minimax-cn/speech-01-turbo",
+      "upstreamModelId": "speech-01-turbo",
+      "publicAlias": "minimax-cn/speech-01-turbo",
+      "description": "Speech 01 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    }
+  ],
+  "minimax": [
+    {
+      "id": "minimax/MiniMax-M3",
+      "upstreamModelId": "MiniMax-M3",
+      "publicAlias": "minimax/MiniMax-M3",
+      "description": "MiniMax M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "minimax/MiniMax-M2.7",
+      "upstreamModelId": "MiniMax-M2.7",
+      "publicAlias": "minimax/MiniMax-M2.7",
+      "description": "MiniMax M2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "minimax/MiniMax-M2.5",
+      "upstreamModelId": "MiniMax-M2.5",
+      "publicAlias": "minimax/MiniMax-M2.5",
+      "description": "MiniMax M2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "minimax/MiniMax-M2.1",
+      "upstreamModelId": "MiniMax-M2.1",
+      "publicAlias": "minimax/MiniMax-M2.1",
+      "description": "MiniMax M2.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "minimax/minimax-image-01",
+      "upstreamModelId": "minimax-image-01",
+      "publicAlias": "minimax/minimax-image-01",
+      "description": "MiniMax Image 01",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    }
+  ],
+  "mistral": [
+    {
+      "id": "mistral/mistral-large-latest",
+      "upstreamModelId": "mistral-large-latest",
+      "publicAlias": "mistral/mistral-large-latest",
+      "description": "Mistral Large 3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "mistral/codestral-latest",
+      "upstreamModelId": "codestral-latest",
+      "publicAlias": "mistral/codestral-latest",
+      "description": "Codestral",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "mistral/mistral-medium-latest",
+      "upstreamModelId": "mistral-medium-latest",
+      "publicAlias": "mistral/mistral-medium-latest",
+      "description": "Mistral Medium 3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "mistral/mistral-embed",
+      "upstreamModelId": "mistral-embed",
+      "publicAlias": "mistral/mistral-embed",
+      "description": "Mistral Embed",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    }
+  ],
+  "muse": [
+    {
+      "id": "muse/muse-spark-1.3",
+      "upstreamModelId": "muse-spark-1.3",
+      "publicAlias": "muse/muse-spark-1.3",
+      "description": "Muse Spark 1.3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "nanobanana": [
+    {
+      "id": "nanobanana/nanobanana-flash",
+      "upstreamModelId": "nanobanana-flash",
+      "publicAlias": "nanobanana/nanobanana-flash",
+      "description": "NanoBanana Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "nebius": [
+    {
+      "id": "nebius/meta-llama/Llama-3.3-70B-Instruct",
+      "upstreamModelId": "meta-llama/Llama-3.3-70B-Instruct",
+      "publicAlias": "nebius/meta-llama/Llama-3.3-70B-Instruct",
+      "description": "Llama 3.3 70B Instruct",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "nebius/Qwen/Qwen3-Embedding-8B",
+      "upstreamModelId": "Qwen/Qwen3-Embedding-8B",
+      "publicAlias": "nebius/Qwen/Qwen3-Embedding-8B",
+      "description": "Qwen3 Embedding 8B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    }
+  ],
+  "nvidia": [
+    {
+      "id": "nvidia/minimaxai/minimax-m2.7",
+      "upstreamModelId": "minimaxai/minimax-m2.7",
+      "publicAlias": "nvidia/minimaxai/minimax-m2.7",
+      "description": "MiniMax M2.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "nvidia/minimaxai/minimax-m3",
+      "upstreamModelId": "minimaxai/minimax-m3",
+      "publicAlias": "nvidia/minimaxai/minimax-m3",
+      "description": "MiniMax M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "nvidia/z-ai/glm-5.2",
+      "upstreamModelId": "z-ai/glm-5.2",
+      "publicAlias": "nvidia/z-ai/glm-5.2",
+      "description": "GLM 5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "nvidia/deepseek-ai/deepseek-v4-pro",
+      "upstreamModelId": "deepseek-ai/deepseek-v4-pro",
+      "publicAlias": "nvidia/deepseek-ai/deepseek-v4-pro",
+      "description": "DeepSeek V4 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "nvidia/deepseek-ai/deepseek-v4-flash",
+      "upstreamModelId": "deepseek-ai/deepseek-v4-flash",
+      "publicAlias": "nvidia/deepseek-ai/deepseek-v4-flash",
+      "description": "DeepSeek V4 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "nvidia/moonshotai/kimi-k2.6",
+      "upstreamModelId": "moonshotai/kimi-k2.6",
+      "publicAlias": "nvidia/moonshotai/kimi-k2.6",
+      "description": "Kimi K2.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "nvidia/nvidia/nemotron-3-ultra-550b-a55b",
+      "upstreamModelId": "nvidia/nemotron-3-ultra-550b-a55b",
+      "publicAlias": "nvidia/nvidia/nemotron-3-ultra-550b-a55b",
+      "description": "Nemotron 3 Ultra",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "nvidia/nvidia/nv-embedqa-e5-v5",
+      "upstreamModelId": "nvidia/nv-embedqa-e5-v5",
+      "publicAlias": "nvidia/nvidia/nv-embedqa-e5-v5",
+      "description": "NV EmbedQA E5 v5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "nvidia/nvidia/parakeet-ctc-1.1b-asr",
+      "upstreamModelId": "nvidia/parakeet-ctc-1.1b-asr",
+      "publicAlias": "nvidia/nvidia/parakeet-ctc-1.1b-asr",
+      "description": "Parakeet CTC 1.1B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    }
+  ],
+  "ollama": [
+    {
+      "id": "ollama/gpt-oss:120b",
+      "upstreamModelId": "gpt-oss:120b",
+      "publicAlias": "ollama/gpt-oss:120b",
+      "description": "GPT OSS 120B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "ollama/kimi-k2.5",
+      "upstreamModelId": "kimi-k2.5",
+      "publicAlias": "ollama/kimi-k2.5",
+      "description": "Kimi K2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "ollama/glm-5",
+      "upstreamModelId": "glm-5",
+      "publicAlias": "ollama/glm-5",
+      "description": "GLM 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "ollama/minimax-m2.5",
+      "upstreamModelId": "minimax-m2.5",
+      "publicAlias": "ollama/minimax-m2.5",
+      "description": "MiniMax M2.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "ollama/glm-4.7-flash",
+      "upstreamModelId": "glm-4.7-flash",
+      "publicAlias": "ollama/glm-4.7-flash",
+      "description": "GLM 4.7 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "ollama/qwen3.5",
+      "upstreamModelId": "qwen3.5",
+      "publicAlias": "ollama/qwen3.5",
+      "description": "Qwen3.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "ollama/minimax-m3",
+      "upstreamModelId": "minimax-m3",
+      "publicAlias": "ollama/minimax-m3",
+      "description": "MiniMax M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "ollama/deepseek-v4.1-flash:cloud",
+      "upstreamModelId": "deepseek-v4.1-flash:cloud",
+      "publicAlias": "ollama/deepseek-v4.1-flash:cloud",
+      "description": "DeepSeek V4.1 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    }
+  ],
+  "openai": [
+    {
+      "id": "openai/gpt-5.5",
+      "upstreamModelId": "gpt-5.5",
+      "publicAlias": "openai/gpt-5.5",
+      "description": "GPT-5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "openai/gpt-5.4",
+      "upstreamModelId": "gpt-5.4",
+      "publicAlias": "openai/gpt-5.4",
+      "description": "GPT-5.4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "openai/gpt-5.4-mini",
+      "upstreamModelId": "gpt-5.4-mini",
+      "publicAlias": "openai/gpt-5.4-mini",
+      "description": "GPT-5.4 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "openai/gpt-5.4-nano",
+      "upstreamModelId": "gpt-5.4-nano",
+      "publicAlias": "openai/gpt-5.4-nano",
+      "description": "GPT-5.4 Nano",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "openai/gpt-5.2",
+      "upstreamModelId": "gpt-5.2",
+      "publicAlias": "openai/gpt-5.2",
+      "description": "GPT-5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "openai/gpt-5.1",
+      "upstreamModelId": "gpt-5.1",
+      "publicAlias": "openai/gpt-5.1",
+      "description": "GPT-5.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "openai/gpt-5",
+      "upstreamModelId": "gpt-5",
+      "publicAlias": "openai/gpt-5",
+      "description": "GPT-5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "openai/gpt-5-mini",
+      "upstreamModelId": "gpt-5-mini",
+      "publicAlias": "openai/gpt-5-mini",
+      "description": "GPT-5 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "openai/gpt-5-nano",
+      "upstreamModelId": "gpt-5-nano",
+      "publicAlias": "openai/gpt-5-nano",
+      "description": "GPT-5 Nano",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "openai/gpt-4o",
+      "upstreamModelId": "gpt-4o",
+      "publicAlias": "openai/gpt-4o",
+      "description": "GPT-4o",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "openai/gpt-4o-mini",
+      "upstreamModelId": "gpt-4o-mini",
+      "publicAlias": "openai/gpt-4o-mini",
+      "description": "GPT-4o Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "openai/gpt-4-turbo",
+      "upstreamModelId": "gpt-4-turbo",
+      "publicAlias": "openai/gpt-4-turbo",
+      "description": "GPT-4 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "openai/gpt-4.1",
+      "upstreamModelId": "gpt-4.1",
+      "publicAlias": "openai/gpt-4.1",
+      "description": "GPT-4.1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "openai/gpt-4.1-mini",
+      "upstreamModelId": "gpt-4.1-mini",
+      "publicAlias": "openai/gpt-4.1-mini",
+      "description": "GPT-4.1 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "openai/gpt-4.1-nano",
+      "upstreamModelId": "gpt-4.1-nano",
+      "publicAlias": "openai/gpt-4.1-nano",
+      "description": "GPT-4.1 Nano",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "openai/o3",
+      "upstreamModelId": "o3",
+      "publicAlias": "openai/o3",
+      "description": "O3",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 15
+    },
+    {
+      "id": "openai/o3-mini",
+      "upstreamModelId": "o3-mini",
+      "publicAlias": "openai/o3-mini",
+      "description": "O3 Mini",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 16
+    },
+    {
+      "id": "openai/o3-pro",
+      "upstreamModelId": "o3-pro",
+      "publicAlias": "openai/o3-pro",
+      "description": "O3 Pro",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 17
+    },
+    {
+      "id": "openai/o4-mini",
+      "upstreamModelId": "o4-mini",
+      "publicAlias": "openai/o4-mini",
+      "description": "O4 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 18
+    },
+    {
+      "id": "openai/o1",
+      "upstreamModelId": "o1",
+      "publicAlias": "openai/o1",
+      "description": "O1",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 19
+    },
+    {
+      "id": "openai/o1-mini",
+      "upstreamModelId": "o1-mini",
+      "publicAlias": "openai/o1-mini",
+      "description": "O1 Mini",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 20
+    },
+    {
+      "id": "openai/text-embedding-3-large",
+      "upstreamModelId": "text-embedding-3-large",
+      "publicAlias": "openai/text-embedding-3-large",
+      "description": "Text Embedding 3 Large",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 21
+    },
+    {
+      "id": "openai/text-embedding-3-small",
+      "upstreamModelId": "text-embedding-3-small",
+      "publicAlias": "openai/text-embedding-3-small",
+      "description": "Text Embedding 3 Small",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 22
+    },
+    {
+      "id": "openai/text-embedding-ada-002",
+      "upstreamModelId": "text-embedding-ada-002",
+      "publicAlias": "openai/text-embedding-ada-002",
+      "description": "Text Embedding Ada 002",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 23
+    },
+    {
+      "id": "openai/tts-1",
+      "upstreamModelId": "tts-1",
+      "publicAlias": "openai/tts-1",
+      "description": "TTS-1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 24
+    },
+    {
+      "id": "openai/tts-1-hd",
+      "upstreamModelId": "tts-1-hd",
+      "publicAlias": "openai/tts-1-hd",
+      "description": "TTS-1 HD",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 25
+    },
+    {
+      "id": "openai/gpt-4o-mini-tts",
+      "upstreamModelId": "gpt-4o-mini-tts",
+      "publicAlias": "openai/gpt-4o-mini-tts",
+      "description": "GPT-4o Mini TTS",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 26
+    },
+    {
+      "id": "openai/whisper-1",
+      "upstreamModelId": "whisper-1",
+      "publicAlias": "openai/whisper-1",
+      "description": "Whisper 1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 27
+    }
+  ],
+  "opencode-go": [
+    {
+      "id": "opencode-go/deepseek-flash",
+      "upstreamModelId": "deepseek-flash",
+      "publicAlias": "opencode-go/deepseek-flash",
+      "description": "DeepSeek Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "opencode-zen": [
+    {
+      "id": "opencode-zen/claude-fable-5",
+      "upstreamModelId": "claude-fable-5",
+      "publicAlias": "ocz/claude-fable-5",
+      "description": "Claude Fable 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "opencode": [
+    {
+      "id": "opencode/muse-spark-1.2-contributor-free",
+      "upstreamModelId": "muse-spark-1.2-contributor-free",
+      "publicAlias": "oc/muse-spark-1.2-contributor-free",
+      "description": "Muse Spark 1.2 Contributor Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "opencode/muse-spark-1.3-contributor-free",
+      "upstreamModelId": "muse-spark-1.3-contributor-free",
+      "publicAlias": "oc/muse-spark-1.3-contributor-free",
+      "description": "Muse Spark 1.3 Contributor Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "opencode/union-alpha",
+      "upstreamModelId": "union-alpha",
+      "publicAlias": "oc/union-alpha",
+      "description": "Union Alpha Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "opencode/jev-1.13-free",
+      "upstreamModelId": "jev-1.13-free",
+      "publicAlias": "oc/jev-1.13-free",
+      "description": "Jev 1.13 Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    }
+  ],
+  "openrouter": [
+    {
+      "id": "openrouter/openai/text-embedding-3-large",
+      "upstreamModelId": "openai/text-embedding-3-large",
+      "publicAlias": "openrouter/openai/text-embedding-3-large",
+      "description": "OpenAI Text Embedding 3 Large",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "openrouter/openai/text-embedding-3-small",
+      "upstreamModelId": "openai/text-embedding-3-small",
+      "publicAlias": "openrouter/openai/text-embedding-3-small",
+      "description": "OpenAI Text Embedding 3 Small",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "openrouter/openai/text-embedding-ada-002",
+      "upstreamModelId": "openai/text-embedding-ada-002",
+      "publicAlias": "openrouter/openai/text-embedding-ada-002",
+      "description": "OpenAI Text Embedding Ada 002",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "openrouter/qwen/qwen3-embedding-8b",
+      "upstreamModelId": "qwen/qwen3-embedding-8b",
+      "publicAlias": "openrouter/qwen/qwen3-embedding-8b",
+      "description": "Qwen3 Embedding 8B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "openrouter/perplexity/pplx-embed-v1-4b",
+      "upstreamModelId": "perplexity/pplx-embed-v1-4b",
+      "publicAlias": "openrouter/perplexity/pplx-embed-v1-4b",
+      "description": "Perplexity Embed V1 4B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "openrouter/perplexity/pplx-embed-v1-0.6b",
+      "upstreamModelId": "perplexity/pplx-embed-v1-0.6b",
+      "publicAlias": "openrouter/perplexity/pplx-embed-v1-0.6b",
+      "description": "Perplexity Embed V1 0.6B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "openrouter/nvidia/llama-nemotron-embed-vl-1b-v2:free",
+      "upstreamModelId": "nvidia/llama-nemotron-embed-vl-1b-v2:free",
+      "publicAlias": "openrouter/nvidia/llama-nemotron-embed-vl-1b-v2:free",
+      "description": "NVIDIA Nemotron Embed VL 1B V2 (Free)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "openrouter/openai/gpt-4o-mini-tts",
+      "upstreamModelId": "openai/gpt-4o-mini-tts",
+      "publicAlias": "openrouter/openai/gpt-4o-mini-tts",
+      "description": "GPT-4o Mini TTS",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "openrouter/openai/tts-1-hd",
+      "upstreamModelId": "openai/tts-1-hd",
+      "publicAlias": "openrouter/openai/tts-1-hd",
+      "description": "TTS-1 HD",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "openrouter/openai/tts-1",
+      "upstreamModelId": "openai/tts-1",
+      "publicAlias": "openrouter/openai/tts-1",
+      "description": "TTS-1",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "openrouter/openai/dall-e-3",
+      "upstreamModelId": "openai/dall-e-3",
+      "publicAlias": "openrouter/openai/dall-e-3",
+      "description": "DALL-E 3 (via OpenRouter)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    }
+  ],
+  "perplexity-agent": [
+    {
+      "id": "perplexity-agent/perplexity/sonar",
+      "upstreamModelId": "perplexity/sonar",
+      "publicAlias": "perplexity-agent/perplexity/sonar",
+      "description": "Perplexity Sonar",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "perplexity-agent/openai/gpt-5.5",
+      "upstreamModelId": "openai/gpt-5.5",
+      "publicAlias": "perplexity-agent/openai/gpt-5.5",
+      "description": "GPT-5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "perplexity-agent/openai/gpt-5.4",
+      "upstreamModelId": "openai/gpt-5.4",
+      "publicAlias": "perplexity-agent/openai/gpt-5.4",
+      "description": "GPT-5.4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "perplexity-agent/openai/gpt-5.4-mini",
+      "upstreamModelId": "openai/gpt-5.4-mini",
+      "publicAlias": "perplexity-agent/openai/gpt-5.4-mini",
+      "description": "GPT-5.4 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "perplexity-agent/anthropic/claude-sonnet-4-6",
+      "upstreamModelId": "anthropic/claude-sonnet-4-6",
+      "publicAlias": "perplexity-agent/anthropic/claude-sonnet-4-6",
+      "description": "Claude Sonnet 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "perplexity-agent/anthropic/claude-opus-4-8",
+      "upstreamModelId": "anthropic/claude-opus-4-8",
+      "publicAlias": "perplexity-agent/anthropic/claude-opus-4-8",
+      "description": "Claude Opus 4.8",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "perplexity-agent/google/gemini-3.1-pro-preview",
+      "upstreamModelId": "google/gemini-3.1-pro-preview",
+      "publicAlias": "perplexity-agent/google/gemini-3.1-pro-preview",
+      "description": "Gemini 3.1 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "perplexity-agent/xai/grok-4.20-reasoning",
+      "upstreamModelId": "xai/grok-4.20-reasoning",
+      "publicAlias": "perplexity-agent/xai/grok-4.20-reasoning",
+      "description": "Grok 4.20 Reasoning",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "perplexity-agent/perplexity/glm-5.2",
+      "upstreamModelId": "perplexity/glm-5.2",
+      "publicAlias": "perplexity-agent/perplexity/glm-5.2",
+      "description": "GLM 5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "perplexity-agent/perplexity/kimi-k2.7-code",
+      "upstreamModelId": "perplexity/kimi-k2.7-code",
+      "publicAlias": "perplexity-agent/perplexity/kimi-k2.7-code",
+      "description": "Kimi K2.7 Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "perplexity-agent/nvidia/nemotron-3-super-120b-a12b",
+      "upstreamModelId": "nvidia/nemotron-3-super-120b-a12b",
+      "publicAlias": "perplexity-agent/nvidia/nemotron-3-super-120b-a12b",
+      "description": "Nemotron 3 Super 120B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    }
+  ],
+  "perplexity": [
+    {
+      "id": "perplexity/sonar-pro",
+      "upstreamModelId": "sonar-pro",
+      "publicAlias": "perplexity/sonar-pro",
+      "description": "Sonar Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "perplexity/sonar",
+      "upstreamModelId": "sonar",
+      "publicAlias": "perplexity/sonar",
+      "description": "Sonar",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    }
+  ],
+  "playht": [
+    {
+      "id": "playht/PlayDialog",
+      "upstreamModelId": "PlayDialog",
+      "publicAlias": "playht/PlayDialog",
+      "description": "PlayDialog",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "playht/Play3.0-mini",
+      "upstreamModelId": "Play3.0-mini",
+      "publicAlias": "playht/Play3.0-mini",
+      "description": "Play 3.0 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    }
+  ],
+  "qoder-cn": [
+    {
+      "id": "qoder-cn/ultimate",
+      "upstreamModelId": "ultimate",
+      "publicAlias": "qdcn/ultimate",
+      "description": "Ultimate",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "qoder-cn/auto",
+      "upstreamModelId": "auto",
+      "publicAlias": "qdcn/auto",
+      "description": "Auto",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "qoder-cn/performance",
+      "upstreamModelId": "performance",
+      "publicAlias": "qdcn/performance",
+      "description": "Performance",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "qoder-cn/efficient",
+      "upstreamModelId": "efficient",
+      "publicAlias": "qdcn/efficient",
+      "description": "Efficient",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "qoder-cn/lite",
+      "upstreamModelId": "lite",
+      "publicAlias": "qdcn/lite",
+      "description": "Lite",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "qoder-cn/qmodel_38max",
+      "upstreamModelId": "qmodel_38max",
+      "publicAlias": "qdcn/qmodel_38max",
+      "description": "Qwen3.8-Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "qoder-cn/qmodel_latest",
+      "upstreamModelId": "qmodel_latest",
+      "publicAlias": "qdcn/qmodel_latest",
+      "description": "Qwen3.7-Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "qoder-cn/qmodel",
+      "upstreamModelId": "qmodel",
+      "publicAlias": "qdcn/qmodel",
+      "description": "Qwen3.7-Plus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "qoder-cn/qfmodel",
+      "upstreamModelId": "qfmodel",
+      "publicAlias": "qdcn/qfmodel",
+      "description": "Qwen3.8-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "qoder-cn/kmodel_latest",
+      "upstreamModelId": "kmodel_latest",
+      "publicAlias": "qdcn/kmodel_latest",
+      "description": "Kimi-K3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "qoder-cn/kmodel",
+      "upstreamModelId": "kmodel",
+      "publicAlias": "qdcn/kmodel",
+      "description": "Kimi-K2.7-Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "qoder-cn/gmodel",
+      "upstreamModelId": "gmodel",
+      "publicAlias": "qdcn/gmodel",
+      "description": "GLM-5.3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "qoder-cn/gfmodel",
+      "upstreamModelId": "gfmodel",
+      "publicAlias": "qdcn/gfmodel",
+      "description": "GLM-5.3-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "qoder-cn/dmodel",
+      "upstreamModelId": "dmodel",
+      "publicAlias": "qdcn/dmodel",
+      "description": "DeepSeek-V4-Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "qoder-cn/dfmodel",
+      "upstreamModelId": "dfmodel",
+      "publicAlias": "qdcn/dfmodel",
+      "description": "DeepSeek-V4-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "qoder-cn/mmodel",
+      "upstreamModelId": "mmodel",
+      "publicAlias": "qdcn/mmodel",
+      "description": "MiniMax-M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    }
+  ],
+  "qoder": [
+    {
+      "id": "qoder/ultimate",
+      "upstreamModelId": "ultimate",
+      "publicAlias": "qd/ultimate",
+      "description": "Ultimate",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "qoder/auto",
+      "upstreamModelId": "auto",
+      "publicAlias": "qd/auto",
+      "description": "Auto",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "qoder/performance",
+      "upstreamModelId": "performance",
+      "publicAlias": "qd/performance",
+      "description": "Performance",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "qoder/efficient",
+      "upstreamModelId": "efficient",
+      "publicAlias": "qd/efficient",
+      "description": "Efficient",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "qoder/lite",
+      "upstreamModelId": "lite",
+      "publicAlias": "qd/lite",
+      "description": "Lite",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "qoder/qmodel_38max",
+      "upstreamModelId": "qmodel_38max",
+      "publicAlias": "qd/qmodel_38max",
+      "description": "Qwen3.8-Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "qoder/qmodel_latest",
+      "upstreamModelId": "qmodel_latest",
+      "publicAlias": "qd/qmodel_latest",
+      "description": "Qwen3.7-Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "qoder/qmodel",
+      "upstreamModelId": "qmodel",
+      "publicAlias": "qd/qmodel",
+      "description": "Qwen3.7-Plus",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "qoder/qfmodel",
+      "upstreamModelId": "qfmodel",
+      "publicAlias": "qd/qfmodel",
+      "description": "Qwen3.8-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "qoder/kmodel_latest",
+      "upstreamModelId": "kmodel_latest",
+      "publicAlias": "qd/kmodel_latest",
+      "description": "Kimi-K3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "qoder/kmodel",
+      "upstreamModelId": "kmodel",
+      "publicAlias": "qd/kmodel",
+      "description": "Kimi-K2.7-Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "qoder/gmodel",
+      "upstreamModelId": "gmodel",
+      "publicAlias": "qd/gmodel",
+      "description": "GLM-5.3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "qoder/gfmodel",
+      "upstreamModelId": "gfmodel",
+      "publicAlias": "qd/gfmodel",
+      "description": "GLM-5.3-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "qoder/dmodel",
+      "upstreamModelId": "dmodel",
+      "publicAlias": "qd/dmodel",
+      "description": "DeepSeek-V4-Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "qoder/dfmodel",
+      "upstreamModelId": "dfmodel",
+      "publicAlias": "qd/dfmodel",
+      "description": "DeepSeek-V4-Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "qoder/mmodel",
+      "upstreamModelId": "mmodel",
+      "publicAlias": "qd/mmodel",
+      "description": "MiniMax-M3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    }
+  ],
+  "recraft": [
+    {
+      "id": "recraft/recraftv3",
+      "upstreamModelId": "recraftv3",
+      "publicAlias": "recraft/recraftv3",
+      "description": "Recraft V3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "runwayml": [
+    {
+      "id": "runwayml/gen4_image",
+      "upstreamModelId": "gen4_image",
+      "publicAlias": "runwayml/gen4_image",
+      "description": "Gen-4 Image",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "sdwebui": [
+    {
+      "id": "sdwebui/stable-diffusion-v1-5",
+      "upstreamModelId": "stable-diffusion-v1-5",
+      "publicAlias": "sdwebui/stable-diffusion-v1-5",
+      "description": "Stable Diffusion v1.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "selfhosted-embedding": [
+    {
+      "id": "selfhosted-embedding/embedding",
+      "upstreamModelId": "embedding",
+      "publicAlias": "selfhosted-embedding/embedding",
+      "description": "Self-hosted embedding model",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "selfhosted-stt": [
+    {
+      "id": "selfhosted-stt/whisper-1",
+      "upstreamModelId": "whisper-1",
+      "publicAlias": "selfhosted-stt/whisper-1",
+      "description": "Whisper (self-hosted)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "selfhosted-tts": [
+    {
+      "id": "selfhosted-tts/kokoro",
+      "upstreamModelId": "kokoro",
+      "publicAlias": "selfhosted-tts/kokoro",
+      "description": "Kokoro (self-hosted)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "stability-ai": [
+    {
+      "id": "stability-ai/stable-image-ultra",
+      "upstreamModelId": "stable-image-ultra",
+      "publicAlias": "stability-ai/stable-image-ultra",
+      "description": "Stable Image Ultra",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "together": [
+    {
+      "id": "together/meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "upstreamModelId": "meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "publicAlias": "together/meta-llama/Llama-3.3-70B-Instruct-Turbo",
+      "description": "Llama 3.3 70B Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "together/deepseek-ai/DeepSeek-R1",
+      "upstreamModelId": "deepseek-ai/DeepSeek-R1",
+      "publicAlias": "together/deepseek-ai/DeepSeek-R1",
+      "description": "DeepSeek R1",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "together/Qwen/Qwen3-235B-A22B",
+      "upstreamModelId": "Qwen/Qwen3-235B-A22B",
+      "publicAlias": "together/Qwen/Qwen3-235B-A22B",
+      "description": "Qwen3 235B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+      "upstreamModelId": "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+      "publicAlias": "together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
+      "description": "Llama 4 Maverick",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "together/BAAI/bge-large-en-v1.5",
+      "upstreamModelId": "BAAI/bge-large-en-v1.5",
+      "publicAlias": "together/BAAI/bge-large-en-v1.5",
+      "description": "BGE Large EN v1.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "together/togethercomputer/m2-bert-80M-8k-retrieval",
+      "upstreamModelId": "togethercomputer/m2-bert-80M-8k-retrieval",
+      "publicAlias": "together/togethercomputer/m2-bert-80M-8k-retrieval",
+      "description": "M2 BERT 80M 8K",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    }
+  ],
+  "tokenharbor": [
+    {
+      "id": "tokenharbor/claude-opus-5.5",
+      "upstreamModelId": "claude-opus-5.5",
+      "publicAlias": "tokenharbor/claude-opus-5.5",
+      "description": "Claude Opus 5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "tokenharbor/claude-sonnet-5",
+      "upstreamModelId": "claude-sonnet-5",
+      "publicAlias": "tokenharbor/claude-sonnet-5",
+      "description": "Claude Sonnet 5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "tokenharbor/gpt-6-astra",
+      "upstreamModelId": "gpt-6-astra",
+      "publicAlias": "tokenharbor/gpt-6-astra",
+      "description": "GPT-6 Astra",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "tokenharbor/gpt-6-sol",
+      "upstreamModelId": "gpt-6-sol",
+      "publicAlias": "tokenharbor/gpt-6-sol",
+      "description": "GPT-6 Sol",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "tokenharbor/deepseek-v4.1-flash:free",
+      "upstreamModelId": "deepseek-v4.1-flash:free",
+      "publicAlias": "tokenharbor/deepseek-v4.1-flash:free",
+      "description": "DeepSeek V4.1 Flash (Free)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "tokenharbor/grok-4.7",
+      "upstreamModelId": "grok-4.7",
+      "publicAlias": "tokenharbor/grok-4.7",
+      "description": "Grok 4.7",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    }
+  ],
+  "tokenrouter": [
+    {
+      "id": "tokenrouter/anthropic/claude-haiku-4.5",
+      "upstreamModelId": "anthropic/claude-haiku-4.5",
+      "publicAlias": "tokenrouter/anthropic/claude-haiku-4.5",
+      "description": "Claude Haiku 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "tokenrouter/anthropic/claude-sonnet-4.6",
+      "upstreamModelId": "anthropic/claude-sonnet-4.6",
+      "publicAlias": "tokenrouter/anthropic/claude-sonnet-4.6",
+      "description": "Claude Sonnet 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "tokenrouter/anthropic/claude-opus-4.8",
+      "upstreamModelId": "anthropic/claude-opus-4.8",
+      "publicAlias": "tokenrouter/anthropic/claude-opus-4.8",
+      "description": "Claude Opus 4.8",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "tokenrouter/anthropic/claude-opus-4.8-fast",
+      "upstreamModelId": "anthropic/claude-opus-4.8-fast",
+      "publicAlias": "tokenrouter/anthropic/claude-opus-4.8-fast",
+      "description": "Claude Opus 4.8 Fast",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "tokenrouter/openai/gpt-5.4",
+      "upstreamModelId": "openai/gpt-5.4",
+      "publicAlias": "tokenrouter/openai/gpt-5.4",
+      "description": "Gpt 5.4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "tokenrouter/openai/gpt-5.4-mini",
+      "upstreamModelId": "openai/gpt-5.4-mini",
+      "publicAlias": "tokenrouter/openai/gpt-5.4-mini",
+      "description": "Gpt 5.4 Mini",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "tokenrouter/openai/gpt-5.4-pro",
+      "upstreamModelId": "openai/gpt-5.4-pro",
+      "publicAlias": "tokenrouter/openai/gpt-5.4-pro",
+      "description": "Gpt 5.4 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "tokenrouter/openai/gpt-5.5",
+      "upstreamModelId": "openai/gpt-5.5",
+      "publicAlias": "tokenrouter/openai/gpt-5.5",
+      "description": "Gpt 5.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "tokenrouter/openai/gpt-5.6-sol",
+      "upstreamModelId": "openai/gpt-5.6-sol",
+      "publicAlias": "tokenrouter/openai/gpt-5.6-sol",
+      "description": "Gpt 5.6 Sol",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "tokenrouter/google/gemini-3.5-flash",
+      "upstreamModelId": "google/gemini-3.5-flash",
+      "publicAlias": "tokenrouter/google/gemini-3.5-flash",
+      "description": "Gemini 3.5 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "tokenrouter/google/gemini-3.6-flash",
+      "upstreamModelId": "google/gemini-3.6-flash",
+      "publicAlias": "tokenrouter/google/gemini-3.6-flash",
+      "description": "Gemini 3.6 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "tokenrouter/deepseek/deepseek-v4-flash",
+      "upstreamModelId": "deepseek/deepseek-v4-flash",
+      "publicAlias": "tokenrouter/deepseek/deepseek-v4-flash",
+      "description": "Deepseek V4 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "tokenrouter/deepseek/deepseek-v4-pro",
+      "upstreamModelId": "deepseek/deepseek-v4-pro",
+      "publicAlias": "tokenrouter/deepseek/deepseek-v4-pro",
+      "description": "Deepseek V4 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    },
+    {
+      "id": "tokenrouter/qwen/qwen3-coder-next",
+      "upstreamModelId": "qwen/qwen3-coder-next",
+      "publicAlias": "tokenrouter/qwen/qwen3-coder-next",
+      "description": "Qwen3 Coder Next",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 13
+    },
+    {
+      "id": "tokenrouter/qwen/qwen3.7-max",
+      "upstreamModelId": "qwen/qwen3.7-max",
+      "publicAlias": "tokenrouter/qwen/qwen3.7-max",
+      "description": "Qwen3.7 Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 14
+    },
+    {
+      "id": "tokenrouter/qwen/qwen3.8-max",
+      "upstreamModelId": "qwen/qwen3.8-max",
+      "publicAlias": "tokenrouter/qwen/qwen3.8-max",
+      "description": "Qwen3.8 Max",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 15
+    },
+    {
+      "id": "tokenrouter/moonshotai/kimi-k2.7-code",
+      "upstreamModelId": "moonshotai/kimi-k2.7-code",
+      "publicAlias": "tokenrouter/moonshotai/kimi-k2.7-code",
+      "description": "Kimi K2.7 Code",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 16
+    },
+    {
+      "id": "tokenrouter/moonshotai/kimi-k3-free",
+      "upstreamModelId": "moonshotai/kimi-k3-free",
+      "publicAlias": "tokenrouter/moonshotai/kimi-k3-free",
+      "description": "Kimi K3 Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 17
+    },
+    {
+      "id": "tokenrouter/z-ai/glm-5.3-free",
+      "upstreamModelId": "z-ai/glm-5.3-free",
+      "publicAlias": "tokenrouter/z-ai/glm-5.3-free",
+      "description": "Glm 5.3 Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 18
+    },
+    {
+      "id": "tokenrouter/z-ai/glm-5.2",
+      "upstreamModelId": "z-ai/glm-5.2",
+      "publicAlias": "tokenrouter/z-ai/glm-5.2",
+      "description": "Glm 5.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 19
+    },
+    {
+      "id": "tokenrouter/z-ai/glm-5-turbo",
+      "upstreamModelId": "z-ai/glm-5-turbo",
+      "publicAlias": "tokenrouter/z-ai/glm-5-turbo",
+      "description": "Glm 5 Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 20
+    },
+    {
+      "id": "tokenrouter/x-ai/grok-4.5",
+      "upstreamModelId": "x-ai/grok-4.5",
+      "publicAlias": "tokenrouter/x-ai/grok-4.5",
+      "description": "Grok 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 21
+    }
+  ],
+  "tortoise": [
+    {
+      "id": "tortoise/tortoise-v2",
+      "upstreamModelId": "tortoise-v2",
+      "publicAlias": "tortoise/tortoise-v2",
+      "description": "Tortoise v2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ],
+  "v1m": [
+    {
+      "id": "v1m/rev-latest",
+      "upstreamModelId": "rev-latest",
+      "publicAlias": "v1m/rev-latest",
+      "description": "v1m Rev Latest (Calibrated)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "v1m/v1m-decision-engine",
+      "upstreamModelId": "v1m-decision-engine",
+      "publicAlias": "v1m/v1m-decision-engine",
+      "description": "v1m Decision Engine",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    }
+  ],
+  "venice": [
+    {
+      "id": "venice/venice-uncensored-1-2",
+      "upstreamModelId": "venice-uncensored-1-2",
+      "publicAlias": "venice/venice-uncensored-1-2",
+      "description": "Venice Uncensored 1.2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "venice/zai-org-glm-5",
+      "upstreamModelId": "zai-org-glm-5",
+      "publicAlias": "venice/zai-org-glm-5",
+      "description": "GLM-5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "venice/qwen3-235b-a22b-instruct-2507",
+      "upstreamModelId": "qwen3-235b-a22b-instruct-2507",
+      "publicAlias": "venice/qwen3-235b-a22b-instruct-2507",
+      "description": "Qwen3 235B A22B Instruct",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "venice/qwen3-coder-480b-a35b-instruct-turbo",
+      "upstreamModelId": "qwen3-coder-480b-a35b-instruct-turbo",
+      "publicAlias": "venice/qwen3-coder-480b-a35b-instruct-turbo",
+      "description": "Qwen3 Coder 480B A35B Turbo",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "venice/qwen3-vl-235b-a22b",
+      "upstreamModelId": "qwen3-vl-235b-a22b",
+      "publicAlias": "venice/qwen3-vl-235b-a22b",
+      "description": "Qwen3 VL 235B A22B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "venice/deepseek-v4-pro",
+      "upstreamModelId": "deepseek-v4-pro",
+      "publicAlias": "venice/deepseek-v4-pro",
+      "description": "DeepSeek V4 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "venice/llama-3.3-70b",
+      "upstreamModelId": "llama-3.3-70b",
+      "publicAlias": "venice/llama-3.3-70b",
+      "description": "Llama 3.3 70B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "venice/hermes-3-llama-3.1-405b",
+      "upstreamModelId": "hermes-3-llama-3.1-405b",
+      "publicAlias": "venice/hermes-3-llama-3.1-405b",
+      "description": "Hermes 3 Llama 3.1 405B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 7
+    },
+    {
+      "id": "venice/mistral-small-3-2-24b-instruct",
+      "upstreamModelId": "mistral-small-3-2-24b-instruct",
+      "publicAlias": "venice/mistral-small-3-2-24b-instruct",
+      "description": "Mistral Small 3.2 24B",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 8
+    },
+    {
+      "id": "venice/text-embedding-3-large",
+      "upstreamModelId": "text-embedding-3-large",
+      "publicAlias": "venice/text-embedding-3-large",
+      "description": "Text Embedding 3 Large",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 9
+    },
+    {
+      "id": "venice/text-embedding-bge-m3",
+      "upstreamModelId": "text-embedding-bge-m3",
+      "publicAlias": "venice/text-embedding-bge-m3",
+      "description": "BGE-M3 Embedding",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 10
+    },
+    {
+      "id": "venice/text-embedding-qwen3-8b",
+      "upstreamModelId": "text-embedding-qwen3-8b",
+      "publicAlias": "venice/text-embedding-qwen3-8b",
+      "description": "Qwen3 8B Embedding",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 11
+    },
+    {
+      "id": "venice/venice-sd35",
+      "upstreamModelId": "venice-sd35",
+      "publicAlias": "venice/venice-sd35",
+      "description": "Venice SD3.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 12
+    }
+  ],
+  "vertex": [
+    {
+      "id": "vertex/gemini-3.1-pro-preview",
+      "upstreamModelId": "gemini-3.1-pro-preview",
+      "publicAlias": "vertex/gemini-3.1-pro-preview",
+      "description": "Gemini 3.1 Pro Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "vertex/gemini-3.1-flash-lite-preview",
+      "upstreamModelId": "gemini-3.1-flash-lite-preview",
+      "publicAlias": "vertex/gemini-3.1-flash-lite-preview",
+      "description": "Gemini 3.1 Flash Lite Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "vertex/gemini-3-flash-preview",
+      "upstreamModelId": "gemini-3-flash-preview",
+      "publicAlias": "vertex/gemini-3-flash-preview",
+      "description": "Gemini 3 Flash Preview",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "vertex/gemini-2.5-flash",
+      "upstreamModelId": "gemini-2.5-flash",
+      "publicAlias": "vertex/gemini-2.5-flash",
+      "description": "Gemini 2.5 Flash",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "vertex/veo-3.1-generate-preview",
+      "upstreamModelId": "veo-3.1-generate-preview",
+      "publicAlias": "vertex/veo-3.1-generate-preview",
+      "description": "Veo 3.1 (Preview)",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    }
+  ],
+  "voyage-ai": [
+    {
+      "id": "voyage-ai/voyage-3-large",
+      "upstreamModelId": "voyage-3-large",
+      "publicAlias": "voyage-ai/voyage-3-large",
+      "description": "Voyage 3 Large",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "voyage-ai/voyage-3.5",
+      "upstreamModelId": "voyage-3.5",
+      "publicAlias": "voyage-ai/voyage-3.5",
+      "description": "Voyage 3.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "voyage-ai/voyage-3.5-lite",
+      "upstreamModelId": "voyage-3.5-lite",
+      "publicAlias": "voyage-ai/voyage-3.5-lite",
+      "description": "Voyage 3.5 Lite",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "voyage-ai/voyage-code-3",
+      "upstreamModelId": "voyage-code-3",
+      "publicAlias": "voyage-ai/voyage-code-3",
+      "description": "Voyage Code 3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "voyage-ai/voyage-finance-2",
+      "upstreamModelId": "voyage-finance-2",
+      "publicAlias": "voyage-ai/voyage-finance-2",
+      "description": "Voyage Finance 2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "voyage-ai/voyage-law-2",
+      "upstreamModelId": "voyage-law-2",
+      "publicAlias": "voyage-ai/voyage-law-2",
+      "description": "Voyage Law 2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "voyage-ai/voyage-multilingual-2",
+      "upstreamModelId": "voyage-multilingual-2",
+      "publicAlias": "voyage-ai/voyage-multilingual-2",
+      "description": "Voyage Multilingual 2",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    }
+  ],
+  "xai": [
+    {
+      "id": "xai/grok-4.6",
+      "upstreamModelId": "grok-4.6",
+      "publicAlias": "xai/grok-4.6",
+      "description": "Grok 4.6",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "xai/grok-4.5",
+      "upstreamModelId": "grok-4.5",
+      "publicAlias": "xai/grok-4.5",
+      "description": "Grok 4.5",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "xai/grok-4",
+      "upstreamModelId": "grok-4",
+      "publicAlias": "xai/grok-4",
+      "description": "Grok 4",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "xai/grok-4-fast-reasoning",
+      "upstreamModelId": "grok-4-fast-reasoning",
+      "publicAlias": "xai/grok-4-fast-reasoning",
+      "description": "Grok 4 Fast Reasoning",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "xai/grok-code-fast-1",
+      "upstreamModelId": "grok-code-fast-1",
+      "publicAlias": "xai/grok-code-fast-1",
+      "description": "Grok Code Fast",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "xai/grok-3",
+      "upstreamModelId": "grok-3",
+      "publicAlias": "xai/grok-3",
+      "description": "Grok 3",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "xai/grok-2-image-1212",
+      "upstreamModelId": "grok-2-image-1212",
+      "publicAlias": "xai/grok-2-image-1212",
+      "description": "Grok 2 Image",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
+    }
+  ],
+  "xiaomi-mimo": [
+    {
+      "id": "xiaomi-mimo/mimo-v2.6-pro",
+      "upstreamModelId": "xiaomi/mimo-v2.6-pro",
+      "publicAlias": "xiaomi-mimo/mimo-v2.6-pro",
+      "description": "MiMo V2.6 Pro",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 0
+    }
+  ]
+}

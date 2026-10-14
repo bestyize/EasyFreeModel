@@ -12,6 +12,7 @@ import type {
 import { validateBaseUrl } from '@/components/providers/validation'
 import catalogJson from '../../../src-tauri/resources/provider_catalog.json'
 import statusJson from '../../../src-tauri/resources/provider_status.json'
+import modelsJson from '../../../src-tauri/resources/provider_models.json'
 
 /**
  * 浏览器预览用 mock，仅在非 Tauri 环境生效。
@@ -47,6 +48,8 @@ interface StatusJsonEntry {
 
 const CATALOG = catalogJson as unknown as CatalogJsonEntry[]
 const STATUS = statusJson as unknown as Record<string, StatusJsonEntry>
+/** 内置预设模型库（与 Rust 的 catalog::curated_models 同一份数据） */
+const CURATED_MODELS = modelsJson as unknown as Record<string, ModelEntry[]>
 
 export const SECRET_MASK = '••••••••'
 const RISK_NOTICE =
@@ -152,6 +155,12 @@ let seq = 0
 function buildCatalog(): Map<string, ProviderDetail> {
   const map = new Map<string, ProviderDetail>()
   for (const e of CATALOG) map.set(e.id, blankDetail(e))
+
+  // 预置模型（与真实应用一致：启动种子写入内置模型库，用户无需手动添加）
+  for (const [id, d] of map) {
+    const curated = CURATED_MODELS[id]
+    if (curated?.length) d.models = curated.map((m) => ({ ...m }))
+  }
 
   // 演示数据（仅预览）：OpenRouter 适配器就绪，放一条演示连接与两个模型，不代表真实连接状态
   const or = map.get('openrouter')
@@ -372,6 +381,24 @@ export const providersMock: ProvidersApi = {
       }
     }
     return out
+  },
+  fetchProviderModels: async (providerId) => {
+    await delay(300)
+    const d = store.get(providerId)
+    if (!d) throw new Error(`provider not found: ${providerId}`)
+    // 浏览器预览里没有真实上游请求：合并内置预设模型库（不伪造“已从上游拉到”）
+    const curated = CURATED_MODELS[providerId] ?? []
+    // 按稳定 id 合并，保留用户已改的公开别名与启用状态（同一 upstreamModelId 可有多个档位）
+    const prevById = new Map(d.models.map((m) => [m.id, m]))
+    const merged = curated.map((m) => {
+      const prev = prevById.get(m.id)
+      return prev ? { ...m, publicAlias: prev.publicAlias, enabled: prev.enabled } : m
+    })
+    // 用户手动添加、预设库里没有的模型保留
+    const curatedIds = new Set(curated.map((m) => m.id))
+    for (const m of d.models) if (!curatedIds.has(m.id)) merged.push(m)
+    d.models = merged
+    return d.models.map((m) => ({ ...m }))
   },
 }
 

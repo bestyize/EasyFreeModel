@@ -24,6 +24,7 @@ export const tauriApi: Api = {
   updateConnectionCredential: (connectionId, apiKey) =>
     invoke('update_connection_credential', { connectionId, apiKey }),
   testProviders: (ids) => invoke('test_providers', { ids }),
+  fetchProviderModels: (providerId) => invoke('fetch_provider_models', { providerId }),
 
   oauthListProviders: () => oauth('oauth_list_providers'),
   oauthSetClientCredentials: (input) =>

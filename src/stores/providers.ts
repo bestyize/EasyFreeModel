@@ -5,6 +5,7 @@ import type {
   AddConnectionInput,
   Connection,
   CreateCustomProviderInput,
+  ModelEntry,
   ProviderDetail,
   ProviderGroup,
   ProviderSummary,
@@ -108,6 +109,23 @@ export const useProvidersStore = defineStore('providers', () => {
     await api.updateConnectionCredential(connectionId, apiKey)
   }
 
+  const fetchingModels = ref<Set<string>>(new Set())
+
+  /**
+   * 拉取某提供商的可用模型（优先上游 /models，失败回退内置预设模型库）并合并入库。
+   * 返回最新模型列表，交给弹窗草稿直接替换。
+   */
+  async function fetchModels(providerId: string): Promise<ModelEntry[]> {
+    fetchingModels.value = new Set(fetchingModels.value).add(providerId)
+    try {
+      return await api.fetchProviderModels(providerId)
+    } finally {
+      const next = new Set(fetchingModels.value)
+      next.delete(providerId)
+      fetchingModels.value = next
+    }
+  }
+
   /** 并发度受限的批量执行 */
   async function pool<T>(items: T[], limit: number, fn: (item: T) => Promise<void>) {
     const queue = [...items]
@@ -184,5 +202,7 @@ export const useProvidersStore = defineStore('providers', () => {
     updateConnectionCredential,
     testConnection,
     testGroup,
+    fetchModels,
+    fetchingModels,
   }
 })

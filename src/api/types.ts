@@ -9,6 +9,7 @@ import type {
   GatewayStatus,
   MediaJob,
   MediaKind,
+  ModelEntry,
   OAuthClientCredentialsInput,
   OAuthPollResult,
   OAuthProviderInfo,
@@ -43,6 +44,8 @@ export interface ProvidersApi {
   updateConnectionCredential(connectionId: string, apiKey: string): Promise<void>
   /** 批量测试：逐个返回 TestResult（providerId 归组）；适配器未就绪的如实 ok=false + 原因 */
   testProviders(ids: string[]): Promise<TestResult[]>
+  /** 从上游（或内置模型库）拉取模型列表并同步更新到数据库 */
+  fetchProviderModels(providerId: string): Promise<ModelEntry[]>
 }
 
 export interface ApiKeysApi {

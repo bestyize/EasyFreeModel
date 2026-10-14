@@ -69,3 +69,12 @@ pub async fn update_connection_credential(
 ) -> AppResult<()> {
     providers::update_connection_credential(&state.db, &state.vault, &connection_id, &api_key).await
 }
+
+/// 从上游（或内置模型库）拉取模型列表并同步入库
+#[tauri::command]
+pub async fn fetch_provider_models(
+    state: State<'_, AppState>,
+    provider_id: String,
+) -> AppResult<Vec<crate::models::ModelEntry>> {
+    providers::fetch_models(&state.db, &state.vault, &provider_id).await
+}

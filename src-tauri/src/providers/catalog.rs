@@ -17,6 +17,28 @@ use crate::providers::status::{self, StatusEntry};
 use crate::store::{self, providers as repo};
 
 pub const CATALOG_JSON: &str = include_str!("../../resources/provider_catalog.json");
+pub const MODELS_JSON: &str = include_str!("../../resources/provider_models.json");
+
+#[derive(Debug, Clone, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ModelSeed {
+    pub id: String,
+    pub upstream_model_id: String,
+    pub public_alias: String,
+    pub description: String,
+    pub supports_thinking: bool,
+    pub enabled: bool,
+    pub position: i64,
+}
+
+pub fn curated_models() -> &'static std::collections::HashMap<String, Vec<ModelSeed>> {
+    static CACHE: OnceLock<std::collections::HashMap<String, Vec<ModelSeed>>> = OnceLock::new();
+    CACHE.get_or_init(|| serde_json::from_str(MODELS_JSON).expect("内嵌的 provider_models.json 无效"))
+}
+
+pub fn curated_models_for(provider_id: &str) -> Vec<ModelSeed> {
+    curated_models().get(provider_id).cloned().unwrap_or_default()
+}
 
 pub const OAUTH_RISK_NOTICE: &str = "该接入方式依赖 OAuth/订阅账户，可能受上游服务条款限制。\
 仅在你本人授权且上游允许的前提下使用，不要用于规避服务限制。";
@@ -196,6 +218,34 @@ pub async fn seed(pool: &SqlitePool) -> AppResult<()> {
             tracing::warn!("内置提供商 id 与已有的自定义提供商冲突，已跳过：{}", entry.id);
         }
     }
+
+    // 预置可用模型：对尚未包含模型的提供商，批量预置其预设可用模型
+    let models_map = curated_models();
+    for (pid, mlist) in models_map {
+        let count: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM models WHERE provider_id = ?1")
+            .bind(pid)
+            .fetch_one(&mut *tx)
+            .await?;
+        if count == 0 {
+            for m in mlist {
+                sqlx::query(
+                    "INSERT OR IGNORE INTO models (id, provider_id, upstream_model_id, public_alias, description, supports_thinking, enabled, position) \
+                     VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
+                )
+                .bind(&m.id)
+                .bind(pid)
+                .bind(&m.upstream_model_id)
+                .bind(&m.public_alias)
+                .bind(&m.description)
+                .bind(m.supports_thinking)
+                .bind(m.enabled)
+                .bind(m.position)
+                .execute(&mut *tx)
+                .await?;
+            }
+        }
+    }
+
     tx.commit().await?;
     Ok(())
 }

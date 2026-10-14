@@ -754,6 +754,216 @@ pub async fn test_providers(
     Ok(out)
 }
 
+fn to_model_entry(m: repo::ModelRow) -> ModelEntry {
+    ModelEntry {
+        id: m.id,
+        upstream_model_id: m.upstream_model_id,
+        public_alias: m.public_alias,
+        description: m.description,
+        enabled: m.enabled,
+        supports_thinking: m.supports_thinking,
+    }
+}
+
+/// 从上游（或预设模型库）拉取模型列表，并与数据库中现有模型合并保存：
+/// 1. 若上游可用且有有效连接，尝试发送 HTTP 请求获取真实模型；
+/// 2. 若上游未返回新模型或暂无连接，安全回退到预设模型库中该提供商的可用模型；
+/// 3. 合并保存进数据库并保留用户此前定制的 `enabled` 状态，返回最新列表。
+pub async fn fetch_models(
+    pool: &SqlitePool,
+    vault: &Arc<dyn CredentialVault>,
+    provider_id: &str,
+) -> AppResult<Vec<ModelEntry>> {
+    let p = repo::get_provider(pool, provider_id)
+        .await?
+        .ok_or_else(|| AppError::NotFound(format!("provider {provider_id}")))?;
+
+    let mut fetched = try_fetch_upstream_models(pool, vault, &p).await.unwrap_or_default();
+    if fetched.is_empty() {
+        let curated = catalog::curated_models_for(provider_id);
+        for m in curated {
+            fetched.push(ModelEntry {
+                id: m.id,
+                upstream_model_id: m.upstream_model_id,
+                public_alias: m.public_alias,
+                description: m.description,
+                enabled: m.enabled,
+                supports_thinking: m.supports_thinking,
+            });
+        }
+    }
+
+    if fetched.is_empty() {
+        let existing = repo::list_models(pool, provider_id).await?;
+        return Ok(existing.into_iter().map(to_model_entry).collect());
+    }
+
+    let existing = repo::list_models(pool, provider_id).await?;
+    // 按稳定 id 保留用户已改的启用状态；缺 id 时退回到 upstream_model_id（用户手动加的）
+    let existing_enabled: HashMap<String, bool> = existing
+        .iter()
+        .map(|m| (m.id.clone(), m.enabled))
+        .chain(existing.iter().map(|m| (m.upstream_model_id.clone(), m.enabled)))
+        .collect();
+
+    let mut tx = pool.begin().await?;
+    for (pos, m) in fetched.iter().enumerate() {
+        let enabled = existing_enabled.get(&m.id).copied().unwrap_or(m.enabled);
+        sqlx::query(
+            "INSERT INTO models (id, provider_id, upstream_model_id, public_alias, description, supports_thinking, enabled, position) \
+             VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) \
+             ON CONFLICT(id) DO UPDATE SET public_alias = excluded.public_alias, description = excluded.description, \
+                supports_thinking = excluded.supports_thinking, position = excluded.position",
+        )
+        .bind(&m.id)
+        .bind(provider_id)
+        .bind(&m.upstream_model_id)
+        .bind(&m.public_alias)
+        .bind(&m.description)
+        .bind(m.supports_thinking)
+        .bind(enabled)
+        .bind(pos as i64)
+        .execute(&mut *tx)
+        .await?;
+    }
+    tx.commit().await?;
+
+    let updated = repo::list_models(pool, provider_id).await?;
+    Ok(updated.into_iter().map(to_model_entry).collect())
+}
+
+async fn try_fetch_upstream_models(
+    pool: &SqlitePool,
+    vault: &Arc<dyn CredentialVault>,
+    provider: &repo::ProviderRow,
+) -> AppResult<Vec<ModelEntry>> {
+    let connections = repo::list_connections(pool, &provider.id).await?;
+    let active_conn = connections.iter().find(|c| c.enabled && c.status == "active");
+
+    let api_key = if let Some(c) = active_conn {
+        if let Some(r) = &c.credential_ref {
+            vault.get(r)?
+        } else {
+            None
+        }
+    } else if provider.id == "ollama-local" {
+        None
+    } else {
+        return Ok(Vec::new());
+    };
+
+    let target = match resolve_upstream(pool, &provider.id).await {
+        Ok(t) => t,
+        Err(_) => return Ok(Vec::new()),
+    };
+
+    let client = reqwest::Client::builder()
+        .no_proxy()
+        .timeout(std::time::Duration::from_secs(8))
+        .build()
+        .map_err(|e| AppError::msg(format!("创建上游客户端失败：{e}")))?;
+
+    let (url, auth_style) = match target.adapter {
+        Adapter::OpenaiCompatible | Adapter::OpenaiResponses => {
+            let u = target.base_url.trim_end_matches('/');
+            let m_url = if let Some(prefix) = u.strip_suffix("/chat/completions") {
+                format!("{prefix}/models")
+            } else if let Some(prefix) = u.strip_suffix("/responses") {
+                format!("{prefix}/models")
+            } else {
+                format!("{u}/models")
+            };
+            (m_url, "bearer")
+        }
+        Adapter::Ollama => {
+            let u = target.base_url.trim_end_matches('/');
+            let tags_url = if let Some(prefix) = u.strip_suffix("/api/chat") {
+                format!("{prefix}/api/tags")
+            } else {
+                format!("{u}/api/tags")
+            };
+            (tags_url, "bearer")
+        }
+        Adapter::AnthropicCompatible => {
+            ("https://api.anthropic.com/v1/models".to_string(), "x-api-key")
+        }
+        Adapter::Gemini | Adapter::Vertex => {
+            ("https://generativelanguage.googleapis.com/v1beta/models".to_string(), "x-goog-api-key")
+        }
+    };
+
+    let mut rb = client.get(&url).header("User-Agent", "RouterDesktop/0.5.99");
+    if let Some(key) = &api_key {
+        match auth_style {
+            "bearer" => {
+                rb = rb.header("Authorization", format!("Bearer {key}"));
+            }
+            "x-api-key" => {
+                rb = rb.header("x-api-key", key).header("anthropic-version", "2023-06-01");
+            }
+            "x-goog-api-key" => {
+                rb = rb.header("x-goog-api-key", key);
+            }
+            _ => {}
+        }
+    }
+
+    let resp = match rb.send().await {
+        Ok(r) => r,
+        Err(_) => return Ok(Vec::new()),
+    };
+    if !resp.status().is_success() {
+        return Ok(Vec::new());
+    }
+
+    let body: serde_json::Value = match resp.json().await {
+        Ok(b) => b,
+        Err(_) => return Ok(Vec::new()),
+    };
+    let mut models = Vec::new();
+
+    if let Some(arr) = body.get("data").and_then(|v| v.as_array()) {
+        for item in arr {
+            if let Some(id) = item.get("id").and_then(|v| v.as_str()) {
+                let name = item.get("name").or_else(|| item.get("display_name")).and_then(|v| v.as_str()).unwrap_or(id);
+                let think = item.get("thinking").is_some()
+                    || id.contains("thinking")
+                    || id.contains("r1")
+                    || id.contains("o1")
+                    || id.contains("o3");
+                let alias = format!("{}/{}", provider.id, id);
+                models.push(ModelEntry {
+                    id: format!("{}/{}", provider.id, id),
+                    upstream_model_id: id.to_string(),
+                    public_alias: alias,
+                    description: name.to_string(),
+                    supports_thinking: think,
+                    enabled: true,
+                });
+            }
+        }
+    } else if let Some(arr) = body.get("models").and_then(|v| v.as_array()) {
+        for item in arr {
+            let id = item.get("name").or_else(|| item.get("model")).and_then(|v| v.as_str());
+            if let Some(raw_id) = id {
+                let clean_id = raw_id.strip_prefix("models/").unwrap_or(raw_id);
+                let name = item.get("displayName").and_then(|v| v.as_str()).unwrap_or(clean_id);
+                let alias = format!("{}/{}", provider.id, clean_id);
+                models.push(ModelEntry {
+                    id: format!("{}/{}", provider.id, clean_id),
+                    upstream_model_id: clean_id.to_string(),
+                    public_alias: alias,
+                    description: name.to_string(),
+                    supports_thinking: false,
+                    enabled: true,
+                });
+            }
+        }
+    }
+
+    Ok(models)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -830,6 +1040,8 @@ mod tests {
     async fn seed_is_idempotent_and_keeps_user_data() {
         let (pool, vault) = setup().await;
         let mut d = get_detail(&pool, "openrouter").await.unwrap();
+        let seeded = d.models.len();
+        assert!(seeded > 0, "启动种子已预置可用模型");
         d.connections.push(conn("c-keep", "work"));
         d.models.push(model("", "or/keep"));
         d.distribution.max_concurrency = 9;
@@ -845,7 +1057,7 @@ mod tests {
         let after = get_detail(&pool, "openrouter").await.unwrap();
         assert_eq!(after.connections.len(), 1);
         assert_eq!(after.connections[0].id, "c-keep");
-        assert_eq!(after.models.len(), 1);
+        assert_eq!(after.models.len(), seeded + 1, "已存在的模型不被重复 seed，用户新增的保留");
         assert_eq!(after.distribution.max_concurrency, 9);
         assert_eq!(after.thinking_level, ThinkingLevel::High);
         let enabled: bool = sqlx::query_scalar("SELECT enabled FROM providers WHERE id = 'openrouter'")
@@ -1029,7 +1241,7 @@ mod tests {
         assert_eq!(saved.connections.len(), 1);
         assert_eq!(saved.summary.connection_count, 1);
         assert!(!saved.connections[0].id.is_empty());
-        assert_eq!(saved.models[0].id, "openrouter/up");
+        assert_eq!(saved.models.last().unwrap().id, "openrouter/up", "用户新增模型追加在预设模型之后");
         let tok = saved.custom_headers.iter().find(|h| h.key == "X-Token").unwrap();
         assert_eq!(tok.value, SECRET_MASK);
         let json = serde_json::to_string(&saved).unwrap();
@@ -1094,7 +1306,8 @@ mod tests {
         assert!(err.to_string().contains("shared/name"));
 
         // 停用后不冲突
-        b.models[0].enabled = false;
+        let idx = b.models.len() - 1;
+        b.models[idx].enabled = false;
         save_detail(&pool, &vault, b).await.unwrap();
 
         // 同一提供商内重复也被拒绝

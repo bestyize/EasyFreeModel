@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Ban, Bot, Check, Copy, Power, Search } from 'lucide-vue-next'
+import { Ban, Bot, Check, Copy, Power, RefreshCw, Search } from 'lucide-vue-next'
 import type { ModelEntry, ProviderDetail } from '@/types'
 
 const props = defineProps<{
@@ -9,10 +9,14 @@ const props = defineProps<{
   /** 处于别名冲突中的模型 ID */
   conflictIds: Set<string>
   readonly?: boolean
+  /** 正在拉取模型（顶部按钮显示加载态） */
+  fetching?: boolean
 }>()
 const emit = defineEmits<{
   'update:models': [value: ModelEntry[]]
   'update:thinkingLevel': [value: ProviderDetail['thinkingLevel']]
+  /** 请求从上游/内置模型库拉取模型 */
+  fetch: []
 }>()
 
 const query = ref('')
@@ -86,9 +90,20 @@ async function copy(m: ModelEntry) {
       <button type="button" class="btn" :disabled="readonly || !visible.length" aria-label="全部禁用（当前筛选结果）" @click="setAll(false)">
         <Ban :size="14" /> 全部禁用
       </button>
+      <button
+        type="button"
+        class="btn"
+        :disabled="readonly || fetching"
+        data-testid="fetch-models"
+        :aria-label="fetching ? '正在拉取模型' : '从上游拉取模型列表'"
+        :title="'向上游 /models 拉取；失败时回退到内置预设模型库'"
+        @click="emit('fetch')"
+      >
+        <RefreshCw :size="14" :class="{ spin: fetching }" /> {{ fetching ? '拉取中…' : '拉取模型' }}
+      </button>
     </div>
 
-    <p v-if="!models.length" class="empty">该提供商暂无可用模型。</p>
+    <p v-if="!models.length" class="empty">该提供商暂无可用模型。点击「拉取模型」从上游或内置模型库获取。</p>
     <p v-else-if="!visible.length" class="empty">没有匹配“{{ query }}”的模型。</p>
     <ul v-else class="grid">
       <li v-for="m in visible" :key="m.id" class="model" :class="{ conflict: conflictIds.has(m.id), off: !m.enabled }">
@@ -155,4 +170,6 @@ h3 small { margin-left: 6px; font-size: 12px; font-weight: 400; color: var(--c-t
 .err { margin: 2px 6px 0; font-size: 12px; color: var(--c-danger); }
 .copy { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border: 0; border-radius: 8px; background: transparent; color: var(--c-text-2); }
 .copy:hover { background: var(--c-surface-2); }
+.spin { animation: spin 1s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
 </style>
