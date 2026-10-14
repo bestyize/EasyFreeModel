@@ -218,8 +218,8 @@ mod tests {
             assert!(status(id)["limitation"].as_str().unwrap().contains("令牌兑换步骤尚未接入"));
         }
         assert!(status("claude")["riskNotice"].is_string());
-        // 转发适配器尚未接入的提供商，授权状态里同样如实说明
-        assert!(status("claude")["limitation"].as_str().unwrap().contains("转发适配器尚未接入"));
+        // 转发适配器已就绪的提供商，limitation 为 null
+        assert!(status("claude")["limitation"].is_null());
 
         // 自定义流程的授权入口被拒绝（不会去绑端口 / 请求网络）
         assert_eq!(state.oauth_hub.start("cursor", "x").await.unwrap_err().code(), "custom_flow_required");

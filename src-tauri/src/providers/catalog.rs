@@ -245,9 +245,8 @@ mod tests {
     fn status_rules_hold_for_every_entry() {
         for e in entries() {
             let st = status::get(&e.id).unwrap();
-            let oauth_like = e.category == "oauth" || e.has_oauth;
-            if e.category == "webCookie" || oauth_like {
-                assert!(st.adapter.is_none(), "{} 属于 OAuth/网页会话类，不得标记就绪", e.id);
+            if e.category == "webCookie" {
+                assert!(st.adapter.is_none(), "{} 属于网页会话类，不得标记就绪", e.id);
             }
             if !e.service_kinds().iter().any(|k| k == "llm") {
                 assert!(st.adapter.is_none(), "{} 不是聊天类，不得标记聊天适配器", e.id);
@@ -263,7 +262,9 @@ mod tests {
         assert_eq!(status::get("gemini").unwrap().adapter, Some(Gemini));
         assert_eq!(status::get("vertex").unwrap().adapter, Some(Vertex));
         assert_eq!(status::get("ollama").unwrap().adapter, Some(Ollama));
-        assert!(status::get("claude").unwrap().adapter.is_none());
+        assert_eq!(status::get("claude").unwrap().adapter, Some(AnthropicCompatible));
+        assert_eq!(status::get("codex").unwrap().adapter, Some(OpenaiResponses));
+        assert_eq!(status::get("xai").unwrap().adapter, Some(OpenaiCompatible));
         assert!(status::get("grok-web").unwrap().adapter.is_none());
         assert!(status::get("elevenlabs").unwrap().adapter.is_none());
     }

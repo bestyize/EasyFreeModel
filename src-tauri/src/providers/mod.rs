@@ -1116,9 +1116,9 @@ mod tests {
         assert!(saved.summary.adapter_ready);
         assert!(saved.summary.pending_reason.is_none());
 
-        let mut oauth = get_detail(&pool, "claude").await.unwrap();
-        oauth.summary.adapter_ready = true;
-        let saved = save_detail(&pool, &vault, oauth).await.unwrap();
+        let mut unready = get_detail(&pool, "grok-web").await.unwrap();
+        unready.summary.adapter_ready = true;
+        let saved = save_detail(&pool, &vault, unready).await.unwrap();
         assert!(!saved.summary.adapter_ready, "客户端不能把 adapter=null 的提供商改成就绪");
     }
 
@@ -1294,8 +1294,8 @@ mod tests {
     async fn add_connection_refuses_providers_without_adapter_and_explains_why() {
         let (pool, vault) = setup().await;
         for (id, expect) in [
-            ("claude", "OAuth 授权流程待接入"),
             ("grok-web", "网页会话类暂缓"),
+            ("perplexity-web", "网页会话类暂缓"),
         ] {
             let err = add_connection(&pool, &vault, id, "x", SECRET).await.unwrap_err().to_string();
             assert!(err.contains(expect), "{id}: {err}");
@@ -1387,8 +1387,8 @@ mod tests {
         assert_eq!(t.base_url, "https://g.example.com");
         assert!(!t.base_url_is_full_endpoint);
 
-        let err = resolve_upstream(&pool, "claude").await.unwrap_err().to_string();
-        assert!(err.contains("OAuth"));
+        let err = resolve_upstream(&pool, "grok-web").await.unwrap_err().to_string();
+        assert!(err.contains("网页会话类暂缓"));
         assert!(matches!(resolve_upstream(&pool, "nope").await, Err(AppError::NotFound(_))));
     }
 
@@ -1409,12 +1409,12 @@ mod tests {
     #[tokio::test]
     async fn test_connection_on_pending_provider_reports_reason() {
         let (pool, vault) = setup().await;
-        // 已授权（令牌在凭据库里）但适配器未就绪的 OAuth 连接
-        oauth_conn(&pool, &vault, "claude", "c-old", "active", Some((Some("RT"), 3600))).await;
+        // 适配器未就绪的连接
+        oauth_conn(&pool, &vault, "grok-web", "c-old", "active", Some((Some("RT"), 3600))).await;
         let r = test_connection(&pool, &vault, "c-old").await.unwrap();
         assert!(!r.ok);
         let e = r.error.unwrap();
-        assert!(e.contains("尚未接入") && e.contains("OAuth 授权流程待接入"), "{e}");
+        assert!(e.contains("尚未接入") && e.contains("网页会话类暂缓"), "{e}");
     }
 
     #[tokio::test]
@@ -1437,16 +1437,16 @@ mod tests {
         let off = add_connection(&pool, &vault, "groq", "off", "sk-off").await.unwrap();
         repo::set_connection_enabled(&pool, &off.id, false).await.unwrap();
 
-        let ids: Vec<String> = ["claude", "openrouter", "nvidia", "deepseek", "mistral", "groq", "missing", "claude"]
+        let ids: Vec<String> = ["grok-web", "openrouter", "nvidia", "deepseek", "mistral", "groq", "missing", "grok-web"]
             .iter()
             .map(|s| s.to_string())
             .collect();
         let rs = test_providers(&pool, &vault, &ids).await.unwrap();
         assert!(rs.iter().all(|r| !r.ok), "没有真实探测，任何结果都不能是成功");
         let of = |pid: &str| -> Vec<&TestResult> { rs.iter().filter(|r| r.provider_id.as_deref() == Some(pid)).collect() };
-        assert_eq!(of("claude").len(), 1, "重复 id 只测一次");
-        assert!(of("claude")[0].error.as_deref().unwrap().contains("OAuth 授权流程待接入"));
-        assert_eq!(of("claude")[0].connection_id, "");
+        assert_eq!(of("grok-web").len(), 1, "重复 id 只测一次");
+        assert!(of("grok-web")[0].error.as_deref().unwrap().contains("网页会话类暂缓"));
+        assert_eq!(of("grok-web")[0].connection_id, "");
         assert_eq!(of("openrouter")[0].connection_id, c.id);
         assert!(of("openrouter")[0].error.as_deref().unwrap().contains("探测尚未接入"));
         assert!(of("nvidia")[0].error.as_deref().unwrap().contains("缺少 API Key"));
@@ -1513,6 +1513,7 @@ mod tests {
         oauth_conn(&pool, &vault, "claude", "lost", "active", None).await;
         oauth_conn(&pool, &vault, "claude", "dead", "active", Some((None, -60))).await;
         oauth_conn(&pool, &vault, "claude", "renewable", "active", Some((Some("RT"), -60))).await;
+        oauth_conn(&pool, &vault, "kiro", "c-kiro-unready", "active", Some((Some("RT"), 3600))).await;
         oauth_conn(&pool, &vault, "muse", "muse-expired", "active", Some((Some("RT"), -60))).await;
         oauth_conn(&pool, &vault, "github", "gh", "active", Some((None, 3600))).await;
         sqlx::query("UPDATE connections SET credential_ref = NULL WHERE id = 'ok'").execute(&pool).await.unwrap();
@@ -1529,9 +1530,12 @@ mod tests {
             async move { test_connection(&pool, &vault, &id).await.unwrap() }
         };
 
-        // 适配器未就绪的提供商：令牌可用，但如实说明还不能测
+        // 适配器就绪的提供商：令牌可用，说明探测尚未接入
         let e = err(t("ok").await);
-        assert!(e.contains("授权令牌已保存") && e.contains("适配器尚未接入"), "{e}");
+        assert!(e.contains("授权令牌已保存") && e.contains("无法确认可用"), "{e}");
+        // 适配器未就绪的提供商：如实说明适配器尚未接入
+        let e_unready = err(t("c-kiro-unready").await);
+        assert!(e_unready.contains("授权令牌已保存") && e_unready.contains("适配器尚未接入"), "{e_unready}");
         assert!(err(t("stale").await).contains("需要重新授权"));
         let e = err(t("lost").await);
         assert!(e.contains("找不到") && e.contains("重新授权"), "{e}");

@@ -82,7 +82,8 @@
     "hasOAuth": true,
     "oauthFlow": "authorization-code",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -333,7 +334,8 @@
     "hasOAuth": true,
     "oauthFlow": "authorization-code",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -356,7 +358,8 @@
     "hasOAuth": true,
     "oauthFlow": "authorization-code",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -452,7 +455,8 @@
     "hasOAuth": true,
     "oauthFlow": "authorization-code",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -801,7 +805,8 @@
     "hasOAuth": true,
     "oauthFlow": "authorization-code",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -853,7 +858,8 @@
     "hasOAuth": true,
     "oauthFlow": "device",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -877,7 +883,8 @@
     "hasOAuth": true,
     "oauthFlow": "other",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [],
@@ -992,7 +999,8 @@
     "hasOAuth": true,
     "oauthFlow": "device",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -1110,7 +1118,8 @@
     "hasOAuth": true,
     "oauthFlow": "authorization-code",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -1202,7 +1211,8 @@
     "hasOAuth": true,
     "oauthFlow": "other",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -2448,7 +2458,8 @@
     "hasOAuth": true,
     "oauthFlow": "authorization-code",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -3048,7 +3059,8 @@
     "hasOAuth": true,
     "oauthFlow": "other",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [
@@ -3071,7 +3083,8 @@
     "hasOAuth": true,
     "oauthFlow": "other",
     "authModes": [
-      "oauth"
+      "oauth",
+      "apiKey"
     ],
     "noAuth": false,
     "serviceKinds": [

@@ -18,10 +18,12 @@
     "reason": null
   },
   "antigravity": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "gemini",
+    "baseUrl": "https://cloudcode-pa.googleapis.com/v1internal",
+    "auth": {
+      "header": "x-goog-api-key"
+    },
+    "reason": null
   },
   "assemblyai": {
     "adapter": null,
@@ -84,22 +86,22 @@
     "reason": null
   },
   "claude": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://api.anthropic.com/v1/messages",
+    "auth": "bearer",
+    "reason": null
   },
   "cline": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.cline.bot/api/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "clinepass": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.cline.bot/api/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "cloudflare-ai": {
     "adapter": null,
@@ -108,16 +110,16 @@
     "reason": "Cloudflare 端点需要账户 ID 参数，待接入"
   },
   "codebuddy-cn": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://copilot.tencent.com/v2/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "codex": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-responses",
+    "baseUrl": "https://chatgpt.com/backend-api/codex/responses",
+    "auth": "bearer",
+    "reason": null
   },
   "cohere": {
     "adapter": "openai-compatible",
@@ -204,10 +206,12 @@
     "reason": null
   },
   "gemini-cli": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "gemini",
+    "baseUrl": "https://cloudcode-pa.googleapis.com/v1internal",
+    "auth": {
+      "header": "x-goog-api-key"
+    },
+    "reason": null
   },
   "gemini": {
     "adapter": "gemini",
@@ -218,16 +222,16 @@
     "reason": null
   },
   "github": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.githubcopilot.com/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "gitlab": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://gitlab.com/api/v4/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "glm-cn": {
     "adapter": "openai-compatible",
@@ -236,10 +240,10 @@
     "reason": null
   },
   "glm": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://api.z.ai/api/anthropic/v1/messages",
+    "auth": "x-api-key",
+    "reason": null
   },
   "google-pse": {
     "adapter": null,
@@ -254,10 +258,10 @@
     "reason": "媒体适配器由媒体模块提供"
   },
   "grok-cli": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-responses",
+    "baseUrl": "https://cli-chat-proxy.grok.com/v1/responses",
+    "auth": "bearer",
+    "reason": null
   },
   "grok-web": {
     "adapter": null,
@@ -284,10 +288,10 @@
     "reason": null
   },
   "iflow": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://apis.iflow.cn/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "inworld": {
     "adapter": null,
@@ -308,22 +312,22 @@
     "reason": "搜索/抓取适配器由 WebSearch 模块提供"
   },
   "kilocode": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.kilo.ai/api/openrouter/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "kimchi": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://llm.kimchi.dev/openai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "kimi": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://api.kimi.com/coding/v1/messages",
+    "auth": "x-api-key",
+    "reason": null
   },
   "kiro": {
     "adapter": null,
@@ -410,10 +414,10 @@
     "reason": "搜索/抓取适配器由 WebSearch 模块提供"
   },
   "qoder-cn": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://gateway.qoder.com.cn/algo/api/v2/service/pro/sse/agent_chat_generation",
+    "auth": "bearer",
+    "reason": null
   },
   "openai": {
     "adapter": "openai-compatible",
@@ -434,10 +438,10 @@
     "reason": null
   },
   "opencode": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OpenCode Free 按模型使用不同的端点格式，待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://opencode.ai/zen/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "openrouter": {
     "adapter": "openai-compatible",
@@ -458,10 +462,10 @@
     "reason": null
   },
   "perplexity-agent": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OpenAI Responses 上游适配待接入"
+    "adapter": "openai-responses",
+    "baseUrl": "https://api.perplexity.ai/v1/responses",
+    "auth": "bearer",
+    "reason": null
   },
   "playht": {
     "adapter": null,
@@ -470,10 +474,10 @@
     "reason": "媒体适配器由媒体模块提供"
   },
   "qoder": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api3.qoder.sh/algo/api/v2/service/pro/sse/agent_chat_generation",
+    "auth": "bearer",
+    "reason": null
   },
   "recraft": {
     "adapter": null,
@@ -586,22 +590,22 @@
     "reason": "嵌入适配器待接入"
   },
   "xai": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.x.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "xiaomi-mimo": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.xiaomimimo.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "xiaomi-tokenplan": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "端点按区域动态解析，待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://token-plan-sgp.xiaomimimo.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "youcom": {
     "adapter": null,
@@ -616,16 +620,16 @@
     "reason": null
   },
   "codebuddy-intl": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://www.codebuddy.ai/v2/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "zed": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://cloud.zed.dev/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "api-airforce": {
     "adapter": "openai-compatible",
@@ -772,22 +776,22 @@
     "reason": "System One 协议待接入"
   },
   "muse": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入；API Key 方式暂未开放"
+    "adapter": "openai-compatible",
+    "baseUrl": "https://api.meta.ai/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
   },
   "minimax-code": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://agent.minimax.cn/mavis/api/v1/llm/v1/messages",
+    "auth": "bearer",
+    "reason": null
   },
   "minimax-code-global": {
-    "adapter": null,
-    "baseUrl": null,
-    "auth": null,
-    "reason": "OAuth 授权流程待接入"
+    "adapter": "anthropic-compatible",
+    "baseUrl": "https://agent.minimax.io/mavis/api/v1/llm/v1/messages",
+    "auth": "bearer",
+    "reason": null
   },
   "bedrock": {
     "adapter": null,

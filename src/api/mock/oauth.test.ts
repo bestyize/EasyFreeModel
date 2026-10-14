@@ -61,7 +61,7 @@ describe('oauth mock：能力信息取自 oauth_providers.json', () => {
       expect(by[id].limitation).toContain('暂不能用于转发')
     }
     expect(by.claude.tokenExchangePending).toBe(false)
-    expect(by.claude.limitation).toBe('OAuth 授权流程待接入')
+    expect(by.claude.limitation).toBeNull()
   })
 })
 
@@ -118,12 +118,12 @@ describe('oauth mock：授权状态机', () => {
     const detail = await providersMock.getProvider('claude')
     expect(detail.connections).toHaveLength(1)
     expect(detail.connections[0]).toMatchObject({ id: connectionId, kind: 'oauth', status: 'active', accountLabel: '工作账号', enabled: true })
-    // claude 适配器未就绪：不得标成“已连接”
-    expect(detail.adapterReady).toBe(false)
-    expect(detail.status).toBe('unsupported')
+    // claude 适配器已就绪：标成“已连接”
+    expect(detail.adapterReady).toBe(true)
+    expect(detail.status).toBe('connected')
     const summary = (await providersMock.listProviders()).find((p) => p.id === 'claude')!
     expect(summary.connectionCount).toBe(1)
-    expect(summary.status).toBe('unsupported')
+    expect(summary.status).toBe('connected')
 
     // 重复轮询结果稳定，不会重复创建连接
     expect(await mock.oauthPoll(s.sessionId)).toEqual({ status: 'succeeded', connectionId })

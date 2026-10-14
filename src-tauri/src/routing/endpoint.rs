@@ -105,8 +105,8 @@ mod tests {
         let p = endpoint_for(&row("claude", "builtin", "none", false, None)).unwrap_err();
         assert_eq!(p.0, "待接入");
         // 状态文件里 adapter 为 null 的内置提供商：原样给出 reason
-        let p = endpoint_for(&row("perplexity-agent", "builtin", "none", true, None)).unwrap_err();
-        assert!(p.0.contains("Responses"), "{p}");
+        let p = endpoint_for(&row("grok-web", "builtin", "none", true, None)).unwrap_err();
+        assert!(p.0.contains("网页会话类暂缓"), "{p}");
         // 未知适配器 id
         assert!(endpoint_for(&row("c", "custom", "bogus", true, Some("https://x.example"))).is_err());
     }

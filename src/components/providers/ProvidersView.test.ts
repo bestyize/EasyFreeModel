@@ -149,7 +149,7 @@ describe('第四组：API Key 提供商', () => {
     expect(add.attributes('disabled')).toBeDefined()
   })
 
-  it('OAuth 类：提供“添加 OAuth 连接”入口，不出现 API Key 表单，并如实说明授权后暂不能转发', async () => {
+  it('OAuth 类：提供“添加 OAuth 连接”入口，并可正常打开授权面板', async () => {
     const w = await mountView()
     await cardOf(w, 'Claude Code').trigger('click')
     await flushPromises()
@@ -157,13 +157,11 @@ describe('第四组：API Key 提供商', () => {
     expect(w.findAll('button').some((b) => b.text().includes('授权流程待接入'))).toBe(false)
     const oauth = w.findAll('button').find((b) => b.text().includes('添加 OAuth 连接'))!
     expect(oauth.attributes('disabled')).toBeUndefined()
-    // 适配器未就绪：API Key 的“添加连接”仍置灰，API Key 表单不出现
-    const add = w.findAll('button').find((b) => b.text().includes('添加连接'))
-    if (add) expect(add.attributes('disabled')).toBeDefined()
-    expect(w.find('form[aria-label="添加 API Key 连接"]').exists()).toBe(false)
     expect(w.text()).toContain('风险提示')
-    expect(w.text()).toContain('OAuth 授权流程待接入')
-    expect(w.find('[data-testid="oauth-forward-note"]').text()).toContain('授权后暂不能用于转发')
+    // 点击添加 OAuth 连接可打开授权面板
+    await oauth.trigger('click')
+    await flushPromises()
+    expect(w.findComponent({ name: 'OAuthPanel' }).exists()).toBe(true)
   })
 
   it('专有流程的 OAuth 提供商（Cursor）：授权按钮置灰，原因与接入要求以可见文字展示', async () => {

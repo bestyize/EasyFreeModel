@@ -67,8 +67,8 @@ describe('mock 目录与真实资源一致', () => {
 
 describe('mock 命令遵守同样的红线', () => {
   it('addConnection：未就绪的提供商被拒绝并说明原因', async () => {
-    await expect(mock.addConnection({ providerId: 'claude', accountLabel: 'x', apiKey: SECRET })).rejects.toThrow(
-      'OAuth 授权流程待接入',
+    await expect(mock.addConnection({ providerId: 'grok-web', accountLabel: 'x', apiKey: SECRET })).rejects.toThrow(
+      '网页会话类暂缓',
     )
     await expect(mock.addConnection({ providerId: 'elevenlabs', accountLabel: 'x', apiKey: SECRET })).rejects.toThrow(
       '媒体适配器由媒体模块提供',
@@ -88,11 +88,11 @@ describe('mock 命令遵守同样的红线', () => {
 
   it('testProviders / testConnection 永远不伪造成功', async () => {
     const conn = await mock.addConnection({ providerId: 'openai', accountLabel: 'k', apiKey: SECRET })
-    const res = await mock.testProviders(['claude', 'openai', 'mistral', 'openrouter', 'nope', 'claude'])
+    const res = await mock.testProviders(['grok-web', 'openai', 'mistral', 'openrouter', 'nope', 'grok-web'])
     expect(res.every((r) => !r.ok)).toBe(true)
     const of = (id: string) => res.filter((r) => r.providerId === id)
-    expect(of('claude')).toHaveLength(1)
-    expect(of('claude')[0].error).toContain('OAuth 授权流程待接入')
+    expect(of('grok-web')).toHaveLength(1)
+    expect(of('grok-web')[0].error).toContain('网页会话类暂缓')
     expect(of('openai')[0].connectionId).toBe(conn.id)
     expect(of('openai')[0].error).toContain('无法确认可用')
     expect(of('mistral')[0].error).toContain('尚未添加连接')
@@ -121,8 +121,8 @@ describe('mock 命令遵守同样的红线', () => {
   })
 
   it('saveProvider 不接受待接入提供商的写入，也不允许客户端改写 adapterReady', async () => {
-    const claude = await mock.getProvider('claude')
-    await expect(mock.saveProvider({ ...claude, adapterReady: true })).rejects.toThrow('待接入')
+    const unready = await mock.getProvider('grok-web')
+    await expect(mock.saveProvider({ ...unready, adapterReady: true })).rejects.toThrow('待接入')
     const or = await mock.getProvider('openrouter')
     const saved = await mock.saveProvider({ ...or, adapterReady: false, name: 'Hacked', customHeaders: [{ key: 'X-T', value: 'secret-value', secret: true }] })
     expect(saved.adapterReady).toBe(true)
