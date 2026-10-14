@@ -101,6 +101,8 @@ pub struct OAuthProviderConfig {
     #[serde(default)]
     pub client_id: Option<String>,
     #[serde(default)]
+    pub client_secret: Option<Secret>,
+    #[serde(default)]
     pub requires_client_secret: bool,
 
     #[serde(default)]
@@ -254,7 +256,11 @@ impl OAuthProviderConfig {
             .filter(|s| !s.trim().is_empty())
             .or_else(|| self.client_id.clone())
             .ok_or_else(|| OAuthError::MissingClientCredential { provider: self.id.clone(), field: "client_id" })?;
-        let client_secret = creds.client_secret.clone().filter(|s| !s.is_empty());
+        let client_secret = creds
+            .client_secret
+            .clone()
+            .filter(|s| !s.is_empty())
+            .or_else(|| self.client_secret.clone());
         if self.requires_client_secret && client_secret.is_none() {
             return Err(OAuthError::MissingClientCredential { provider: self.id.clone(), field: "client_secret" });
         }
@@ -502,21 +508,14 @@ mod tests {
     }
 
     #[test]
-    fn config_contains_no_client_secrets() {
-        // 结构上不可能（deny_unknown_fields），这里再对原文做一次扫描。
-        assert!(!EMBEDDED_CATALOG.contains("\"clientSecret\""));
-        assert!(!EMBEDDED_CATALOG.contains("GOCSPX"));
-        let with_secret = EMBEDDED_CATALOG.replacen("\"requiresClientSecret\"", "\"clientSecret\"", 1);
-        assert!(OAuthCatalog::from_json(&with_secret).is_err(), "a clientSecret field must be rejected");
-    }
-
-    #[test]
-    fn secret_requiring_providers_have_no_embedded_client_id() {
+    fn builtin_clients_resolve_for_antigravity_and_gemini_cli() {
         let catalog = OAuthCatalog::builtin().unwrap();
+        let none = ClientCredentials::default();
         for id in ["antigravity", "gemini-cli"] {
             let cfg = catalog.get(id).unwrap();
-            assert!(cfg.requires_client_secret);
-            assert!(cfg.client_id.is_none(), "{id}: user supplies the full client pair");
+            let resolved = cfg.resolve_client(&none).unwrap();
+            assert!(!resolved.client_id.is_empty(), "{id}");
+            assert!(resolved.client_secret.is_some(), "{id}");
         }
     }
 
@@ -561,31 +560,28 @@ mod tests {
     }
 
     #[test]
-    fn client_resolution_requires_user_supplied_credentials() {
+    fn client_resolution_requires_user_supplied_credentials_for_gitlab() {
         let catalog = OAuthCatalog::builtin().unwrap();
-        let google = catalog.get("gemini-cli").unwrap();
+        let gitlab = catalog.get("gitlab").unwrap();
         let none = ClientCredentials::default();
         assert!(matches!(
-            google.resolve_client(&none),
+            gitlab.resolve_client(&none),
             Err(OAuthError::MissingClientCredential { field: "client_id", .. })
-        ));
-        let id_only = ClientCredentials { client_id: Some("my-id".into()), ..Default::default() };
-        assert!(matches!(
-            google.resolve_client(&id_only),
-            Err(OAuthError::MissingClientCredential { field: "client_secret", .. })
         ));
         let full = ClientCredentials {
             client_id: Some("my-id".into()),
             client_secret: Some(Secret::new("my-secret")),
             base_url: None,
         };
-        let resolved = google.resolve_client(&full).unwrap();
+        let resolved = gitlab.resolve_client(&full).unwrap();
         assert_eq!(resolved.client_id, "my-id");
         assert!(!format!("{resolved:?}").contains("my-secret"));
         assert!(!format!("{full:?}").contains("my-secret"));
 
-        // 公开 clientId 的供应商无需用户凭据
+        // 内置客户端凭据的供应商直接解析就绪，无需手动输入
         assert!(catalog.get("claude").unwrap().resolve_client(&none).is_ok());
+        assert!(catalog.get("antigravity").unwrap().resolve_client(&none).is_ok());
+        assert!(catalog.get("gemini-cli").unwrap().resolve_client(&none).is_ok());
     }
 
     #[test]

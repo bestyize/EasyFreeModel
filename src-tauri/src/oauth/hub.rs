@@ -475,7 +475,7 @@ impl OAuthHub {
             token_exchange_pending: exchange_note.is_some(),
             risk_notice: cfg.risk_notice.clone(),
             client_id_required: cfg.client_id.is_none(),
-            client_secret: if cfg.requires_client_secret {
+            client_secret: if cfg.requires_client_secret && cfg.client_secret.is_none() {
                 SecretRequirement::Required
             } else if cfg.client_id.is_none() {
                 SecretRequirement::Optional

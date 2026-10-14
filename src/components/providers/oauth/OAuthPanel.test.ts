@@ -110,27 +110,27 @@ describe('OAuthPanel：加载 / 错误 / 专有流程', () => {
 
 describe('OAuthPanel：配置客户端凭据', () => {
   it('need_client_credentials 先显示表单：密码框、中文标签，不能直接开始授权', async () => {
-    const w = mountPanel('antigravity')
+    const w = mountPanel('gitlab')
     await flushPromises()
     expect(w.text()).toContain('配置客户端凭据')
     expect(w.text()).toContain('需要配置客户端凭据')
     expect(w.find('input[aria-label="客户端 ID"]').exists()).toBe(true)
     expect(w.find('input[aria-label="客户端密钥"]').attributes('type')).toBe('password')
-    expect(w.find('input[aria-label="基础地址"]').exists()).toBe(false)
+    expect(w.find('input[aria-label="基础地址"]').exists()).toBe(true)
     expect(w.findAll('button').some((b) => b.text() === '开始授权')).toBe(false)
   })
 
-  it('GitLab：客户端密钥可选、有基础地址字段', async () => {
-    const w = mountPanel('gitlab')
+  it('Antigravity 内置客户端凭据就绪，直接展示授权入口无需手动配置', async () => {
+    const w = mountPanel('antigravity')
     await flushPromises()
-    expect(w.text()).toContain('客户端密钥（可选）')
-    expect(w.find('input[aria-label="基础地址"]').exists()).toBe(true)
+    expect(btn(w, '开始授权')).toBeTruthy()
+    expect(w.find('input[aria-label="客户端 ID"]').exists()).toBe(false)
   })
 
   it('提交：输入框立即清空，密钥只作为那一次调用的入参，store 状态里没有密钥，随后进入授权步骤', async () => {
     let release!: (i: OAuthProviderInfo) => void
     h.api.oauthSetClientCredentials.mockReturnValue(new Promise<OAuthProviderInfo>((r) => (release = r)))
-    const w = mountPanel('antigravity')
+    const w = mountPanel('gitlab')
     await flushPromises()
     await w.find('input[aria-label="客户端 ID"]').setValue('my-client-id')
     await w.find('input[aria-label="客户端密钥"]').setValue(SECRET)
@@ -140,12 +140,12 @@ describe('OAuthPanel：配置客户端凭据', () => {
     expect((w.find('input[aria-label="客户端密钥"]').element as HTMLInputElement).value).toBe('')
     expect(h.api.oauthSetClientCredentials).toHaveBeenCalledTimes(1)
     expect(h.api.oauthSetClientCredentials).toHaveBeenCalledWith({
-      providerId: 'antigravity',
+      providerId: 'gitlab',
       clientId: 'my-client-id',
       clientSecret: SECRET,
     })
 
-    release({ ...infoOf('antigravity'), status: 'ready', clientConfigured: true })
+    release({ ...infoOf('gitlab'), status: 'ready', clientConfigured: true })
     await flushPromises()
     expect(btn(w, '开始授权')).toBeTruthy()
     expect(btn(w, '清除客户端凭据')).toBeTruthy()
@@ -158,7 +158,7 @@ describe('OAuthPanel：配置客户端凭据', () => {
 
   it('提交失败：显示映射文案，不回显原始文本，密钥输入框保持为空', async () => {
     h.api.oauthSetClientCredentials.mockRejectedValue({ code: 'invalid_input', message: `RAW ${SECRET}` })
-    const w = mountPanel('antigravity')
+    const w = mountPanel('gitlab')
     await flushPromises()
     await w.find('input[aria-label="客户端 ID"]').setValue('cid')
     await w.find('input[aria-label="客户端密钥"]').setValue(SECRET)
@@ -171,7 +171,7 @@ describe('OAuthPanel：配置客户端凭据', () => {
   })
 
   it('必填项为空时不调用 API', async () => {
-    const w = mountPanel('antigravity')
+    const w = mountPanel('gitlab')
     await flushPromises()
     await w.find('form').trigger('submit')
     expect(h.api.oauthSetClientCredentials).not.toHaveBeenCalled()
@@ -179,7 +179,7 @@ describe('OAuthPanel：配置客户端凭据', () => {
   })
 
   it('取消与卸载都会清空密钥输入', async () => {
-    const w = mountPanel('antigravity')
+    const w = mountPanel('gitlab')
     await flushPromises()
     const input = w.find('input[aria-label="客户端密钥"]')
     await input.setValue(SECRET)
@@ -190,23 +190,23 @@ describe('OAuthPanel：配置客户端凭据', () => {
   })
 
   it('已配置凭据时可以清除', async () => {
-    const configured = { ...infoOf('antigravity'), status: 'ready' as const, clientConfigured: true }
+    const configured = { ...infoOf('gitlab'), status: 'ready' as const, clientConfigured: true }
     h.api.oauthListProviders.mockResolvedValue([configured])
     h.api.oauthClearClientCredentials.mockResolvedValue({ ...configured, status: 'need_client_credentials', clientConfigured: false })
-    const w = mountPanel('antigravity')
+    const w = mountPanel('gitlab')
     await flushPromises()
     await btn(w, '清除客户端凭据').trigger('click')
     await flushPromises()
-    expect(h.api.oauthClearClientCredentials).toHaveBeenCalledWith('antigravity')
+    expect(h.api.oauthClearClientCredentials).toHaveBeenCalledWith('gitlab')
     // 清除后回到“配置客户端凭据”
     expect(w.find('input[aria-label="客户端密钥"]').exists()).toBe(true)
   })
 
   it('开始授权时后端报 missing_client_credential，会切回凭据表单', async () => {
     // 能力信息说“ready”，但后端实际缺凭据（例如凭据库被清理）：以后端的拒绝为准
-    h.api.oauthListProviders.mockResolvedValue([{ ...infoOf('antigravity'), status: 'ready' }])
+    h.api.oauthListProviders.mockResolvedValue([{ ...infoOf('gitlab'), status: 'ready' }])
     h.api.oauthStart.mockRejectedValue(new OAuthApiError('missing_client_credential'))
-    const w = mountPanel('antigravity')
+    const w = mountPanel('gitlab')
     await flushPromises()
     await btn(w, '开始授权').trigger('click')
     await flushPromises()

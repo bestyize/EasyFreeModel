@@ -207,10 +207,10 @@ mod tests {
             assert!(!v["requires"].as_array().unwrap().is_empty(), "{}", p.provider_id);
         }
         let status = |id: &str| serde_json::to_value(list.iter().find(|p| p.provider_id == id).unwrap()).unwrap();
-        for id in ["antigravity", "gemini-cli", "gitlab"] {
+        for id in ["gitlab"] {
             assert_eq!(status(id)["status"], "need_client_credentials", "{id}");
         }
-        for id in ["claude", "codex", "github", "grok-cli", "kimi", "muse", "minimax-code", "minimax-code-global"] {
+        for id in ["antigravity", "gemini-cli", "claude", "codex", "github", "grok-cli", "kimi", "muse", "minimax-code", "minimax-code-global"] {
             assert_eq!(status(id)["status"], "ready", "{id}");
         }
         for id in ["github", "muse"] {
@@ -223,21 +223,26 @@ mod tests {
 
         // 自定义流程的授权入口被拒绝（不会去绑端口 / 请求网络）
         assert_eq!(state.oauth_hub.start("cursor", "x").await.unwrap_err().code(), "custom_flow_required");
-        // 需要凭据的提供商没配置时：missing_client_credential
-        assert_eq!(state.oauth_hub.start("antigravity", "x").await.unwrap_err().code(), "missing_client_credential");
+        // 需要凭据的提供商（如 gitlab）没配置时：missing_client_credential
+        assert_eq!(state.oauth_hub.start("gitlab", "x").await.unwrap_err().code(), "missing_client_credential");
+
+        // Antigravity 内置凭据可以直接启动授权并打开 Google 登录页
+        let started_ag = state.oauth_hub.start("antigravity", "me").await.unwrap();
+        assert!(started_ag.authorize_url.as_deref().unwrap().starts_with("https://accounts.google.com/"));
+        state.oauth_hub.cancel(&started_ag.session_id).await;
 
         // 客户端凭据经 AppState 里的凭据库实现保存，且被框架读取
         let set = state
             .oauth_hub
-            .set_client_credentials("gemini-cli", "id.apps.example", Some(crate::oauth::Secret::new("sec-ret-value")), None)
+            .set_client_credentials("gitlab", "my-gitlab-client-id", Some(crate::oauth::Secret::new("sec-ret-value")), None)
             .await
             .unwrap();
         assert_eq!(serde_json::to_value(&set).unwrap()["status"], "ready");
-        assert!(state.vault.get("oauth-client/gemini-cli").unwrap().is_some());
-        let started = state.oauth_hub.start("gemini-cli", "me").await.unwrap();
-        assert!(started.authorize_url.as_deref().unwrap().starts_with("https://accounts.google.com/"));
+        assert!(state.vault.get("oauth-client/gitlab").unwrap().is_some());
+        let started = state.oauth_hub.start("gitlab", "me").await.unwrap();
+        assert!(started.authorize_url.as_deref().unwrap().starts_with("https://gitlab.com/"));
         let url = started.authorize_url.as_deref().unwrap();
-        assert!(url.contains("client_id=id.apps.example") && !url.contains("sec-ret-value"), "{url}");
+        assert!(url.contains("client_id=my-gitlab-client-id") && !url.contains("sec-ret-value"), "{url}");
         state.oauth_hub.cancel(&started.session_id).await;
     }
 

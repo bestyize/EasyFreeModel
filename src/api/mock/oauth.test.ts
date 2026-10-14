@@ -42,7 +42,7 @@ describe('oauth mock：能力信息取自 oauth_providers.json', () => {
     const by = Object.fromEntries((await mock.oauthListProviders()).map((i) => [i.providerId, i]))
     expect(by.claude.status).toBe('ready')
     expect(by.github.status).toBe('ready')
-    expect(by.antigravity).toMatchObject({ status: 'need_client_credentials', clientIdRequired: true, clientSecret: 'required' })
+    expect(by.antigravity).toMatchObject({ status: 'ready', clientIdRequired: false, clientSecret: 'none' })
     expect(by.gitlab).toMatchObject({
       status: 'need_client_credentials',
       clientIdRequired: true,
@@ -67,21 +67,17 @@ describe('oauth mock：能力信息取自 oauth_providers.json', () => {
 
 describe('oauth mock：客户端凭据（只记布尔值）', () => {
   it('校验输入；保存后变 ready 且 clientConfigured，返回值不含凭据；清除后恢复', async () => {
-    expect(await rejectCode(mock.oauthSetClientCredentials({ providerId: 'antigravity', clientId: ' ', clientSecret: SECRET }))).toBe('invalid_input')
-    expect(await rejectCode(mock.oauthSetClientCredentials({ providerId: 'antigravity', clientId: 'cid' }))).toBe('invalid_input')
+    expect(await rejectCode(mock.oauthSetClientCredentials({ providerId: 'gitlab', clientId: ' ', clientSecret: SECRET }))).toBe('invalid_input')
     expect(await rejectCode(mock.oauthSetClientCredentials({ providerId: 'cursor', clientId: 'x' }))).toBe('custom_flow_required')
     expect(await rejectCode(mock.oauthSetClientCredentials({ providerId: 'nope', clientId: 'x' }))).toBe('unknown_provider')
-    expect(
-      await rejectCode(mock.oauthSetClientCredentials({ providerId: 'antigravity', clientId: 'c', clientSecret: SECRET, baseUrl: 'https://x.example.com' })),
-    ).toBe('invalid_input')
 
-    const info = await mock.oauthSetClientCredentials({ providerId: 'antigravity', clientId: 'my-client-id', clientSecret: SECRET })
-    expect(info).toMatchObject({ providerId: 'antigravity', status: 'ready', clientConfigured: true })
+    const info = await mock.oauthSetClientCredentials({ providerId: 'gitlab', clientId: 'my-client-id', clientSecret: SECRET })
+    expect(info).toMatchObject({ providerId: 'gitlab', status: 'ready', clientConfigured: true })
     const dump = JSON.stringify([info, await mock.oauthListProviders()])
     expect(dump).not.toContain('SUPERSECRET')
     expect(dump).not.toContain('my-client-id')
 
-    const cleared = await mock.oauthClearClientCredentials('antigravity')
+    const cleared = await mock.oauthClearClientCredentials('gitlab')
     expect(cleared).toMatchObject({ status: 'need_client_credentials', clientConfigured: false })
   })
 
@@ -96,7 +92,7 @@ describe('oauth mock：授权状态机', () => {
   it('start 的拒绝：未知 / custom / 缺凭据 / 标识非法', async () => {
     expect(await rejectCode(mock.oauthStart('nope', ''))).toBe('unknown_provider')
     expect(await rejectCode(mock.oauthStart('kiro', ''))).toBe('custom_flow_required')
-    expect(await rejectCode(mock.oauthStart('antigravity', ''))).toBe('missing_client_credential')
+    expect(await rejectCode(mock.oauthStart('gitlab', ''))).toBe('missing_client_credential')
     expect(await rejectCode(mock.oauthStart('claude', 'x'.repeat(129)))).toBe('label_invalid')
   })
 
@@ -203,11 +199,11 @@ describe('oauth mock：授权状态机', () => {
 
   it('__resetProvidersMock 会一并清掉授权会话与凭据标记', async () => {
     const s = await mock.oauthStart('github', '')
-    await mock.oauthSetClientCredentials({ providerId: 'antigravity', clientId: 'c', clientSecret: SECRET })
+    await mock.oauthSetClientCredentials({ providerId: 'gitlab', clientId: 'c', baseUrl: 'https://gitlab.com' })
     __resetProvidersMock()
     __setOAuthMockTiming({ latencyMs: 0 })
     expect(await mock.oauthPoll(s.sessionId)).toEqual({ status: 'expired' })
-    expect((await mock.oauthListProviders()).find((i) => i.providerId === 'antigravity')!.status).toBe('need_client_credentials')
+    expect((await mock.oauthListProviders()).find((i) => i.providerId === 'gitlab')!.status).toBe('need_client_credentials')
   })
 
   it('__resetOAuthMock 单独可用', async () => {

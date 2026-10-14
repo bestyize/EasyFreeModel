@@ -37,6 +37,25 @@ impl From<String> for Secret {
     }
 }
 
+impl<'de> serde::Deserialize<'de> for Secret {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        let s = String::deserialize(deserializer)?;
+        Ok(Secret(s))
+    }
+}
+
+impl serde::Serialize for Secret {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.0)
+    }
+}
+
 impl From<&str> for Secret {
     fn from(value: &str) -> Self {
         Secret(value.to_owned())

@@ -62,7 +62,7 @@ npx tauri dev              # 启动桌面开发窗口
    - 需要官方放行：cursor、qoder、qoder-cn、zed、xiaomi-mimo、codebuddy-cn、codebuddy-intl、glm。
    - 回调无 state，过不了安全校验：cline、clinepass。
    - 协议非标准，可单独写适配器：kilocode、kimchi、iflow（需用户自备 secret）、kiro（AWS SSO OIDC）。用户已同意这 4 家也做，仍按“只做标准流程、不带伪装”。
-   - antigravity、gemini-cli、gitlab 需要用户自备 client id/secret。
+   - antigravity、gemini-cli 已对齐 9Router 内置官方客户端凭据，点击“开始授权”直接拉起浏览器登录；仅 gitlab 保留自建/第三方应用凭据输入。
    - github 与 muse 授权成功后还要把账户令牌换成模型调用凭据（Copilot 令牌 / Model API Key），框架没做；转发时会如实报“令牌兑换步骤尚未接入”，不要把账户令牌当模型 Key 发。
 6. **其它遗留**：
    - Vertex 只支持 express（API Key）；服务账号/访问令牌配置返回 NotReady。

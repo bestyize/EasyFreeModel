@@ -533,15 +533,14 @@ async fn oauth_builtin_catalog_entry_points_reject_unusable_providers() {
     let store = Arc::new(MemoryTokenStore::new());
     let service = OAuthService::with_builtin_catalog(Arc::new(NoClientCredentials), store).unwrap();
 
-    // 需要用户自备 clientId / clientSecret
+    // gitlab 需要用户自备 clientId
     assert!(matches!(
-        service.start_authorization("gemini-cli").await.unwrap_err(),
+        service.start_authorization("gitlab").await.unwrap_err(),
         OAuthError::MissingClientCredential { .. }
     ));
-    assert!(matches!(
-        service.start_authorization("antigravity").await.unwrap_err(),
-        OAuthError::MissingClientCredential { .. }
-    ));
+    // gemini-cli 与 antigravity 有内置客户端凭据，可以直接拉起授权
+    assert!(service.start_authorization("gemini-cli").await.is_ok());
+    assert!(service.start_authorization("antigravity").await.is_ok());
     // custom 不硬做
     for id in ["cursor", "qoder", "kiro", "zed", "cline"] {
         assert!(matches!(
