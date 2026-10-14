@@ -45,7 +45,8 @@ const addLabelEl = (w: VueWrapper) => w.find(`${ADD_FORM} input[aria-label="账�
 const valueOf = (wrapper: { element: Element }) => (wrapper.element as HTMLInputElement).value
 
 async function expandApikey(w: VueWrapper) {
-  await apikeyGroup(w).findAll('button').find((b) => b.text().includes('展开'))!.trigger('click')
+  const btn = apikeyGroup(w).findAll('button').find((b) => b.text().includes('展开'))
+  if (btn) await btn.trigger('click')
 }
 
 beforeEach(() => {
@@ -62,22 +63,27 @@ describe('第四组：API Key 提供商', () => {
     expect(apikeyCount).toBe(87)
 
     expect(apikeyGroup(w).exists()).toBe(true)
-    expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').text()).toContain(`共 ${apikeyCount} 家`)
-    expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(0)
+    // 默认全部展开：直接显示全部卡片与 aria-expanded="true"
+    expect(apikeyGroup(w).find('[aria-expanded="true"]').exists()).toBe(true)
+    expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(apikeyCount)
+    expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').exists()).toBe(false)
+
     // 组顺序：自定义 → OAuth → 免费 → API Key
     const titles = w.findAll('h2.section-title').map((h) => h.text())
     expect(titles.findIndex((t) => t.includes('OAuth'))).toBeLessThan(titles.findIndex((t) => t.includes('免费')))
     expect(titles.at(-1)).toBe('API Key 提供商')
-    expect(w.findAll('button.provider-card')).toHaveLength(23 + 23)
 
+    // 点击「收起」后折叠
+    await button(w, '收起')!.trigger('click')
+    expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(0)
+    expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').exists()).toBe(true)
+    expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').text()).toContain(`共 ${apikeyCount} 家`)
+
+    // 再次点击「展开」后恢复展开
     await expandApikey(w)
     expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').exists()).toBe(false)
     expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(apikeyCount)
     expect(apikeyGroup(w).find('[aria-expanded="true"]').exists()).toBe(true)
-
-    await button(w, '收起')!.trigger('click')
-    expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(0)
-    expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').exists()).toBe(true)
   })
 
   it('按能力筛选：点击“语音”只剩 TTS/STT 提供商，再点一次恢复', async () => {

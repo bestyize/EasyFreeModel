@@ -6,7 +6,7 @@ pub mod vault;
 
 pub use api_keys::DbKeyVerifier;
 pub use oauth_store::{VaultClientCredentials, VaultTokenStore};
-pub use vault::{CredentialVault, KeyringVault, MemoryVault};
+pub use vault::{CredentialVault, KeyringVault, LocalVault, MemoryVault};
 
 /// 日志/错误信息用的脱敏：只保留首尾少量字符。永远不要把完整密钥交给 tracing。
 pub fn redact(secret: &str) -> String {

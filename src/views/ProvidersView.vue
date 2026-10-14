@@ -27,8 +27,8 @@ const activeProvider = ref<ProviderSummary | null>(null)
 const customOpen = ref(false)
 const customProtocol = ref<CustomProtocol>('openai-chat')
 
-/** API Key 组：默认折叠；搜索时自动展开，避免命中项被藏起来 */
-const apikeyExpanded = ref(false)
+/** API Key 组：默认全部展开；支持手动收起 */
+const apikeyExpanded = ref(true)
 const capFilter = ref<CapabilityId | 'all'>('all')
 
 onMounted(() => {

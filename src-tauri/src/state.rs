@@ -10,7 +10,7 @@ use crate::gateway::{GatewayManager, KeyVerifier};
 use crate::oauth::{ClientCredentialAdmin, OAuthHub, OAuthService};
 use crate::providers::catalog;
 use crate::routing::Runtime;
-use crate::security::{CredentialVault, DbKeyVerifier, KeyringVault, VaultClientCredentials, VaultTokenStore};
+use crate::security::{CredentialVault, DbKeyVerifier, LocalVault, VaultClientCredentials, VaultTokenStore};
 use crate::store;
 
 /// 系统凭据库中使用的 service 名，与 tauri.conf.json 的 identifier 保持一致。
@@ -60,14 +60,12 @@ impl AppState {
         Self { db, gateway, vault, oauth, oauth_hub }
     }
 
-    /// 打开数据库（含迁移）、写入提供商目录、接上系统凭据库。
+    /// 打开数据库（含迁移）、写入提供商目录、接上本地凭据库（对齐 9Router，秒级静默读取）。
     pub async fn init(data_dir: &Path) -> AppResult<Self> {
         let db = store::open(&data_dir.join(DB_FILE)).await?;
         catalog::seed(&db).await?;
-        if !KeyringVault::is_available() {
-            tracing::warn!("系统凭据库不可用：保存第三方凭据的操作将失败（不会降级为明文存储）");
-        }
-        Self::try_new(db, Arc::new(KeyringVault::new(VAULT_SERVICE)))
+        let vault = Arc::new(LocalVault::new(data_dir.join("vault.json")));
+        Self::try_new(db, vault)
     }
 
     /// 网关用来校验 Bearer 密钥的校验器。
