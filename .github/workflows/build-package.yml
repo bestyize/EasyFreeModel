@@ -73,10 +73,10 @@ jobs:
           test "$(find release-assets -maxdepth 1 -name '*.exe' -type f | wc -l)" -eq 1
           test "$(find release-assets -maxdepth 1 -name '*.dmg' -type f | wc -l)" -eq 1
           version=$(python3 .github/scripts/release_version.py verify)
-          # Reject stale re-runs: don't publish an old tag or bump a newer main.
-          git fetch --no-tags origin main
-          if [[ "$GITHUB_REF" != "refs/heads/main" || "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]]; then
-            echo "::error::This run is not based on the latest main. Trigger a fresh manual BuildPackage run."
+          # Publish the exact commit that produced the installers. Other commits
+          # can land on main while Windows/macOS are building.
+          if [[ "$GITHUB_REF" != "refs/heads/main" ]]; then
+            echo "::error::Releases must be triggered from the main branch."
             exit 1
           fi
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
@@ -103,19 +103,29 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # Only advance versions after BOTH platform builds and Release succeed.
-          # Concurrency prevents another BuildPackage run overlapping this bump.
-          git fetch --no-tags origin main
-          if [[ "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]]; then
-            echo "::error::main changed during publication; refusing to overwrite newer commits."
-            exit 1
-          fi
-          next_version=$(python3 .github/scripts/release_version.py bump "$RELEASED_VERSION")
+          # Bump on the latest main, not the build's starting commit: code may
+          # have changed during the lengthy Windows/macOS build. Never force push.
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add package.json package-lock.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock
-          git commit -m "chore(release): prepare v${next_version} [skip ci]"
-          git push origin HEAD:refs/heads/main
+          for attempt in 1 2 3; do
+            git fetch --no-tags origin main
+            git checkout -B release-version-bump origin/main
+            current_version=$(python3 .github/scripts/release_version.py verify)
+            if [[ "$current_version" != "$RELEASED_VERSION" ]]; then
+              echo "::notice::main is already at v${current_version}; skipping bump for released v${RELEASED_VERSION}."
+              exit 0
+            fi
+            next_version=$(python3 .github/scripts/release_version.py bump "$RELEASED_VERSION")
+            git add package.json package-lock.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock
+            git commit -m "chore(release): prepare v${next_version} [skip ci]"
+            if git push origin HEAD:refs/heads/main; then
+              echo "Prepared v${next_version} on main."
+              exit 0
+            fi
+            echo "::warning::main changed during version push (attempt ${attempt}/3); retrying on latest main."
+          done
+          echo "::error::Could not push the next version after 3 attempts."
+          exit 1
 
   cleanup:
     name: Keep latest two BuildPackage runs
