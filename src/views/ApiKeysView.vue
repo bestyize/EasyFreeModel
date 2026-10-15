@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { computed, onActivated, onMounted, ref } from 'vue'
-import { Copy, Eye, EyeOff, Plus, RotateCw, ShieldAlert, Trash2 } from 'lucide-vue-next'
+import { Copy, Eye, EyeOff, Link2, Plus, RotateCw, ShieldAlert, Trash2 } from 'lucide-vue-next'
 import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import ApiKeyCreateModal from '@/components/apikeys/ApiKeyCreateModal.vue'
-import ConnectPanel from '@/components/guide/ConnectPanel.vue'
+import KeyImportFlow from '@/components/guide/KeyImportFlow.vue'
 import SecretRevealModal from '@/components/apikeys/SecretRevealModal.vue'
 import { isLoopbackAddress } from '@/components/settings/address'
 import { protocolLabel } from '@/components/settings/protocols'
@@ -22,6 +22,11 @@ const system = useSystemStore()
 const ui = useUiStore()
 
 const createOpen = ref(false)
+const importKey = ref<ApiKeyInfo | null>(null)
+const importOpen = computed({
+  get: () => importKey.value !== null,
+  set: (v: boolean) => { if (!v) importKey.value = null },
+})
 const actionError = ref<string | null>(null)
 
 /** 用于创建、轮换及查看密钥弹窗展示 */
@@ -98,6 +103,10 @@ function scopeText(k: ApiKeyInfo): { protocols: string; models: string; limits: 
     models: k.allowedModels.length ? `${k.allowedModels.length} 个模型` : '全部模型',
     limits: limits.length ? limits.join(' · ') : '无限额',
   }
+}
+
+function canImport(k: ApiKeyInfo): boolean {
+  return !!k.secret && !k.disabled && !isExpired(k)
 }
 
 function isBusy(id: string): boolean {
@@ -238,6 +247,9 @@ onActivated(() => {
             <td><StatusTag :tone="statusOf(k).tone">{{ statusOf(k).label }}</StatusTag></td>
             <td>
               <div class="actions">
+                <button class="btn import-btn" type="button" :disabled="isBusy(k.id) || !canImport(k)" :title="canImport(k) ? '选择要接入的客户端' : '需要启用中的完整密钥'" :data-testid="'import-' + k.id" @click="importKey = k">
+                  <Link2 :size="15" aria-hidden="true" /> 接入客户端
+                </button>
                 <button
                   class="icon" type="button" :disabled="isBusy(k.id)" :aria-label="`查看 ${k.name}`" title="查看完整密钥"
                   :data-testid="`view-${k.id}`" @click="viewKey(k)"
@@ -266,7 +278,7 @@ onActivated(() => {
       </table>
     </div>
 
-    <ConnectPanel v-if="store.loaded" />
+    <KeyImportFlow v-model="importOpen" :api-key="importKey" />
 
     <ApiKeyCreateModal v-model="createOpen" @created="onCreated" />
 
@@ -314,7 +326,9 @@ tbody tr:last-child td { border-bottom: 0; }
 .mini-btn { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--c-border); border-radius: 6px; background: var(--c-canvas); color: var(--c-text-2); padding: 0; cursor: pointer; }
 .mini-btn:hover { background: var(--c-surface-2); color: var(--c-text); }
 .scope { max-width: 280px; }
-.actions { display: flex; align-items: center; gap: 6px; }
+.actions { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.import-btn { display: inline-flex; align-items: center; gap: 5px; color: var(--c-brand); }
+.import-btn:disabled { opacity: 0.5; }
 .icon { display: grid; place-items: center; width: 32px; height: 32px; border: 1px solid var(--c-border); border-radius: 8px; background: var(--c-canvas); color: var(--c-text-2); }
 .icon:hover { background: var(--c-surface-2); }
 .icon.danger { color: var(--c-danger); }
