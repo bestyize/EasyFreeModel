@@ -13,9 +13,11 @@ import {
   Volume2,
 } from 'lucide-vue-next'
 import type { Component } from 'vue'
+import { version as packageVersion } from '../../package.json'
 
 export const APP_NAME = 'FreeApiBox'
-export const APP_VERSION = '0.8.2'
+// Single source of truth: the manifest is versioned together with the Tauri bundle.
+export const APP_VERSION = packageVersion
 
 export interface NavItem {
   path: string

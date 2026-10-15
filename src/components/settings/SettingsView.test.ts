@@ -14,6 +14,7 @@ import SettingsDataSection from './SettingsDataSection.vue'
 import { useSystemStore } from '@/stores/system'
 import { useSettingsStore } from '@/stores/settings'
 import { isLoopbackAddress, isValidListenAddress } from './address'
+import { version as packageVersion } from '../../../package.json'
 
 const base: AppSettings = {
   listenAddress: '127.0.0.1', port: 20128, autoStart: false, trayEnabled: true, timeoutSeconds: 120, retryCount: 2,
@@ -67,7 +68,7 @@ describe('SettingsView', () => {
   it('渲染五个区块与版本号', async () => {
     await mountView()
     for (const t of ['本地服务', '协议与路由', '数据与安全', '界面', '关于']) expect(wrapper.text()).toContain(t)
-    expect(wrapper.get('[data-testid="app-version"]').text()).toBe('0.8.2')
+    expect(wrapper.get('[data-testid="app-version"]').text()).toBe(packageVersion)
   })
 
   it('网关状态来自 system store：停止 / 运行 / 端口占用错误', async () => {
