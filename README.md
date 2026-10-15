@@ -6,7 +6,7 @@
 
 ## 下载与开发
 
-Windows x64 和 macOS Apple Silicon 的安装包通过手动触发的 [BuildPackage](https://github.com/bestyize/EasyFreeModel/actions/workflows/build-package.yml) 工作流构建，并发布在 [Releases](https://github.com/bestyize/EasyFreeModel/releases)。
+Windows x64 和 macOS Apple Silicon 的安装包通过手动触发的 [BuildPackage](.github/workflows/build-package.yml) 工作流构建，并发布在仓库的 Releases 页面。
 
 本地开发需要 Node.js 22 与 Rust（1.98 或更新版本）：
 
