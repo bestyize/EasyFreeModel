@@ -236,6 +236,24 @@ fn tool_result_error_flag_survives_anthropic_roundtrip_and_warns_on_openai() {
     assert!(enc.warnings.iter().any(|w| w.contains("is_error")));
 }
 
+#[test]
+fn assistant_history_fragments_do_not_gain_newlines_on_openai_conversion() {
+    let req = an(&json!({"model": "m", "max_tokens": 32, "messages": [
+        {"role": "assistant", "content": [
+            {"type": "text", "text": "Hello"},
+            {"type": "text", "text": " world"},
+            {"type": "text", "text": "!\nNext line"}
+        ]},
+        {"role": "user", "content": "continue"}
+    ]}));
+    let body = openai_chat::encode_request(&req).unwrap().body;
+    assert_eq!(body["messages"][0]["content"], json!([
+        {"type": "text", "text": "Hello"},
+        {"type": "text", "text": " world"},
+        {"type": "text", "text": "!\nNext line"}
+    ]));
+}
+
 // ───────────── 图片 ─────────────
 
 #[test]
