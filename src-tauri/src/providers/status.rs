@@ -32,6 +32,8 @@ pub enum Adapter {
     Ollama,
     #[serde(rename = "openai-responses")]
     OpenaiResponses,
+    #[serde(rename = "code-assist")]
+    CodeAssist,
 }
 
 impl Adapter {
@@ -43,6 +45,7 @@ impl Adapter {
             Self::Vertex => "vertex",
             Self::Ollama => "ollama",
             Self::OpenaiResponses => "openai-responses",
+            Self::CodeAssist => "code-assist",
         }
     }
 
@@ -54,6 +57,7 @@ impl Adapter {
             Self::Vertex,
             Self::Ollama,
             Self::OpenaiResponses,
+            Self::CodeAssist,
         ]
         .into_iter()
         .find(|a| a.as_str() == s)
@@ -109,7 +113,7 @@ pub fn adapter_for_custom_protocol(protocol: crate::models::Protocol) -> Option<
 
 pub fn default_auth(adapter: Adapter) -> AuthSpec {
     match adapter {
-        Adapter::OpenaiCompatible | Adapter::Ollama | Adapter::OpenaiResponses => AuthSpec::Scheme(AuthScheme::Bearer),
+        Adapter::OpenaiCompatible | Adapter::Ollama | Adapter::OpenaiResponses | Adapter::CodeAssist => AuthSpec::Scheme(AuthScheme::Bearer),
         Adapter::AnthropicCompatible => AuthSpec::Scheme(AuthScheme::XApiKey),
         Adapter::Gemini | Adapter::Vertex => AuthSpec::Header { header: "x-goog-api-key".into() },
     }
@@ -186,6 +190,16 @@ mod tests {
     #[test]
     fn embedded_status_file_is_valid() {
         parse_table().unwrap();
+    }
+
+    #[test]
+    fn code_assist_providers_parse_at_startup() {
+        let table = parse_table().unwrap();
+        for id in ["antigravity", "gemini-cli"] {
+            let status = table.get(id).unwrap();
+            assert_eq!(status.adapter, Some(Adapter::CodeAssist));
+            assert_eq!(status.auth, Some(AuthSpec::Scheme(AuthScheme::Bearer)));
+        }
     }
 
     #[test]

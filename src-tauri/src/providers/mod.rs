@@ -1127,6 +1127,8 @@ async fn try_fetch_upstream_models(
         Adapter::Gemini | Adapter::Vertex => {
             ("https://generativelanguage.googleapis.com/v1beta/models".to_string(), "x-goog-api-key")
         }
+        // Code Assist 使用专用的项目上下文和请求信封，没有通用 GET /models 接口。
+        Adapter::CodeAssist => return Ok(Vec::new()),
     };
 
     let mut rb = client.get(&url).header("User-Agent", crate::upstream::client::user_agent());

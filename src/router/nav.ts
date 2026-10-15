@@ -15,7 +15,7 @@ import {
 import type { Component } from 'vue'
 
 export const APP_NAME = 'FreeApiBox'
-export const APP_VERSION = '0.8.0'
+export const APP_VERSION = '0.8.1'
 
 export interface NavItem {
   path: string

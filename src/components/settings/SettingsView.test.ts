@@ -67,7 +67,7 @@ describe('SettingsView', () => {
   it('渲染五个区块与版本号', async () => {
     await mountView()
     for (const t of ['本地服务', '协议与路由', '数据与安全', '界面', '关于']) expect(wrapper.text()).toContain(t)
-    expect(wrapper.get('[data-testid="app-version"]').text()).toBe('0.8.0')
+    expect(wrapper.get('[data-testid="app-version"]').text()).toBe('0.8.1')
   })
 
   it('网关状态来自 system store：停止 / 运行 / 端口占用错误', async () => {
