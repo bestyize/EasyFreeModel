@@ -26,6 +26,25 @@ pub struct ApiKeyRow {
 const COLS: &str = "id, name, key_hash, key_suffix, key_secret, protocols_json, allowed_models_json, rpm_limit, tpm_limit, \
      total_limit, call_count, created_at, last_used_at, expires_at, disabled_at";
 
+const DEFAULT_KEY_MARKER: &str = "defaultApiKeyInitialized";
+
+/// 启动时只执行一次；即使用户后来删光密钥，也不能在重启时重新生成。
+pub async fn default_key_initialized(pool: &SqlitePool) -> AppResult<bool> {
+    let value: Option<String> = sqlx::query_scalar("SELECT value FROM app_settings WHERE key = ?1")
+        .bind(DEFAULT_KEY_MARKER)
+        .fetch_optional(pool)
+        .await?;
+    Ok(value.is_some())
+}
+
+pub async fn mark_default_key_initialized(pool: &SqlitePool) -> AppResult<()> {
+    sqlx::query("INSERT INTO app_settings (key, value) VALUES (?1, 'true') ON CONFLICT(key) DO NOTHING")
+        .bind(DEFAULT_KEY_MARKER)
+        .execute(pool)
+        .await?;
+    Ok(())
+}
+
 pub async fn insert(pool: &SqlitePool, row: &ApiKeyRow) -> AppResult<()> {
     sqlx::query(
         "INSERT INTO api_keys (id, name, key_hash, key_suffix, key_secret, protocols_json, allowed_models_json, rpm_limit, \
