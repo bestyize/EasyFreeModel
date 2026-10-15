@@ -20,6 +20,8 @@ pub const USER_AGENT_PREFIX: &str = "RouterDesktop";
 pub const CODEX_CLI_VERSION: &str = "0.159.0";
 pub const CODEX_USER_AGENT: &str = "codex_cli_rs/0.159.0";
 pub const CLAUDE_USER_AGENT: &str = "claude-cli/2.1.280 (external, sdk-cli)";
+pub const CODEBUDDY_CN_USER_AGENT: &str = "CLI/2.108.1 CodeBuddy/2.108.1";
+pub const CODEBUDDY_INTL_USER_AGENT: &str = "IDE/2.108.1 CodeBuddy/2.108.1";
 
 pub fn user_agent() -> String {
     format!("{USER_AGENT_PREFIX}/{}", env!("CARGO_PKG_VERSION"))
@@ -145,6 +147,8 @@ impl UpstreamClient {
         let agent = match provider_id {
             "codex" => CODEX_USER_AGENT.to_string(),
             "claude" => CLAUDE_USER_AGENT.to_string(),
+            "codebuddy-cn" => CODEBUDDY_CN_USER_AGENT.to_string(),
+            "codebuddy-intl" => CODEBUDDY_INTL_USER_AGENT.to_string(),
             _ => user_agent(),
         };
         headers.insert(USER_AGENT, HeaderValue::from_str(&agent).expect("static user agent"));

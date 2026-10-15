@@ -50,6 +50,7 @@ impl Adapter for OpenAiCompatAdapter {
     }
 
     fn prepare_body(&self, body: &mut Value, req: &UpstreamRequest, target: &UpstreamTarget) {
+        super::codebuddy_compat::prepare_body(body, &target.provider_id);
         let Some(obj) = body.as_object_mut() else { return };
         if !req.stream {
             return;

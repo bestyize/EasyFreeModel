@@ -15,6 +15,7 @@ pub mod anthropic_compat;
 pub mod auth;
 pub mod client;
 pub mod code_assist;
+pub mod codebuddy_compat;
 pub mod endpoint;
 pub mod gemini_compat;
 pub mod ollama_compat;
@@ -420,6 +421,16 @@ fn build_headers<A: Adapter + ?Sized>(
         for (n, v) in &r.extra_headers {
             headers.insert(n.clone(), v.clone());
         }
+    }
+    // CodeBuddy uses a provider-specific OpenAI-compatible gateway (9Router).
+    // Keep these headers provider-scoped and never apply them to user-defined endpoints.
+    if codebuddy_compat::is_codebuddy(&target.provider_id) {
+        let ide = if target.provider_id == "codebuddy-cn" { "CLI" } else { "IDE" };
+        headers.insert("x-product", HeaderValue::from_static("SaaS"));
+        headers.insert("x-ide-type", HeaderValue::from_static(ide));
+        headers.insert("x-ide-name", HeaderValue::from_static(ide));
+        headers.insert("x-requested-with", HeaderValue::from_static("XMLHttpRequest"));
+        headers.insert("x-codebuddy-request", HeaderValue::from_static("1"));
     }
     if target.provider_id == "claude" {
         // Claude OAuth requires the Claude Code beta and OAuth feature flags.

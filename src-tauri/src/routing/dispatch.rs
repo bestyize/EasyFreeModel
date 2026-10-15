@@ -114,6 +114,22 @@ fn classify(status: u16) -> Class {
     }
 }
 
+/// CodeBuddy 11128 is channel/request verification, *not* a bad account.
+/// CodeBuddy 6004 means provider rate limit even when its HTTP status is 400.
+fn classify_rejection(provider: &str, reply: &UpstreamReply) -> Class {
+    if matches!(provider, "codebuddy-cn" | "codebuddy-intl") {
+        if let Ok(body) = serde_json::from_slice::<serde_json::Value>(&reply.body) {
+            let code = body.get("code").and_then(serde_json::Value::as_i64);
+            match code {
+                Some(11128) => return Class::Fatal,
+                Some(6004) => return Class::RateLimited,
+                _ => {}
+            }
+        }
+    }
+    classify(reply.status)
+}
+
 const RECYCLE_BACKOFF: Duration = Duration::from_millis(150);
 
 /// 令牌刷新遇到瞬时故障时给客户端的固定说明。
@@ -260,7 +276,7 @@ impl Runtime {
                     return Ok(Dispatched { value, connection: conn, permit, secrets, attempts });
                 }
                 Attempt::Rejected(reply) => {
-                    let class = classify(reply.status);
+                    let class = classify_rejection(&provider.id, &reply);
                     tracing::warn!(provider = %provider.id, connection = %conn.id, status = reply.status, class = ?class, "upstream rejected the request");
                     match class {
                         Class::Auth => {
@@ -313,5 +329,22 @@ mod tests {
         for s in [300, 302, 400, 404, 413, 422] {
             assert_eq!(classify(s), Class::Fatal, "{s}");
         }
+    }
+
+    #[test]
+    fn codebuddy_channel_error_does_not_disable_oauth_account() {
+        use bytes::Bytes;
+        let reply = UpstreamReply {
+            status: 403,
+            body: Bytes::from_static(br#"{"code":11128,"msg":"Illegal API invocation from an unapproved channel"}"#),
+            content_type: Some("application/json".to_string()),
+            retry_after: None,
+        };
+        assert_eq!(classify_rejection("codebuddy-cn", &reply), Class::Fatal);
+        assert_eq!(classify_rejection("codebuddy-intl", &reply), Class::Fatal);
+        assert_eq!(classify_rejection("other", &reply), Class::Auth);
+        let limited = UpstreamReply { status: 400,
+            body: Bytes::from_static(br#"{"code":6004,"msg":"rate limited"}"#), ..reply };
+        assert_eq!(classify_rejection("codebuddy-cn", &limited), Class::RateLimited);
     }
 }
