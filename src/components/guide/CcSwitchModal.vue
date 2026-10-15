@@ -104,5 +104,5 @@ async function confirm() {
 .mono { font-family: var(--font-mono); font-size: var(--fs-caption); }
 .link summary { cursor: pointer; margin-bottom: 8px; color: var(--c-text-2); font-size: var(--fs-small); }
 .ok { margin: 0; color: var(--c-success); font-size: var(--fs-small); font-weight: 600; }
-.problem { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fdecec; color: #a63232; font-size: var(--fs-small); line-height: 1.6; }
+.problem { margin: 0; padding: 10px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); line-height: 1.6; }
 </style>

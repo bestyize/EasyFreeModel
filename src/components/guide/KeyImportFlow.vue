@@ -297,7 +297,7 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
 .desktop-guide > div code { min-width: 0; }
 .hint,.muted { margin: 0; color: var(--c-text-2); font-size: var(--fs-small); line-height: 1.6; }
 .hint { margin-top: 10px; }
-.notice { margin: 0; padding: 9px 11px; border-radius: 8px; background: #fdf6e8; color: #7a5a14; font-size: var(--fs-small); line-height: 1.6; }
+.notice { margin: 0; padding: 9px 11px; border-radius: 8px; background: var(--c-warning-soft); color: var(--c-warning); font-size: var(--fs-small); line-height: 1.6; }
 .success { display: flex; align-items: center; gap: 8px; color: var(--c-success); }
 .btn { display: inline-flex; align-items: center; gap: 5px; }
 @media(max-width: 620px) { .fields { grid-template-columns: 1fr; } .desktop-guide > div { flex-wrap: wrap; } }

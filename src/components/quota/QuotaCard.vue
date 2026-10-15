@@ -105,7 +105,7 @@ h3 { margin: 0; font-size: var(--fs-body); font-weight: 600; overflow: hidden; t
 .nodata { margin: 0; color: var(--c-text-2); font-size: var(--fs-small); }
 footer { display: grid; gap: 6px; }
 footer p { margin: 0; }
-.error { display: flex; align-items: flex-start; gap: 6px; padding: 6px 10px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-caption); line-height: 1.5; overflow-wrap: anywhere; }
+.error { display: flex; align-items: flex-start; gap: 6px; padding: 6px 10px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-caption); line-height: 1.5; overflow-wrap: anywhere; }
 .error svg { flex: none; margin-top: 2px; }
 .synced { color: var(--c-text-2); font-size: var(--fs-caption); }
 </style>

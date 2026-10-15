@@ -1,5 +1,6 @@
 /* 设计 token：来自 PRODUCT_DESIGN.md §1。不使用渐变色。 */
 :root {
+  color-scheme: light;
   --c-canvas: #ffffff;
   --c-sidebar: #f7f8fa;
   --c-surface-2: #f3f4f6;
@@ -12,6 +13,12 @@
   --c-warning: #f4a524;
   --c-danger: #e44848;
   --c-overlay: rgba(22, 24, 29, 0.45);
+  --c-success-soft: #e8f6f0;
+  --c-warning-soft: #fdf3e0;
+  --c-danger-soft: #fdecec;
+  --c-success-border: #bfe6d5;
+  --c-warning-border: #f1deb0;
+  --c-danger-border: #f3c9c9;
 
   --sidebar-w: 224px;
   --sidebar-w-collapsed: 68px;
@@ -33,4 +40,26 @@
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'PingFang SC', 'Segoe UI',
     'Microsoft YaHei', sans-serif;
   --font-mono: 'SF Mono', Menlo, Consolas, monospace;
+}
+
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --c-canvas: #191919;
+  --c-sidebar: #111111;
+  --c-surface-2: #292929;
+  --c-text: #f2f2f2;
+  --c-text-2: #b3b3b3;
+  --c-border: #393939;
+  --c-brand: #ff5269;
+  --c-brand-soft: #3a2025;
+  --c-success: #55c995;
+  --c-warning: #eec46a;
+  --c-danger: #ff8080;
+  --c-overlay: rgba(0, 0, 0, 0.72);
+  --c-success-soft: #18372c;
+  --c-warning-soft: #3d311d;
+  --c-danger-soft: #3e2528;
+  --c-success-border: #315c49;
+  --c-warning-border: #675231;
+  --c-danger-border: #714044;
 }

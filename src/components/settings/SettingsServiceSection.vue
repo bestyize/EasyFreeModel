@@ -99,8 +99,8 @@ async function toggle() {
 .gateway { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 12px 0 4px; padding: 12px 14px; border-radius: 8px; background: var(--c-sidebar); }
 .gw-info { display: flex; align-items: center; gap: 10px; }
 .addr { font-family: var(--font-mono); font-size: var(--fs-small); }
-.alert { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; padding: 10px 12px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
-.note { margin: 8px 0 0; color: #8a5a07; font-size: var(--fs-small); }
+.alert { display: flex; align-items: center; gap: 8px; margin: 8px 0 0; padding: 10px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
+.note { margin: 8px 0 0; color: var(--c-warning); font-size: var(--fs-small); }
 .risk { margin: 6px 0 0; color: var(--c-danger); font-size: var(--fs-caption); }
 .narrow { width: 120px; }
 </style>

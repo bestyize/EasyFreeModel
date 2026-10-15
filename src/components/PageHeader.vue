@@ -3,10 +3,12 @@ import { onBeforeUnmount, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { Moon, Search, Settings, Sun } from 'lucide-vue-next'
 import { useUiStore } from '@/stores/ui'
+import { useSettingsStore } from '@/stores/settings'
 
 const route = useRoute()
 const router = useRouter()
 const ui = useUiStore()
+const settings = useSettingsStore()
 const searchEl = ref<HTMLInputElement | null>(null)
 const isMac = typeof navigator !== 'undefined' && /Mac/i.test(navigator.platform)
 
@@ -32,9 +34,10 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
         <input ref="searchEl" v-model="ui.globalQuery" type="search" placeholder="搜索模型、提供商或请求 ID…" aria-label="全局搜索" />
         <kbd>{{ isMac ? '⌘' : 'Ctrl' }} K</kbd>
       </label>
-      <button class="icon-btn" type="button" :aria-label="ui.theme === 'dark' ? '切换到浅色' : '切换到深色'" @click="ui.toggleTheme()">
+      <button class="icon-btn" type="button" :aria-label="ui.theme === 'dark' ? '切换到浅色' : '切换到深色'" :disabled="settings.saving" @click="settings.toggleTheme()">
         <component :is="ui.theme === 'dark' ? Sun : Moon" :size="18" />
       </button>
+      <span v-if="settings.themeError" class="theme-error" role="alert">{{ settings.themeError }}</span>
       <button class="icon-btn" type="button" aria-label="设置" @click="router.push('/settings')">
         <Settings :size="18" />
       </button>
@@ -53,4 +56,6 @@ p { margin: 2px 0 0; color: var(--c-text-2); font-size: var(--fs-small); }
 kbd { padding: 1px 6px; border-radius: 5px; background: var(--c-surface-2); font: var(--fs-caption) var(--font); }
 .icon-btn { display: grid; place-items: center; width: 36px; height: 36px; border: 1px solid var(--c-border); border-radius: 50%; background: var(--c-canvas); color: var(--c-text-2); }
 .icon-btn:hover { background: var(--c-surface-2); }
+.icon-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.theme-error { max-width: 220px; color: var(--c-danger); font-size: var(--fs-caption); }
 </style>

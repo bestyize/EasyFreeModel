@@ -149,8 +149,8 @@ onBeforeUnmount(stop)
 .select select { max-width: 200px; border: 0; outline: 0; background: transparent; font-size: var(--fs-small); color: var(--c-text); }
 .select:focus-within { border-color: var(--c-brand); }
 .divider { width: 1px; height: 22px; background: var(--c-border); }
-.btn.danger { border-color: #f6c9c9; background: #fdecec; color: var(--c-danger); }
-.btn.success { border-color: #bfe6d5; background: #e8f6f0; color: var(--c-success); }
+.btn.danger { border-color: var(--c-danger-border); background: var(--c-danger-soft); color: var(--c-danger); }
+.btn.success { border-color: var(--c-success-border); background: var(--c-success-soft); color: var(--c-success); }
 .auto { display: inline-flex; align-items: center; gap: 8px; height: var(--control-h); padding: 0 12px; border: 1px solid var(--c-border); border-radius: 8px; font-size: var(--fs-small); font-variant-numeric: tabular-nums; }
 .refresh { width: var(--control-h); padding: 0; }
 .spin { animation: spin 0.9s linear infinite; }
@@ -160,5 +160,5 @@ onBeforeUnmount(stop)
 .state { margin: 0; padding: 60px 0; text-align: center; color: var(--c-text-2); }
 .notice { display: flex; align-items: center; justify-content: space-between; margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--c-surface-2); font-size: var(--fs-small); }
 .notice button { display: grid; place-items: center; border: 0; background: transparent; color: var(--c-text-2); }
-.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 8px 12px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
 </style>

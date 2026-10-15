@@ -53,7 +53,7 @@ const reset = computed(() => formatCountdown(props.period.resetsAt, props.now))
 .name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: var(--fs-small); }
 .pct { margin-left: auto; font-size: var(--fs-small); font-weight: 600; font-variant-numeric: tabular-nums; }
 .lv-ok .pct { color: var(--c-success); }
-.lv-warn .pct { color: #b9770b; }
+.lv-warn .pct { color: var(--c-warning); }
 .lv-danger .pct { color: var(--c-danger); }
 .lv-unknown .pct { color: var(--c-text-2); font-weight: 500; }
 .bottom { display: flex; justify-content: space-between; gap: 8px; color: var(--c-text-2); font-size: var(--fs-caption); font-variant-numeric: tabular-nums; }

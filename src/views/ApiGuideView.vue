@@ -140,13 +140,13 @@ onActivated(() => {
 .lead { margin: 0; color: var(--c-text-2); font-size: var(--fs-small); line-height: 1.7; }
 .lead a { color: var(--c-brand); text-decoration: none; }
 .lead a:hover { text-decoration: underline; }
-.hint { margin: 0; padding: 8px 12px; border-radius: 8px; background: #fdf6e8; color: #7a5a14; font-size: var(--fs-small); line-height: 1.6; }
+.hint { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--c-warning-soft); color: var(--c-warning); font-size: var(--fs-small); line-height: 1.6; }
 .muted { color: var(--c-text-2); }
 .banner { display: flex; align-items: center; gap: 10px; margin: 0; padding: 10px 14px; border-radius: var(--radius); font-size: var(--fs-small); line-height: 1.6; }
 .banner svg { flex: none; }
 .banner > span { flex: 1; }
-.banner.warn { border: 1px solid #f1deb0; background: #fdf6e8; color: #7a5a14; }
-.banner.danger { border: 1px solid #f3c9c9; background: #fdecec; color: #a63232; }
+.banner.warn { border: 1px solid var(--c-warning-border); background: var(--c-warning-soft); color: var(--c-warning); }
+.banner.danger { border: 1px solid var(--c-danger-border); background: var(--c-danger-soft); color: var(--c-danger); }
 .tabrow { display: flex; flex-wrap: wrap; gap: 12px; }
 .table-wrap { overflow-x: auto; border: 1px solid var(--c-border); border-radius: 8px; }
 table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }

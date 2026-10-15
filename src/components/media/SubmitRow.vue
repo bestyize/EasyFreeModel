@@ -12,5 +12,5 @@ defineProps<{ error: string | null }>()
 <style scoped>
 .submit { display: flex; flex-direction: column; gap: 8px; }
 .buttons { display: flex; gap: 8px; }
-.err { margin: 0; padding: 8px 10px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); overflow-wrap: anywhere; }
+.err { margin: 0; padding: 8px 10px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); overflow-wrap: anywhere; }
 </style>

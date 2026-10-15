@@ -5,12 +5,21 @@ import Sidebar from './Sidebar.vue'
 import PageHeader from './PageHeader.vue'
 import { useUiStore } from '@/stores/ui'
 import { useSystemStore } from '@/stores/system'
+import { useSettingsStore } from '@/stores/settings'
 
 const ui = useUiStore()
 const system = useSystemStore()
+const settings = useSettingsStore()
 
-onMounted(() => system.startPolling())
-onBeforeUnmount(() => system.stopPolling())
+onMounted(() => {
+  settings.startAppearanceSync()
+  void settings.ensureLoaded()
+  system.startPolling()
+})
+onBeforeUnmount(() => {
+  settings.stopAppearanceSync()
+  system.stopPolling()
+})
 </script>
 
 <template>

@@ -146,10 +146,10 @@ onBeforeUnmount(() => window.removeEventListener('beforeunload', onBeforeUnload)
 .page { display: flex; flex-direction: column; gap: 16px; padding-bottom: 72px; max-width: 880px; }
 .muted { color: var(--c-text-2); }
 .banner { display: flex; align-items: center; justify-content: space-between; margin: 0; padding: 12px 14px; border-radius: var(--radius); }
-.banner.error { background: #fdecec; color: var(--c-danger); }
+.banner.error { background: var(--c-danger-soft); color: var(--c-danger); }
 .bar { position: sticky; bottom: 0; display: flex; align-items: center; justify-content: flex-end; gap: 10px; padding: 12px 0; background: var(--c-canvas); border-top: 1px solid var(--c-border); }
 .msg { margin-right: auto; font-size: var(--fs-small); }
-.msg.warn { color: #8a5a07; }
+.msg.warn { color: var(--c-warning); }
 .msg.error { color: var(--c-danger); }
 .msg.ok { color: var(--c-success); }
 </style>

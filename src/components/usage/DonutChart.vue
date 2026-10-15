@@ -5,13 +5,15 @@ import EmptyState from '@/components/EmptyState.vue'
 import { buildDonutOption } from './chartOptions'
 import { colorFor, formatCompact, formatPct } from './format'
 import { useECharts } from './useECharts'
+import { useUiStore } from '@/stores/ui'
 
 const props = defineProps<{ items: UsageSummary['providerShare'] }>()
+const ui = useUiStore()
 
 const el = ref<HTMLElement | null>(null)
 const total = computed(() => props.items.reduce((sum, i) => sum + i.tokens, 0))
 
-useECharts(el, () => buildDonutOption(props.items))
+useECharts(el, () => buildDonutOption(props.items, ui.theme === 'dark'), () => ui.theme)
 </script>
 
 <template>

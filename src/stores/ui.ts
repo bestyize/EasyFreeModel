@@ -11,11 +11,5 @@ export const useUiStore = defineStore('ui', () => {
     sidebarCollapsed.value = !sidebarCollapsed.value
   }
 
-  // 首版优先浅色；深色仅切换 data-theme，样式由后续迭代补全
-  function toggleTheme() {
-    theme.value = theme.value === 'light' ? 'dark' : 'light'
-    document.documentElement.dataset.theme = theme.value
-  }
-
-  return { sidebarCollapsed, theme, globalQuery, toggleSidebar, toggleTheme }
+  return { sidebarCollapsed, theme, globalQuery, toggleSidebar }
 })

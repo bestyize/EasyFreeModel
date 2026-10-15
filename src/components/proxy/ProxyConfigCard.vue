@@ -113,7 +113,7 @@ async function save() {
 .head-actions { display: flex; gap: 8px; }
 .narrow { width: 120px; }
 .wide { width: 340px; }
-.err { margin: 4px 0 0; padding: 8px 12px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
+.err { margin: 4px 0 0; padding: 8px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
 .providers { margin-top: 10px; max-width: 460px; }
 .search { width: 100%; }
 .picked { margin: 6px 0; color: var(--c-text-2); font-size: var(--fs-caption); }

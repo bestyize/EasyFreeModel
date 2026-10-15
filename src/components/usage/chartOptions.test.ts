@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { UsageSummary } from '@/types'
-import { buildTrendOption, seriesFor } from './chartOptions'
+import { buildDonutOption, buildTrendOption, seriesFor } from './chartOptions'
 
 const trend: UsageSummary['trend'] = [
   { label: '00:00', input: 100, output: 10, cached: 500, requests: 3, cost: 0.1 },
@@ -36,5 +36,15 @@ describe('buildTrendOption', () => {
       expect(typeof s.areaStyle.color).toBe('string')
       expect(s.areaStyle.opacity).toBeLessThanOrEqual(0.1)
     }
+  })
+
+  it('夜间模式的坐标轴、提示框与圆环边框使用深色配色', () => {
+    const trendOption = buildTrendOption(trend, 'token', [], true) as unknown as {
+      xAxis: { axisLabel: { color: string } }; tooltip: { backgroundColor: string }
+    }
+    expect(trendOption.xAxis.axisLabel.color).toBe('#b3b3b3')
+    expect(trendOption.tooltip.backgroundColor).toBe('#292929')
+    const donut = buildDonutOption([], true) as unknown as { series: { itemStyle: { borderColor: string } }[] }
+    expect(donut.series[0]!.itemStyle.borderColor).toBe('#191919')
   })
 })

@@ -311,7 +311,7 @@ const gridClass = computed(() => (layout.value === 'card' ? 'grid' : 'list'))
 .seg { display: inline-flex; padding: 3px; border: 1px solid var(--c-border); border-radius: 8px; background: var(--c-sidebar); }
 .seg button { display: grid; place-items: center; width: 32px; height: 28px; border: 0; border-radius: 6px; background: transparent; color: var(--c-text-2); }
 .seg button.on { background: var(--c-canvas); color: var(--c-brand); box-shadow: 0 0 0 1px var(--c-border); }
-.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: var(--radius); background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px; border-radius: var(--radius); background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
 .status-block { display: flex; flex-direction: column; gap: 12px; color: var(--c-text-2); font-size: var(--fs-small); }
 .status-block p { margin: 0; }
 .skeleton-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--card-gap); }

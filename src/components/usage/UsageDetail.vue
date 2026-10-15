@@ -113,6 +113,6 @@ function exportCsv() {
 .filters .query { width: 170px; }
 .spacer { flex: 1; }
 .state { margin: 0; padding: 40px 0; text-align: center; color: var(--c-text-2); }
-.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 10px; padding: 8px 12px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0 0 10px; padding: 8px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
 .stale { opacity: 0.6; }
 </style>

@@ -209,8 +209,8 @@ async function edit() {
 
 <style scoped>
 .conn { list-style: none; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-canvas); }
-.conn.error { border-color: #f3c3c3; }
-.conn.warn { border-color: #f6d9a3; }
+.conn.error { border-color: var(--c-danger-border); }
+.conn.warn { border-color: var(--c-warning-border); }
 .line { display: flex; align-items: center; gap: 8px; min-height: 52px; padding: 6px 12px; }
 .line input[type='checkbox'] { width: 16px; height: 16px; accent-color: var(--c-brand); flex: none; }
 .icon-btn { display: grid; place-items: center; width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--c-text-2); }

@@ -4,8 +4,10 @@ import type { UsageSummary } from '@/types'
 import EmptyState from '@/components/EmptyState.vue'
 import { buildTrendOption, seriesFor, TREND_METRICS, type TrendMetric } from './chartOptions'
 import { useECharts } from './useECharts'
+import { useUiStore } from '@/stores/ui'
 
 const props = defineProps<{ trend: UsageSummary['trend'] }>()
+const ui = useUiStore()
 
 const metric = ref<TrendMetric>('token')
 /** 被用户点击图例隐藏的系列名 */
@@ -23,8 +25,8 @@ function toggle(name: string) {
 
 useECharts(
   el,
-  () => buildTrendOption(props.trend, metric.value, hidden.value),
-  () => metric.value,
+  () => buildTrendOption(props.trend, metric.value, hidden.value, ui.theme === 'dark'),
+  () => `${metric.value}:${ui.theme}`,
 )
 </script>
 

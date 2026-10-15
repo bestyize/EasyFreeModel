@@ -27,6 +27,8 @@ textarea {
   color: inherit;
 }
 
+::placeholder { color: var(--c-text-2); opacity: 1; }
+
 button {
   cursor: pointer;
 }

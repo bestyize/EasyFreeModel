@@ -22,7 +22,7 @@ const scaleOptions = computed(() => {
         <option value="en">English</option>
       </select>
     </SettingsRow>
-    <SettingsRow label="主题" description="首版优先浅色，深色样式后续补全。" for-id="s-theme">
+    <SettingsRow label="主题" description="可选浅色、深色或跟随系统；顶部按钮可快速切换并保存。" for-id="s-theme">
       <select id="s-theme" v-model="draft.theme" class="input">
         <option value="light">浅色</option>
         <option value="dark">深色</option>

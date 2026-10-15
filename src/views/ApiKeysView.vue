@@ -290,11 +290,11 @@ onActivated(() => {
 
 <style scoped>
 .page { display: flex; flex-direction: column; gap: 16px; }
-.risk { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid #f3c9c9; border-radius: var(--radius); background: #fdecec; color: #a63232; font-size: var(--fs-small); line-height: 1.6; }
+.risk { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border: 1px solid var(--c-danger-border); border-radius: var(--radius); background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); line-height: 1.6; }
 .risk svg { flex: none; margin-top: 2px; }
 .toolbar { display: flex; align-items: center; justify-content: space-between; }
 .count { color: var(--c-text-2); font-size: var(--fs-small); }
-.action-error { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
+.action-error { margin: 0; padding: 10px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
 .load-error { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; color: var(--c-danger); }
 .loading { margin: 0; color: var(--c-text-2); }
 .table-wrap { overflow-x: auto; }

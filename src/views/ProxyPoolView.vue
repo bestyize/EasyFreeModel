@@ -240,12 +240,12 @@ onActivated(() => {
 .ov-stats { margin: 8px 0 0; font-size: var(--fs-small); font-weight: 500; }
 .banner { display: flex; align-items: flex-start; gap: 10px; padding: 12px 14px; border-radius: var(--radius); font-size: var(--fs-small); line-height: 1.6; }
 .banner svg { flex: none; margin-top: 2px; }
-.banner.danger { border: 1px solid #f3c9c9; background: #fdecec; color: #a63232; }
-.banner.warn { border: 1px solid #f1deb0; background: #fdf6e8; color: #7a5a14; }
+.banner.danger { border: 1px solid var(--c-danger-border); background: var(--c-danger-soft); color: var(--c-danger); }
+.banner.warn { border: 1px solid var(--c-warning-border); background: var(--c-warning-soft); color: var(--c-warning); }
 .nodes { padding: 18px 0 0; overflow: hidden; }
 .toolbar { display: flex; align-items: center; justify-content: space-between; padding: 0 24px 14px; }
 .tools { display: flex; gap: 8px; }
-.action-error { margin: 0 24px 12px; padding: 10px 12px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
+.action-error { margin: 0 24px 12px; padding: 10px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
 .nodes > :deep(.empty-state) { margin: 0 24px 24px; }
 .table-wrap { overflow-x: auto; border-top: 1px solid var(--c-border); }
 table { width: 100%; border-collapse: collapse; font-size: var(--fs-small); }

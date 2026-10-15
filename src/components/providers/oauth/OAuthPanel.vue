@@ -447,7 +447,7 @@ onBeforeUnmount(() => {
 .notice { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; }
 .notice p { margin: 0 0 4px; }
 .notice ul { margin: 0; padding-left: 18px; }
-.notice.risk { background: #fdf3e0; border: 1px solid #f6d9a3; color: #a35f00; }
+.notice.risk { background: var(--c-warning-soft); border: 1px solid var(--c-warning-border); color: var(--c-warning); }
 .notice.neutral { flex-direction: column; align-items: stretch; gap: 0; background: var(--c-surface-2); color: var(--c-text-2); }
 .req-title { margin-top: 4px; }
 .actions { display: flex; align-items: center; gap: 8px; justify-content: flex-end; }

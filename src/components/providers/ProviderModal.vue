@@ -857,7 +857,7 @@ function cancel() {
 
 .content { display: flex; flex-direction: column; gap: 14px; }
 .notice { display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; }
-.notice.risk { background: #fdf3e0; border: 1px solid #f6d9a3; color: #a35f00; }
+.notice.risk { background: var(--c-warning-soft); border: 1px solid var(--c-warning-border); color: var(--c-warning); }
 .notice.neutral { background: var(--c-surface-2); color: var(--c-text-2); }
 
 .panel { border: 1px solid var(--c-border); border-radius: var(--radius); padding: 14px 16px 16px; background: var(--c-canvas); }
@@ -892,6 +892,6 @@ function cancel() {
 .issues { margin: 0; font-size: 12px; color: var(--c-danger); }
 .issues p { margin: 0; }
 .model-test-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--c-surface-2); font-size: var(--fs-small); color: var(--c-text); }
-.model-test-note.bad { background: #fdecec; color: var(--c-danger); }
+.model-test-note.bad { background: var(--c-danger-soft); color: var(--c-danger); }
 .dirty-tip { font-size: 12px; color: var(--c-brand); }
 </style>

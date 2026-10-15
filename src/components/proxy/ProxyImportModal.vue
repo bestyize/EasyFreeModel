@@ -84,5 +84,5 @@ http://proxy.example.com:8080
 .area { height: auto; padding: 8px 12px; resize: vertical; font-family: var(--font-mono); }
 .hint { margin: 0; color: var(--c-text-2); font-size: var(--fs-caption); }
 .err { margin: 0; color: var(--c-danger); font-size: var(--fs-small); }
-.skipped { margin: 0; padding: 10px 12px 10px 28px; max-height: 200px; overflow-y: auto; border-radius: 8px; background: #fdf6e8; color: #7a5a14; font-size: var(--fs-caption); line-height: 1.7; }
+.skipped { margin: 0; padding: 10px 12px 10px 28px; max-height: 200px; overflow-y: auto; border-radius: 8px; background: var(--c-warning-soft); color: var(--c-warning); font-size: var(--fs-caption); line-height: 1.7; }
 </style>

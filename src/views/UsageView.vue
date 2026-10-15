@@ -170,7 +170,7 @@ onActivated(() => {
 .bottom-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: var(--card-gap); align-items: start; }
 .state { margin: 0; padding: 60px 0; text-align: center; color: var(--c-text-2); }
 .state.small { padding: 30px 0; }
-.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 8px 12px; border-radius: 8px; background: #fdecec; color: var(--c-danger); font-size: var(--fs-small); }
+.banner { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); }
 @media (max-width: 1280px) {
   .main-row { grid-template-columns: minmax(0, 1fr); }
 }

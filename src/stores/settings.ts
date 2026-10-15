@@ -39,25 +39,32 @@ export const useSettingsStore = defineStore('settings', () => {
   const saving = ref(false)
   const loadError = ref<string | null>(null)
   const saveError = ref<string | null>(null)
+  const themeError = ref<string | null>(null)
+  let pendingLoad: Promise<void> | null = null
+  let systemThemeQuery: MediaQueryList | null = null
 
   const dirty = computed(() => !!saved.value && !!draft.value && !sameSettings(saved.value, draft.value))
 
-  async function load(force = false) {
-    if (loading.value) return
+  function load(force = false): Promise<void> {
+    if (pendingLoad) return pendingLoad
     // 草稿有未保存修改时不覆盖，除非强制
-    if (dirty.value && !force) return
+    if (dirty.value && !force) return Promise.resolve()
     loading.value = true
-    try {
-      const s = await api.getSettings()
-      saved.value = clone(s)
-      draft.value = clone(s)
-      loadError.value = null
-      applyAppearance(s)
-    } catch (e) {
-      loadError.value = errorMessage(e)
-    } finally {
-      loading.value = false
-    }
+    pendingLoad = (async () => {
+      try {
+        const s = await api.getSettings()
+        saved.value = clone(s)
+        draft.value = clone(s)
+        loadError.value = null
+        applyAppearance(s)
+      } catch (e) {
+        loadError.value = errorMessage(e)
+      } finally {
+        loading.value = false
+        pendingLoad = null
+      }
+    })()
+    return pendingLoad
   }
 
   /** 页面只需要“已加载过一次”，避免重复请求。 */
@@ -73,6 +80,7 @@ export const useSettingsStore = defineStore('settings', () => {
       const result = await api.saveSettings(clone(draft.value))
       saved.value = clone(result)
       draft.value = clone(result)
+      themeError.value = null
       applyAppearance(result)
       return true
     } catch (e) {
@@ -83,10 +91,54 @@ export const useSettingsStore = defineStore('settings', () => {
     }
   }
 
+  /** 顶部快捷按钮仅保存主题，不会顺带提交设置页其他未保存的字段。 */
+  async function toggleTheme(): Promise<boolean> {
+    if (saving.value) return false
+    await ensureLoaded()
+    if (!saved.value || saving.value) {
+      themeError.value = loadError.value ?? '加载主题设置失败'
+      return false
+    }
+    const previous = clone(saved.value)
+    const nextTheme = useUiStore().theme === 'dark' ? 'light' : 'dark'
+    const next: AppSettings = { ...previous, theme: nextTheme }
+    themeError.value = null
+    saving.value = true
+    applyAppearance(next)
+    try {
+      const result = await api.saveSettings(next)
+      saved.value = clone(result)
+      if (draft.value && draft.value.theme === previous.theme) draft.value.theme = result.theme
+      applyAppearance(result)
+      return true
+    } catch (e) {
+      themeError.value = `主题保存失败：${errorMessage(e)}`
+      applyAppearance(previous)
+      return false
+    } finally {
+      saving.value = false
+    }
+  }
+
+  function startAppearanceSync() {
+    if (systemThemeQuery || typeof window === 'undefined' || typeof window.matchMedia !== 'function') return
+    systemThemeQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    systemThemeQuery.addEventListener('change', onSystemThemeChange)
+  }
+
+  function onSystemThemeChange() {
+    if (!saving.value && saved.value?.theme === 'system') applyAppearance(saved.value)
+  }
+
+  function stopAppearanceSync() {
+    systemThemeQuery?.removeEventListener('change', onSystemThemeChange)
+    systemThemeQuery = null
+  }
+
   function reset() {
     if (saved.value) draft.value = clone(saved.value)
     saveError.value = null
   }
 
-  return { saved, draft, loading, saving, loadError, saveError, dirty, load, ensureLoaded, save, reset }
+  return { saved, draft, loading, saving, loadError, saveError, themeError, dirty, load, ensureLoaded, save, toggleTheme, startAppearanceSync, stopAppearanceSync, reset }
 })

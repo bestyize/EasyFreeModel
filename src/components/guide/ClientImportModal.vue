@@ -149,7 +149,7 @@ const restartHint = computed(() => (props.client === 'codex' ? '重启 Codex（�
 .lead { margin: 0; color: var(--c-text-2); font-size: var(--fs-small); line-height: 1.7; }
 .muted { margin: 0; color: var(--c-text-2); font-size: var(--fs-small); }
 .ok { margin: 0; color: var(--c-success); font-size: var(--fs-body); font-weight: 600; }
-.problem { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fdecec; color: #a63232; font-size: var(--fs-small); line-height: 1.6; }
+.problem { margin: 0; padding: 10px 12px; border-radius: 8px; background: var(--c-danger-soft); color: var(--c-danger); font-size: var(--fs-small); line-height: 1.6; }
 .facts { margin: 0; display: flex; flex-direction: column; gap: 8px; font-size: var(--fs-small); }
 .facts div { display: flex; gap: 12px; align-items: baseline; }
 .facts dt { flex: none; width: 76px; color: var(--c-text-2); }

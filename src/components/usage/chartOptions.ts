@@ -51,8 +51,11 @@ export function buildTrendOption(
   trend: UsageSummary['trend'],
   metric: TrendMetric,
   hidden: readonly string[] = [],
+  dark = false,
 ): EChartsCoreOption {
   const defs = seriesFor(metric)
+  const muted = dark ? '#b3b3b3' : '#677084'
+  const border = dark ? '#393939' : '#e7e9ed'
   return {
     animation: false,
     color: defs.map((d) => d.color),
@@ -65,23 +68,26 @@ export function buildTrendOption(
     },
     tooltip: {
       trigger: 'axis',
+      backgroundColor: dark ? '#292929' : '#ffffff',
+      borderColor: border,
+      textStyle: { color: dark ? '#f2f2f2' : '#16181d' },
       valueFormatter: (v: unknown) => formatMetricValue(metric, Number(v)),
     },
     xAxis: {
       type: 'category',
       boundaryGap: false,
       data: trend.map((p) => p.label),
-      axisLine: { lineStyle: { color: '#e7e9ed' } },
+      axisLine: { lineStyle: { color: border } },
       axisTick: { show: false },
-      axisLabel: { color: '#677084', hideOverlap: true },
+      axisLabel: { color: muted, hideOverlap: true },
     },
     yAxis: {
       type: 'value',
       axisLabel: {
-        color: '#677084',
+        color: muted,
         formatter: (v: number) => (metric === 'cost' ? formatCost(v) : formatCompact(v)),
       },
-      splitLine: { lineStyle: { color: '#eef0f3' } },
+      splitLine: { lineStyle: { color: border } },
     },
     series: defs.map((d) => ({
       name: d.name,
@@ -97,11 +103,14 @@ export function buildTrendOption(
   }
 }
 
-export function buildDonutOption(items: UsageSummary['providerShare']): EChartsCoreOption {
+export function buildDonutOption(items: UsageSummary['providerShare'], dark = false): EChartsCoreOption {
   return {
     animation: false,
     tooltip: {
       trigger: 'item',
+      backgroundColor: dark ? '#292929' : '#ffffff',
+      borderColor: dark ? '#393939' : '#e7e9ed',
+      textStyle: { color: dark ? '#f2f2f2' : '#16181d' },
       formatter: (p: { name: string; value: number; percent: number }) =>
         `${p.name}<br/>${formatInt(p.value)} Token · ${p.percent.toFixed(1)}%`,
     },
@@ -113,7 +122,7 @@ export function buildDonutOption(items: UsageSummary['providerShare']): EChartsC
         avoidLabelOverlap: true,
         label: { show: false },
         labelLine: { show: false },
-        itemStyle: { borderColor: '#ffffff', borderWidth: 2 },
+        itemStyle: { borderColor: dark ? '#191919' : '#ffffff', borderWidth: 2 },
         data: items.map((i) => ({
           name: i.name,
           value: i.tokens,

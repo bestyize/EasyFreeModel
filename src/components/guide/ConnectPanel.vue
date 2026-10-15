@@ -123,7 +123,7 @@ onActivated(() => {
 .keyline { display: flex; align-items: center; gap: 8px; min-width: 0; }
 .keyline code { flex: 1; min-width: 0; padding: 6px 10px; border-radius: 6px; background: var(--c-surface-2); font-family: var(--font-mono); font-size: var(--fs-caption); word-break: break-all; user-select: all; }
 .field-note { margin: 0; color: var(--c-text-2); font-size: var(--fs-caption); line-height: 1.6; }
-.warn-text { margin: 0; color: #a0620a; font-size: var(--fs-small); line-height: 1.6; }
+.warn-text { margin: 0; color: var(--c-warning); font-size: var(--fs-small); line-height: 1.6; }
 .field-note.warn-text { font-size: var(--fs-caption); }
 .clients { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
 .client { display: flex; align-items: center; gap: 12px; padding: 14px 16px; border: 1px solid var(--c-border); border-radius: var(--radius); background: var(--c-canvas); color: var(--c-text); text-align: left; }
