@@ -330,6 +330,10 @@ export interface ClientImportInput {
   origin: string
   apiKey: string
   model: string
+  /** Claude Code 的三个模型档位；缺省时使用 model */
+  haikuModel?: string
+  sonnetModel?: string
+  opusModel?: string
 }
 
 export interface ImportFieldChange {
