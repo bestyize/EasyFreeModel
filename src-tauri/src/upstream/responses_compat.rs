@@ -11,6 +11,23 @@ use super::{Adapter, AdapterKind, Capabilities, UpstreamRequest, UpstreamTarget}
 
 pub struct ResponsesAdapter;
 
+fn has_web_search(tools: &Value) -> bool {
+    tools.as_array().is_some_and(|items| items.iter()
+        .any(|tool| tool.get("type").and_then(Value::as_str) == Some("web_search")))
+}
+
+pub(crate) fn codex_uses_lite(body: &Value, model: &str) -> bool {
+    codex_uses_lite_fields(body.get("tools"), body.get("input"), model)
+}
+
+fn codex_uses_lite_fields(tools: Option<&Value>, input: Option<&Value>, model: &str) -> bool {
+    matches!(model, "gpt-6.1-sol" | "gpt-6-sol" | "gpt-6-luna")
+        && !tools.is_some_and(has_web_search)
+        && !input.and_then(Value::as_array).is_some_and(|items| items.iter()
+            .any(|item| item.get("type").and_then(Value::as_str) == Some("additional_tools")
+                && item.get("tools").is_some_and(has_web_search)))
+}
+
 impl ResponsesAdapter {
     pub fn responses_url(base: &Url, path: Option<&str>) -> Url {
         if let Some(p) = path {
@@ -77,10 +94,29 @@ impl Adapter for ResponsesAdapter {
             obj.insert("instructions".into(), Value::String("You are a helpful assistant.".into()));
         }
         obj.insert("store".into(), Value::Bool(false));
-        let lite = matches!(target.provider_id.as_str(), "codex")
-            && matches!(obj.get("model").and_then(Value::as_str), Some("gpt-6.1-sol" | "gpt-6-sol" | "gpt-6-luna"))
-            && !obj.get("tools").and_then(Value::as_array)
-                .is_some_and(|tools| tools.iter().any(|t| t.get("type").and_then(Value::as_str) == Some("web_search")));
+        let model = obj.get("model").and_then(Value::as_str).unwrap_or_default().to_owned();
+        let lite = codex_uses_lite_fields(obj.get("tools"), obj.get("input"), &model);
+        if !lite {
+            let mut prefix_tools = Vec::new();
+            if let Some(items) = obj.get_mut("input").and_then(Value::as_array_mut) {
+                items.retain(|item| {
+                    if item.get("type").and_then(Value::as_str) != Some("additional_tools") { return true }
+                    if let Some(tools) = item.get("tools").and_then(Value::as_array) {
+                        prefix_tools.extend(tools.iter().cloned());
+                    }
+                    false
+                });
+            }
+            if !prefix_tools.is_empty() {
+                let tools = obj.entry("tools").or_insert_with(|| Value::Array(vec![]));
+                if !tools.is_array() { *tools = Value::Array(vec![]); }
+                if let Some(list) = tools.as_array_mut() {
+                    for tool in prefix_tools {
+                        if !list.contains(&tool) { list.push(tool); }
+                    }
+                }
+            }
+        }
         if lite {
             let has_prefix = obj.get("input").and_then(Value::as_array)
                 .is_some_and(|items| items.iter().any(|item| item.get("type").and_then(Value::as_str) == Some("additional_tools")));
@@ -94,9 +130,15 @@ impl Adapter for ResponsesAdapter {
                 }
             }
             obj.insert("tools".into(), Value::Null);
-            obj.insert("tool_choice".into(), Value::String("auto".into()));
+            obj.entry("tool_choice").or_insert_with(|| Value::String("auto".into()));
             obj.insert("parallel_tool_calls".into(), Value::Bool(false));
-            obj.insert("reasoning".into(), serde_json::json!({"effort":"medium", "context":"all_turns"}));
+            let reasoning = obj.entry("reasoning").or_insert_with(|| serde_json::json!({"effort":"medium"}));
+            if !reasoning.is_object() { *reasoning = serde_json::json!({"effort":"medium"}); }
+            if let Some(r) = reasoning.as_object_mut() {
+                r.entry("effort").or_insert_with(|| Value::String("medium".into()));
+                r.remove("summary");
+                r.insert("context".into(), Value::String("all_turns".into()));
+            }
         } else {
             obj.remove("parallel_tool_calls");
             if !obj.contains_key("reasoning") {
@@ -146,5 +188,32 @@ mod tests {
         assert_eq!(body["stream"], true);
         assert_eq!(body["store"], false);
         assert!(body.get("max_output_tokens").is_none());
+    }
+
+    #[test]
+    fn codex_preserves_reasoning_and_moves_web_search_out_of_lite_prefix() {
+        let target = UpstreamTarget { provider_id: "codex".into(), connection_id: "c".into(),
+            endpoint: super::super::ResolvedEndpoint::new(AdapterKind::OpenAiResponses,
+                Url::parse("https://chatgpt.com/backend-api/codex/responses").unwrap(), super::super::AuthStyle::Bearer),
+            api_key: None, extra_headers: vec![], timeout: std::time::Duration::from_secs(10) };
+        let req = UpstreamRequest { model: "gpt-6.1-sol".into(), stream: true, passthrough: true,
+            body: serde_json::json!({"model":"gpt-6.1-sol", "input":[
+                {"type":"additional_tools", "role":"developer", "tools":[{"type":"web_search"}]},
+                {"type":"message", "role":"user", "content":[{"type":"input_text", "text":"find"}]}
+            ], "reasoning":{"effort":"high"}, "stream":true}), extra_headers: vec![] };
+        assert!(!codex_uses_lite(&req.body, &req.model));
+        let mut body = req.body.clone();
+        ResponsesAdapter.prepare_body(&mut body, &req, &target);
+        assert_eq!(body["tools"][0]["type"], "web_search");
+        assert_eq!(body["input"][0]["role"], "user");
+        assert_eq!(body["reasoning"]["effort"], "high");
+        assert!(body.get("parallel_tool_calls").is_none());
+
+        let mut lite_req = req.clone();
+        lite_req.body = serde_json::json!({"model":"gpt-6.1-sol", "input":[{"role":"user", "content":"hello"}], "reasoning":{"effort":"high"}, "stream":true});
+        let mut lite_body = lite_req.body.clone();
+        ResponsesAdapter.prepare_body(&mut lite_body, &lite_req, &target);
+        assert_eq!(lite_body["reasoning"]["effort"], "high");
+        assert_eq!(lite_body["reasoning"]["context"], "all_turns");
     }
 }

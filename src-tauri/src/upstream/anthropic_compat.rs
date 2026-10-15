@@ -41,6 +41,14 @@ impl Adapter for AnthropicCompatAdapter {
         Self::messages_url(&target.endpoint.base_url, target.endpoint.path.as_deref())
     }
 
+    fn request_url(&self, target: &UpstreamTarget, _req: &UpstreamRequest) -> Url {
+        let mut url = self.endpoint_url(target);
+        if target.provider_id == "claude" && !url.query_pairs().any(|(k, _)| k == "beta") {
+            url.query_pairs_mut().append_pair("beta", "true");
+        }
+        url
+    }
+
     fn models_url(&self, target: &UpstreamTarget) -> Url {
         let base = &target.endpoint.base_url;
         let trimmed = base.path().trim_end_matches('/');
@@ -75,5 +83,21 @@ mod tests {
         assert_eq!(AnthropicCompatAdapter::messages_url(&u("https://h.example/anthropic/v1"), None).as_str(), "https://h.example/anthropic/v1/messages");
         assert_eq!(AnthropicCompatAdapter::messages_url(&u("https://h.example/v1/messages"), None).as_str(), "https://h.example/v1/messages");
         assert_eq!(AnthropicCompatAdapter::messages_url(&u("https://h.example"), Some("/x/messages")).as_str(), "https://h.example/x/messages");
+    }
+
+    #[test]
+    fn claude_oauth_uses_beta_endpoint_only_for_claude() {
+        let endpoint = super::super::ResolvedEndpoint::new(
+            AdapterKind::AnthropicCompatible,
+            Url::parse("https://api.anthropic.com/v1/messages").unwrap(),
+            super::super::AuthStyle::Bearer,
+        );
+        let mut target = UpstreamTarget { provider_id: "claude".into(), connection_id: "c".into(), endpoint,
+            api_key: None, extra_headers: vec![], timeout: std::time::Duration::from_secs(10) };
+        let req = UpstreamRequest { body: serde_json::Value::Null, model: "m".into(), stream: false,
+            passthrough: true, extra_headers: vec![] };
+        assert_eq!(AnthropicCompatAdapter.request_url(&target, &req).as_str(), "https://api.anthropic.com/v1/messages?beta=true");
+        target.provider_id = "anthropic".into();
+        assert_eq!(AnthropicCompatAdapter.request_url(&target, &req).as_str(), "https://api.anthropic.com/v1/messages");
     }
 }

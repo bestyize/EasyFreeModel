@@ -19,6 +19,7 @@ use crate::proxy::{ProxyPool, Route};
 pub const USER_AGENT_PREFIX: &str = "RouterDesktop";
 pub const CODEX_CLI_VERSION: &str = "0.159.0";
 pub const CODEX_USER_AGENT: &str = "codex_cli_rs/0.159.0";
+pub const CLAUDE_USER_AGENT: &str = "claude-cli/2.1.280 (external, sdk-cli)";
 
 pub fn user_agent() -> String {
     format!("{USER_AGENT_PREFIX}/{}", env!("CARGO_PKG_VERSION"))
@@ -141,7 +142,11 @@ impl UpstreamClient {
         total_timeout: Option<Duration>,
         header_timeout: Duration,
     ) -> Result<reqwest::Response, UpstreamError> {
-        let agent = if provider_id == "codex" { CODEX_USER_AGENT.to_string() } else { user_agent() };
+        let agent = match provider_id {
+            "codex" => CODEX_USER_AGENT.to_string(),
+            "claude" => CLAUDE_USER_AGENT.to_string(),
+            _ => user_agent(),
+        };
         headers.insert(USER_AGENT, HeaderValue::from_str(&agent).expect("static user agent"));
         self.send_routed(provider_id, |http| {
             let mut rb = http.post(url.clone()).headers(headers.clone()).body(body.clone());

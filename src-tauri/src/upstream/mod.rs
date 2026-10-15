@@ -421,16 +421,31 @@ fn build_headers<A: Adapter + ?Sized>(
             headers.insert(n.clone(), v.clone());
         }
     }
+    if target.provider_id == "claude" {
+        // Claude OAuth requires the Claude Code beta and OAuth feature flags.
+        // Keep caller beta flags (e.g. prompt caching), without duplicates.
+        const REQUIRED: &[&str] = &[
+            "claude-code-20250219", "oauth-2025-04-20",
+            "interleaved-thinking-2025-05-14", "context-management-2025-06-27",
+        ];
+        let mut flags: Vec<String> = REQUIRED.iter().map(|s| s.to_string()).collect();
+        if let Some(value) = headers.get("anthropic-beta") {
+            if let Ok(raw) = value.to_str() {
+                for flag in raw.split(',').map(str::trim).filter(|s| !s.is_empty()) {
+                    if !flags.iter().any(|existing| existing == flag) { flags.push(flag.to_string()); }
+                }
+            }
+        }
+        headers.insert("anthropic-beta", HeaderValue::from_str(&flags.join(","))
+            .map_err(|_| UpstreamError::Config("invalid Anthropic beta header".into()))?);
+    }
     if target.provider_id == "codex" {
         headers.insert("originator", HeaderValue::from_static("codex_cli_rs"));
         headers.insert("version", HeaderValue::from_static(client::CODEX_CLI_VERSION));
         headers.insert("session_id", HeaderValue::from_str(&target.connection_id)
             .map_err(|_| UpstreamError::Config("invalid connection id".into()))?);
         if let Some(r) = req {
-            if matches!(r.model.as_str(), "gpt-6.1-sol" | "gpt-6-sol" | "gpt-6-luna")
-                && !r.body.get("tools").and_then(Value::as_array)
-                    .is_some_and(|tools| tools.iter().any(|t| t.get("type").and_then(Value::as_str) == Some("web_search")))
-            {
+            if responses_compat::codex_uses_lite(&r.body, &r.model) {
                 headers.insert("x-openai-internal-codex-responses-lite", HeaderValue::from_static("true"));
             }
         }
@@ -503,6 +518,22 @@ mod tests {
         };
         let dbg = format!("{target:?}");
         assert!(!dbg.contains("sk-debug-secret-key") && !dbg.contains("hdr-debug-secret"), "{dbg}");
+    }
+
+    #[test]
+    fn claude_oauth_merges_required_beta_with_client_flags() {
+        let target = UpstreamTarget { provider_id: "claude".into(), connection_id: "c".into(),
+            endpoint: ResolvedEndpoint::new(AdapterKind::AnthropicCompatible,
+                Url::parse("https://api.anthropic.com/v1/messages").unwrap(), AuthStyle::Bearer),
+            api_key: Some(Secret::new("secret")), extra_headers: vec![], timeout: Duration::from_secs(10) };
+        let req = UpstreamRequest { body: serde_json::json!({}), model: "claude-sonnet".into(),
+            stream: true, passthrough: true,
+            extra_headers: vec![(HeaderName::from_static("anthropic-beta"), HeaderValue::from_static("custom-beta,oauth-2025-04-20"))] };
+        let headers = build_headers(&anthropic_compat::AnthropicCompatAdapter, &target, Some(&req), true).unwrap();
+        let beta = headers.get("anthropic-beta").unwrap().to_str().unwrap();
+        assert!(beta.contains("claude-code-20250219") && beta.contains("context-management-2025-06-27"));
+        assert!(beta.contains("custom-beta"));
+        assert_eq!(beta.matches("oauth-2025-04-20").count(), 1);
     }
 
     #[test]
