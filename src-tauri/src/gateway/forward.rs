@@ -310,6 +310,30 @@ fn no_connection_message(provider: &ProviderCfg, n: &NoConnection) -> String {
     format!("All connections of provider `{name}` are disabled or paused.")
 }
 
+/// CodeBuddy uses numeric, top-level error codes rather than OpenAI's error envelope.
+/// Preserve actionable diagnostics while keeping arbitrary upstream text out of logs.
+fn codebuddy_provider_error(provider: &str, body: &[u8]) -> Option<(u16, ApiError)> {
+    if !matches!(provider, "codebuddy-cn" | "codebuddy-intl") {
+        return None;
+    }
+    let value: Value = serde_json::from_slice(body).ok()?;
+    let code = value.get("code").and_then(Value::as_i64)?;
+    match code {
+        11128 => {
+            let request_id = value.get("requestId").and_then(Value::as_str)
+                .filter(|id| id.len() <= 128 && id.chars().all(|c| c.is_ascii_alphanumeric() || c == '-'))
+                .unwrap_or("unavailable");
+            Some((403, ApiError::new(ApiErrorKind::InvalidRequest,
+                format!("CodeBuddy rejected this request during channel verification (11128). This is not an expired API token. Use an approved client or contact CodeBuddy support. Request ID: {request_id}"))
+                .with_code("codebuddy_channel_not_approved")))
+        }
+        6004 => Some((429, ApiError::new(ApiErrorKind::RateLimit,
+            "CodeBuddy has reached its request limit; retry after the provider quota resets.")
+            .with_code("codebuddy_rate_limited"))),
+        _ => None,
+    }
+}
+
 /// 把调度失败如实翻译给客户端，并写入失败的用量记录。
 fn failure_response(
     protocol: ProtocolKind,
@@ -343,6 +367,14 @@ fn failure_response(
             resp
         }
         DispatchError::Upstream { reply, secrets } => {
+            if let Some((status, err)) = codebuddy_provider_error(&provider.id, &reply.body) {
+                let mut resp = error_with_status(protocol, status, &err);
+                resp.headers_mut().insert("x-router-source", HeaderValue::from_static("upstream"));
+                if status == 429 {
+                    if let Some(d) = reply.retry_after { set_retry_after(&mut resp, d); }
+                }
+                return resp;
+            }
             let (status, body) = upstream_error_body(protocol, upstream_protocol, reply.status, &reply.body, &secrets.0);
             let mut resp = Response::new(Body::from(body));
             *resp.status_mut() = StatusCode::from_u16(status).unwrap_or(StatusCode::BAD_GATEWAY);
@@ -443,5 +475,27 @@ pub(crate) async fn list_models_ollama(rt: &Runtime, key: &VerifiedKey) -> Respo
             Json(json!({"models": data})).into_response()
         }
         Err(_) => catalog_error(ProtocolKind::Ollama),
+    }
+}
+
+#[cfg(test)]
+mod codebuddy_diagnostics_tests {
+    use super::*;
+
+    #[test]
+    fn channel_validation_is_actionable_and_scoped() {
+        let body = br#"{"code":11128,"msg":"Illegal API invocation","requestId":"abcd-123"}"#;
+        let (status, err) = codebuddy_provider_error("codebuddy-cn", body).unwrap();
+        assert_eq!(status, 403);
+        assert_eq!(err.code.as_deref(), Some("codebuddy_channel_not_approved"));
+        assert!(err.message.contains("abcd-123"));
+        assert!(codebuddy_provider_error("openai", body).is_none());
+    }
+
+    #[test]
+    fn provider_limit_is_rate_limit_not_invalid_request() {
+        let (status, err) = codebuddy_provider_error("codebuddy-intl", br#"{"code":6004}"#).unwrap();
+        assert_eq!(status, 429);
+        assert_eq!(err.code.as_deref(), Some("codebuddy_rate_limited"));
     }
 }
