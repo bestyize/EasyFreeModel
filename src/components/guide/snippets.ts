@@ -9,8 +9,8 @@ import type { Protocol } from '@/types'
 
 export const KEY_PLACEHOLDER = 'YOUR_API_KEY'
 export const MODEL_PLACEHOLDER = 'YOUR_MODEL'
-export const PROVIDER_NAME = 'Router Desktop'
-const CODEX_PROVIDER_ID = 'router'
+export const PROVIDER_NAME = 'FreeApiBox'
+const CODEX_PROVIDER_ID = 'freeapibox'
 const PROMPT = 'Hello'
 
 export interface GuideInput {
