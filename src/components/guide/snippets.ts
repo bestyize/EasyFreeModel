@@ -18,6 +18,9 @@ export interface GuideInput {
   origin: string
   key: string
   model: string
+  haikuModel?: string
+  sonnetModel?: string
+  opusModel?: string
 }
 
 /** 把监听地址变成客户端可连的根地址。通配地址（0.0.0.0 / ::）对本机客户端等价于回环。 */
@@ -207,15 +210,15 @@ experimental_bearer_token = ${q(key)}`
 
 // ───────── Claude Code ─────────
 
-export function claudeSettingsJson({ origin, key, model }: GuideInput): string {
+export function claudeSettingsJson({ origin, key, model, haikuModel, sonnetModel, opusModel }: GuideInput): string {
   return pretty({
     env: {
       ANTHROPIC_BASE_URL: origin,
       ANTHROPIC_AUTH_TOKEN: key,
       ANTHROPIC_MODEL: model,
-      ANTHROPIC_DEFAULT_HAIKU_MODEL: model,
-      ANTHROPIC_DEFAULT_SONNET_MODEL: model,
-      ANTHROPIC_DEFAULT_OPUS_MODEL: model,
+      ANTHROPIC_DEFAULT_HAIKU_MODEL: haikuModel || model,
+      ANTHROPIC_DEFAULT_SONNET_MODEL: sonnetModel || model,
+      ANTHROPIC_DEFAULT_OPUS_MODEL: opusModel || model,
     },
   })
 }
@@ -233,7 +236,7 @@ export function ccSwitchEndpoint(app: CcSwitchApp, origin: string): string {
  * `ccswitch://v1/import?resource=provider&app=…`。
  * 参数用 encodeURIComponent（空格为 %20，与官方示例一致）。Claude 额外填三个档位模型，避免后台任务请求不存在的 Haiku 模型。
  */
-export function ccSwitchLink(app: CcSwitchApp, { origin, key, model }: GuideInput): string {
+export function ccSwitchLink(app: CcSwitchApp, { origin, key, model, haikuModel, sonnetModel, opusModel }: GuideInput): string {
   const params: [string, string][] = [
     ['resource', 'provider'],
     ['app', app],
@@ -243,7 +246,7 @@ export function ccSwitchLink(app: CcSwitchApp, { origin, key, model }: GuideInpu
     ['model', model],
   ]
   if (app === 'claude') {
-    params.push(['haikuModel', model], ['sonnetModel', model], ['opusModel', model])
+    params.push(['haikuModel', haikuModel || model], ['sonnetModel', sonnetModel || model], ['opusModel', opusModel || model])
   }
   return `ccswitch://v1/import?${params.map(([k, v]) => `${k}=${encodeURIComponent(v)}`).join('&')}`
 }
