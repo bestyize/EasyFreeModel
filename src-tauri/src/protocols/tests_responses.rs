@@ -90,6 +90,24 @@ fn input_may_be_a_plain_string() {
 }
 
 #[test]
+fn responses_assistant_history_fragments_keep_their_original_text() {
+    let req = rs(&json!({"model": "m", "input": [
+        {"role": "assistant", "content": [
+            {"type": "output_text", "text": "One"},
+            {"type": "output_text", "text": " two"},
+            {"type": "output_text", "text": " three\nNext line"}
+        ]},
+        {"role": "user", "content": "continue"}
+    ]}));
+    let body = openai_chat::encode_request(&req).unwrap().body;
+    assert_eq!(body["messages"][0]["content"], json!([
+        {"type": "text", "text": "One"},
+        {"type": "text", "text": " two"},
+        {"type": "text", "text": " three\nNext line"}
+    ]));
+}
+
+#[test]
 fn mid_conversation_developer_message_is_hoisted_with_warning() {
     let req = rs(&json!({"model": "m", "input": [
         {"role": "user", "content": "hi"},

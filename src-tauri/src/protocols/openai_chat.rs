@@ -485,8 +485,13 @@ fn encode_assistant_message(content: &[ContentPart], out: &mut Vec<Value>, warni
     msg.insert("role".into(), json!("assistant"));
     if texts.is_empty() && !calls.is_empty() {
         msg.insert("content".into(), Value::Null);
+    } else if texts.len() <= 1 {
+        msg.insert("content".into(), json!(texts.first().copied().unwrap_or("")));
     } else {
-        msg.insert("content".into(), json!(texts.join("\n")));
+        // Multiple assistant text parts can be stream fragments in a client
+        // history. Keep their boundaries without inventing a newline between
+        // every fragment (9Router retains the parts as an OpenAI content array).
+        msg.insert("content".into(), json!(texts.into_iter().map(|text| json!({"type": "text", "text": text})).collect::<Vec<_>>()));
     }
     if !calls.is_empty() {
         msg.insert("tool_calls".into(), Value::Array(calls));
