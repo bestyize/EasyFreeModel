@@ -80,6 +80,30 @@ pub async fn list(pool: &SqlitePool) -> AppResult<Vec<ApiKeyInfo>> {
     Ok(repo::list(pool).await?.iter().map(to_info).collect())
 }
 
+/// 新安装时预置一把无期限、无限额、全协议密钥。已存在的密钥不变。
+/// 标记一旦写入，用户删除全部密钥后也不会在下次启动自动重建。
+pub async fn ensure_default(pool: &SqlitePool) -> AppResult<()> {
+    if repo::default_key_initialized(pool).await? {
+        return Ok(());
+    }
+    if repo::list(pool).await?.is_empty() {
+        create(
+            pool,
+            CreateApiKeyInput {
+                name: "FreeApiBox 默认密钥".into(),
+                expires_at: None,
+                protocols: Protocol::ALL.to_vec(),
+                allowed_models: vec![],
+                rpm_limit: None,
+                tpm_limit: None,
+                total_limit: None,
+            },
+        )
+        .await?;
+    }
+    repo::mark_default_key_initialized(pool).await
+}
+
 fn validate_limit(name: &str, v: Option<i64>) -> AppResult<()> {
     match v {
         Some(n) if n < 1 => Err(AppError::msg(format!("{name} 必须为正整数或留空"))),
@@ -383,6 +407,26 @@ mod tests {
         let verifier: std::sync::Arc<dyn KeyVerifier> = std::sync::Arc::new(DbKeyVerifier::new(pool));
         assert!(verifier.verify(k.secret.clone()).await.is_some());
         assert!(verifier.verify("sk-rd-nope".into()).await.is_none());
+    }
+
+    #[tokio::test]
+    async fn default_key_is_created_once_and_not_recreated_after_delete() {
+        let pool = store::open_memory().await.unwrap();
+        ensure_default(&pool).await.unwrap();
+        let keys = list(&pool).await.unwrap();
+        assert_eq!(keys.len(), 1);
+        let k = &keys[0];
+        assert_eq!(k.protocols, Protocol::ALL);
+        assert!(k.expires_at.is_none());
+        assert!(k.allowed_models.is_empty());
+        assert!(k.rpm_limit.is_none() && k.tpm_limit.is_none() && k.total_limit.is_none());
+        let secret = k.secret.clone().unwrap();
+        assert!(verify_at(&pool, &secret, Utc::now()).await.is_some());
+        ensure_default(&pool).await.unwrap();
+        assert_eq!(list(&pool).await.unwrap().len(), 1);
+        delete(&pool, &k.id).await.unwrap();
+        ensure_default(&pool).await.unwrap();
+        assert!(list(&pool).await.unwrap().is_empty());
     }
 
     #[tokio::test]
