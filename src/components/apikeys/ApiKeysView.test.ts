@@ -69,11 +69,11 @@ describe('ApiKeysView', () => {
     expect(q('[data-testid="import-target-list"]')?.textContent).toContain('Claude Desktop')
     q('[data-testid="pick-claude"]')!.click()
     await flushPromises()
-    expect((q('#import-default-model') as HTMLInputElement).value).toBe('deepseek-chat')
-    expect((q('#import-haiku') as HTMLInputElement).placeholder).toBe('沿用默认模型')
-    expect((q('#import-haiku') as HTMLInputElement).value).toBe('')
-    expect((q('#import-sonnet') as HTMLInputElement).value).toBe('')
-    expect((q('#import-opus') as HTMLInputElement).value).toBe('')
+    expect((q('#import-default-model') as HTMLSelectElement).value).toBe('deepseek-chat')
+    expect((q('#import-default-model optgroup') as HTMLOptGroupElement).label).toBe('DeepSeek')
+    expect((q('#import-haiku') as HTMLSelectElement).selectedOptions[0].textContent).toBe('沿用默认模型')
+    expect((q('#import-sonnet') as HTMLSelectElement).value).toBe('')
+    expect((q('#import-opus') as HTMLSelectElement).value).toBe('')
     expect(h.api.previewClientImport).toHaveBeenCalledWith(expect.objectContaining({
       client: 'claude', apiKey: SECRET, model: 'deepseek-chat',
       haikuModel: '', sonnetModel: '', opusModel: '',
@@ -94,15 +94,40 @@ describe('ApiKeysView', () => {
     await wrapper.get('[data-testid="import-k1"]').trigger('click')
     q('[data-testid="pick-claude"]')!.click()
     await flushPromises()
-    const opus = q('#import-opus') as HTMLInputElement
+    const opus = q('#import-opus') as HTMLSelectElement
     opus.value = 'strong'
-    opus.dispatchEvent(new Event('input'))
+    opus.dispatchEvent(new Event('change'))
     await flushPromises()
     expect(h.api.previewClientImport).toHaveBeenLastCalledWith(expect.objectContaining({ opusModel: 'strong', apiKey: SECRET }))
     q('[data-testid="confirm-import"]')!.click()
     await flushPromises()
     expect(h.api.applyClientImport).toHaveBeenCalledWith(expect.objectContaining({ opusModel: 'strong' }))
     expect(q('[role="status"]')?.textContent).toContain('配置已写入')
+  })
+
+  it('模型下拉列出所有已配置供应商，并支持选择和手动输入', async () => {
+    h.api.listGatewayModels.mockResolvedValue([
+      { id: 'a/fast', providerId: 'a', providerName: '供应商 A' },
+      { id: 'b/strong', providerId: 'b', providerName: '供应商 B' },
+    ])
+    await mountView('127.0.0.1', [keyInfo({ secret: SECRET })])
+    await wrapper.get('[data-testid="import-k1"]').trigger('click')
+    q('[data-testid="pick-codex"]')!.click()
+    await flushPromises()
+    const select = q('#import-default-model') as HTMLSelectElement
+    expect([...select.querySelectorAll('optgroup')].map((g) => g.label)).toEqual(['供应商 A', '供应商 B'])
+    select.value = 'b/strong'
+    select.dispatchEvent(new Event('change'))
+    await flushPromises()
+    expect(h.api.previewClientImport).toHaveBeenLastCalledWith(expect.objectContaining({ model: 'b/strong' }))
+    select.value = [...select.options].find((o) => o.textContent?.includes('手动输入'))!.value
+    select.dispatchEvent(new Event('change'))
+    await flushPromises()
+    const custom = q('#import-default-model-custom') as HTMLInputElement
+    custom.value = 'my/custom-alias'
+    custom.dispatchEvent(new Event('input'))
+    await flushPromises()
+    expect(h.api.previewClientImport).toHaveBeenLastCalledWith(expect.objectContaining({ model: 'my/custom-alias' }))
   })
 
   it('Claude Desktop 可配置并复制多个模型，不写入 Claude Code 配置', async () => {
@@ -117,9 +142,9 @@ describe('ApiKeysView', () => {
     expect(q('[data-testid="setup-desktop"]')?.textContent).toContain('模型列表')
     q('[data-testid="add-desktop-model"]')!.click()
     await flushPromises()
-    const extra = q('#import-desktop-model-0') as HTMLInputElement
+    const extra = q('#import-desktop-model-0') as HTMLSelectElement
     extra.value = 'second'
-    extra.dispatchEvent(new Event('input'))
+    extra.dispatchEvent(new Event('change'))
     await flushPromises()
     expect(q('[data-testid="desktop-copy-model-0"]')?.textContent).toContain('first')
     expect(q('[data-testid="desktop-copy-model-1"]')?.textContent).toContain('second')

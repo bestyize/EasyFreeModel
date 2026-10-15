@@ -1,3 +1,4 @@
+use std::collections::HashSet;
 use std::io::ErrorKind;
 use std::net::IpAddr;
 
@@ -91,20 +92,28 @@ pub async fn save_settings(state: State<'_, AppState>, settings: AppSettings) ->
     Ok(s)
 }
 
-/// 网关当前能对外提供的模型名（启用且适配器就绪），不受任何密钥的模型白名单限制；
-/// 仅用于接入指南里给出模型候选，真正的访问控制仍由每个密钥的 `allowed_models` 决定。
+/// 导入弹窗的模型候选：已启用、适配器就绪、至少有一个可调度连接的供应商下的已启用模型。
+/// 候选名是网关实际接受的对外模型名；未连账号的内置预设不会误入列表。
 pub async fn list_gateway_models_inner(state: &AppState) -> AppResult<Vec<GatewayModel>> {
     let Some(rt) = state.gateway.runtime() else {
         return Ok(Vec::new());
     };
     let unrestricted = VerifiedKey { id: String::new(), allowed_protocols: Vec::new(), allowed_models: Vec::new(), rpm_limit: None, tpm_limit: None };
+    let connected: HashSet<String> = sqlx::query_scalar::<_, String>(
+        "SELECT DISTINCT provider_id FROM connections WHERE enabled = 1 AND status IN ('active', 'error')",
+    )
+    .fetch_all(&state.db)
+    .await?
+    .into_iter()
+    .collect();
     let mut models: Vec<GatewayModel> = rt
         .list_public_models(&unrestricted)
         .await?
         .into_iter()
+        .filter(|m| connected.contains(&m.provider_id))
         .map(|m| GatewayModel { id: m.id, provider_id: m.provider_id, provider_name: m.provider_name })
         .collect();
-    models.sort_by(|a, b| a.id.cmp(&b.id));
+    models.sort_by(|a, b| a.provider_name.cmp(&b.provider_name).then(a.id.cmp(&b.id)));
     Ok(models)
 }
 
@@ -163,7 +172,7 @@ mod tests {
     #[tokio::test]
     async fn gateway_models_list_only_enabled_ready_models() {
         let state = AppState::new(store::open_memory().await.unwrap(), Arc::new(MemoryVault::default()));
-        for (id, enabled) in [("ready", 1), ("off", 0)] {
+        for (id, enabled) in [("ready", 1), ("other", 1), ("off", 0), ("unconfigured", 1)] {
             sqlx::query(
                 "INSERT INTO providers (id, kind, display_name, grp, adapter, adapter_ready, protocols_json, enabled, sort_order, \
                     round_robin, max_concurrency, max_retries, created_at, updated_at, base_url) \
@@ -175,6 +184,14 @@ mod tests {
             .execute(&state.db)
             .await
             .unwrap();
+            if id != "unconfigured" {
+                sqlx::query("INSERT INTO connections (id, provider_id, account_label, kind, status, enabled, created_at, updated_at) VALUES (?1, ?2, 'Account', 'apiKey', 'active', 1, 't', 't')")
+                    .bind(format!("{id}-conn"))
+                    .bind(id)
+                    .execute(&state.db)
+                    .await
+                    .unwrap();
+            }
             for alias in ["zeta", "alpha"] {
                 sqlx::query(
                     "INSERT INTO models (id, provider_id, upstream_model_id, public_alias, enabled, position) VALUES (?1, ?2, ?3, ?4, 1, 0)",
@@ -190,8 +207,8 @@ mod tests {
         }
         let models = list_gateway_models_inner(&state).await.unwrap();
         let ids: Vec<&str> = models.iter().map(|m| m.id.as_str()).collect();
-        assert_eq!(ids, ["ready-alpha", "ready-zeta"], "停用的提供商不出现，结果按名称排序");
-        assert!(models.iter().all(|m| m.provider_id == "ready" && m.provider_name == "Provider ready"));
+        assert_eq!(ids, ["other-alpha", "other-zeta", "ready-alpha", "ready-zeta"], "所有已连接的可用提供商模型都出现；停用或未配置连接的不出现");
+        assert_eq!(models.iter().map(|m| m.provider_name.as_str()).collect::<Vec<_>>(), ["Provider other", "Provider other", "Provider ready", "Provider ready"]);
     }
 
     #[tokio::test]

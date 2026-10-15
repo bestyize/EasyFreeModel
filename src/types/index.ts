@@ -362,7 +362,7 @@ export interface ClientImportOutcome {
   changed: boolean
 }
 
-/** 网关当前对外提供的模型名（不受密钥白名单限制），用于接入指南的模型候选 */
+/** 已配置连接的可用供应商提供的模型名，用于接入弹窗候选 */
 export interface GatewayModel {
   id: string
   providerId: string

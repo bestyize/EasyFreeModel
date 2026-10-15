@@ -4,10 +4,11 @@ import { ArrowLeft, ArrowRight, Check, Copy, Laptop, Plus, Sparkles, Terminal, T
 import { api } from '@/api'
 import { openCcSwitchLink } from '@/api/openExternal'
 import BaseModal from '@/components/BaseModal.vue'
+import ModelPicker from '@/components/guide/ModelPicker.vue'
 import { errorMessage } from '@/components/media/format'
 import { useGatewayAddress } from '@/components/guide/useGatewayAddress'
 import { ccSwitchLink } from '@/components/guide/snippets'
-import type { ApiKeyInfo, ClientImportInput, ClientImportOutcome, ClientImportPreview, ImportClient } from '@/types'
+import type { ApiKeyInfo, ClientImportInput, ClientImportOutcome, ClientImportPreview, GatewayModel, ImportClient } from '@/types'
 
 type Target = 'codex' | 'claude' | 'desktop' | 'ccswitch'
 const props = defineProps<{ modelValue: boolean; apiKey: ApiKeyInfo | null }>()
@@ -19,7 +20,7 @@ const setupOpen = computed({
   get: () => target.value !== null,
   set: (v: boolean) => { if (!v) target.value = null },
 })
-const modelNames = ref<string[]>([])
+const modelNames = ref<GatewayModel[]>([])
 const modelError = ref<string | null>(null)
 const model = ref('')
 const haiku = ref('')
@@ -67,18 +68,18 @@ watch(() => props.modelValue, async (open) => {
   try {
     const list = await api.listGatewayModels()
     if (!props.modelValue) return
-    modelNames.value = [...new Set(list.map((entry) => entry.id))]
+    modelNames.value = list
   } catch (e) { modelError.value = errorMessage(e) }
 })
 watch(options, (list) => {
   if (!target.value || model.value || !list.length) return
-  model.value = list[0]
+  model.value = list[0].id
 })
 
 function choose(id: Target) {
   if (!props.apiKey?.secret) return
   pickerOpen.value = false
-  model.value = options.value[0] || ''
+  model.value = options.value[0]?.id || ''
   haiku.value = ''
   sonnet.value = ''
   opus.value = ''
@@ -195,33 +196,28 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
 
         <div class="model-heading">
           <strong>模型配置</strong>
-          <span>从已启用模型中选择，也可以输入模型名。</span>
+          <span>已找到 {{ options.length }} 个可用模型。展开下拉框按供应商选择，也可以手动输入。</span>
         </div>
         <div class="fields">
-          <div class="field">
-            <label for="import-default-model">默认模型</label>
-            <input id="import-default-model" v-model="model" list="import-model-options" placeholder="选择或输入模型名" autocomplete="off" spellcheck="false" />
-          </div>
+          <ModelPicker id="import-default-model" v-model="model" label="默认模型" :options="options" />
           <template v-if="target === 'claude' || (target === 'ccswitch' && ccApp === 'claude')">
-            <div class="field"><label for="import-sonnet">Sonnet 档位</label><input id="import-sonnet" v-model="sonnet" list="import-model-options" placeholder="沿用默认模型" autocomplete="off" spellcheck="false" /></div>
-            <div class="field"><label for="import-opus">Opus 档位</label><input id="import-opus" v-model="opus" list="import-model-options" placeholder="沿用默认模型" autocomplete="off" spellcheck="false" /></div>
-            <div class="field"><label for="import-haiku">Haiku 档位</label><input id="import-haiku" v-model="haiku" list="import-model-options" placeholder="沿用默认模型" autocomplete="off" spellcheck="false" /></div>
+            <ModelPicker id="import-sonnet" v-model="sonnet" label="Sonnet 档位" :options="options" optional />
+            <ModelPicker id="import-opus" v-model="opus" label="Opus 档位" :options="options" optional />
+            <ModelPicker id="import-haiku" v-model="haiku" label="Haiku 档位" :options="options" optional />
           </template>
-          <datalist id="import-model-options"><option v-for="name in options" :key="name" :value="name" /></datalist>
         </div>
         <div v-if="target === 'desktop'" class="desktop-models">
           <p class="hint">Claude Desktop 的模型列表可以加入多个模型，第一个模型作为默认选项。</p>
-          <div v-for="(_, index) in desktopModels" :key="index" class="field desktop-model-row">
-            <label :for="'import-desktop-model-' + index">额外模型 {{ index + 1 }}</label>
+          <div v-for="(_, index) in desktopModels" :key="index" class="desktop-model-row">
             <div class="model-input-row">
-              <input :id="'import-desktop-model-' + index" v-model="desktopModels[index]" list="import-model-options" placeholder="选择或输入模型名" autocomplete="off" spellcheck="false" />
+              <ModelPicker :id="'import-desktop-model-' + index" v-model="desktopModels[index]" :label="'额外模型 ' + (index + 1)" :options="options" optional />
               <button class="btn" type="button" :aria-label="'移除额外模型 ' + (index + 1)" @click="desktopModels.splice(index, 1)"><Trash2 :size="15" /></button>
             </div>
           </div>
           <button class="btn add-model" type="button" data-testid="add-desktop-model" @click="desktopModels.push('')"><Plus :size="15" /> 添加模型</button>
         </div>
         <p v-if="target === 'claude' || (target === 'ccswitch' && ccApp === 'claude')" class="hint">三个档位可分别指定模型；留空时沿用默认模型。</p>
-        <p v-if="!options.length" class="hint">还没有已启用的模型。先在“提供商”中启用模型，也可以输入已有的公开模型别名。</p>
+        <p v-if="!options.length" class="hint">尚无已配置且可用的供应商模型。请先在“提供商”中配置连接并启用模型，或手动输入网关模型名。</p>
         <p v-if="!model.trim()" class="notice">请填写默认模型。</p>
 
         <template v-if="target === 'desktop'">
@@ -288,8 +284,8 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
 .desktop-models { display: flex; flex-direction: column; gap: 10px; }
 .desktop-models .hint { margin: 0; }
 .model-input-row { display: flex; gap: 8px; }
-.model-input-row input { flex: 1; }
-.model-input-row button { flex: none; }
+.model-input-row > :first-child { flex: 1; min-width: 0; }
+.model-input-row > button { flex: none; align-self: flex-end; }
 .add-model { align-self: flex-start; }
 .preview,.desktop-guide { display: flex; flex-direction: column; gap: 9px; padding: 14px; border: 1px solid var(--c-border); border-radius: 9px; font-size: var(--fs-small); }
 .preview > code,.desktop-guide code,.muted code { overflow-wrap: anywhere; }
