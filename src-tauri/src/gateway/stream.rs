@@ -298,6 +298,26 @@ pub(crate) struct PumpConfig {
     pub _permit: OwnedSemaphorePermit,
 }
 
+/// Mirrors 9Router's OpenAI SSE passthrough normalization. Some compatible
+/// providers (CodeBuddy CN included) send `tool_calls: []` with every token.
+/// AI SDKs may interpret the presence of the field as the beginning/end of a
+/// tool or reasoning segment, splitting contiguous text into separate blocks.
+/// Do not alter actual text deltas, nonempty tool calls, or other protocols.
+fn normalize_openai_passthrough(frame: &RawFrame) -> Option<Bytes> {
+    let mut data: Value = serde_json::from_str(&frame.data).ok()?;
+    let choices = data.get_mut("choices")?.as_array_mut()?;
+    let mut changed = false;
+    for choice in choices {
+        let Some(delta) = choice.get_mut("delta").and_then(Value::as_object_mut) else { continue };
+        if matches!(delta.get("tool_calls"), Some(Value::Array(calls)) if calls.is_empty()) {
+            delta.remove("tool_calls");
+            changed = true;
+        }
+    }
+    if !changed { return None; }
+    Some(Bytes::from(SseFrame { event: frame.event.clone(), data: data.to_string() }.to_wire()))
+}
+
 pub(crate) struct Pump {
     body: UpstreamBody,
     splitter: FrameSplitter,
@@ -420,6 +440,15 @@ impl Pump {
             (StreamFraming::Sse, WireFormat::Sse) | (StreamFraming::Ndjson, WireFormat::Ndjson)
         );
         if same_shape {
+            if !scrub_secrets
+                && self.cfg.upstream_kind == AdapterKind::OpenAiCompatible
+                && self.cfg.client_protocol == ProtocolKind::OpenAiChat
+            {
+                if let Some(normalized) = normalize_openai_passthrough(frame) {
+                    self.out.push_back(normalized);
+                    return;
+                }
+            }
             if scrub_secrets {
                 let raw = scrub(&String::from_utf8_lossy(&frame.raw), &self.cfg.secrets);
                 self.out.push_back(Bytes::from(raw));
@@ -567,6 +596,37 @@ mod tests {
         assert_eq!(WireFormat::for_client(ProtocolKind::Gemini, false), WireFormat::JsonArray);
         assert_eq!(WireFormat::for_client(ProtocolKind::Ollama, false), WireFormat::Ndjson);
         assert_eq!(WireFormat::for_client(ProtocolKind::OpenAiResponses, false), WireFormat::Sse);
+    }
+
+    #[test]
+    fn openai_passthrough_removes_empty_tool_calls_without_adding_line_breaks() {
+        use crate::protocols::sse::parse_sse;
+        let delta = json!({"id":"a","choices":[{"index":0,"delta":{
+            "content":"你好，世界\\n真实换行", "reasoning_content":"thought", "tool_calls":[]
+        }}]});
+        let frame = RawFrame { raw: Bytes::new(), event: None, data: delta.to_string() };
+        let corrected = normalize_openai_passthrough(&frame).expect("empty tool calls must be stripped");
+        let encoded = String::from_utf8(corrected.to_vec()).unwrap();
+        let parsed = parse_sse(&encoded);
+        assert_eq!(parsed.len(), 1);
+        let output: Value = serde_json::from_str(&parsed[0].data).unwrap();
+        assert!(output["choices"][0]["delta"].get("tool_calls").is_none());
+        assert_eq!(output["choices"][0]["delta"]["content"], "你好，世界\\n真实换行");
+        assert_eq!(output["choices"][0]["delta"]["reasoning_content"], "thought");
+        assert!(!encoded.contains("\\n\\ndata: "), "do not turn token fragments into SSE frames");
+    }
+
+    #[test]
+    fn openai_passthrough_preserves_real_tool_calls_and_regular_frames() {
+        let actual_tool = RawFrame { raw: Bytes::new(), event: None,
+            data: json!({"choices":[{"delta":{"tool_calls":[{"index":0,"function":{"name":"read"}}]}}]}).to_string() };
+        assert!(normalize_openai_passthrough(&actual_tool).is_none());
+        let text = RawFrame { raw: Bytes::new(), event: None,
+            data: json!({"choices":[{"delta":{"content":"Hello"}}]}).to_string() };
+        assert!(normalize_openai_passthrough(&text).is_none());
+        let done = RawFrame { raw: Bytes::from_static(b"data: [DONE]\\n\\n"), event: None,
+            data: "[DONE]".into() };
+        assert!(normalize_openai_passthrough(&done).is_none());
     }
 
     #[test]
