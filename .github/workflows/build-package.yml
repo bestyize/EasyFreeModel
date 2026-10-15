@@ -72,10 +72,15 @@ jobs:
           set -euo pipefail
           test "$(find release-assets -maxdepth 1 -name '*.exe' -type f | wc -l)" -eq 1
           test "$(find release-assets -maxdepth 1 -name '*.dmg' -type f | wc -l)" -eq 1
-          version=$(python3 -c 'import json; print(json.load(open("src-tauri/tauri.conf.json"))["version"])')
-          test "$version" = "$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')"
-          test "$version" = "$(python3 -c 'import tomllib; print(tomllib.load(open("src-tauri/Cargo.toml", "rb"))["package"]["version"])')"
+          version=$(python3 .github/scripts/release_version.py verify)
+          # Reject stale re-runs: don't publish an old tag or bump a newer main.
+          git fetch --no-tags origin main
+          if [[ "$GITHUB_REF" != "refs/heads/main" || "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]]; then
+            echo "::error::This run is not based on the latest main. Trigger a fresh manual BuildPackage run."
+            exit 1
+          fi
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           (cd release-assets && sha256sum -- * > SHA256SUMS.txt)
       - name: Create draft Release with installers
         env:
@@ -91,6 +96,26 @@ jobs:
             --generate-notes \
             --draft
           gh release edit "$RELEASE_TAG" --draft=false
+
+      - name: Prepare next version after successful release
+        env:
+          RELEASED_VERSION: ${{ steps.version.outputs.version }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Only advance versions after BOTH platform builds and Release succeed.
+          # Concurrency prevents another BuildPackage run overlapping this bump.
+          git fetch --no-tags origin main
+          if [[ "$(git rev-parse origin/main)" != "$GITHUB_SHA" ]]; then
+            echo "::error::main changed during publication; refusing to overwrite newer commits."
+            exit 1
+          fi
+          next_version=$(python3 .github/scripts/release_version.py bump "$RELEASED_VERSION")
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock
+          git commit -m "chore(release): prepare v${next_version} [skip ci]"
+          git push origin HEAD:refs/heads/main
 
   cleanup:
     name: Keep latest two BuildPackage runs
