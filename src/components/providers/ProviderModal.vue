@@ -371,7 +371,7 @@ async function submitAdd() {
     const conn = await store.addConnection({ providerId: d.id, accountLabel: addLabel.value.trim(), apiKey })
     for (const target of [original.value, draft.value]) target?.connections.push({ ...conn })
     syncSummary()
-    addNotice.value = `已添加连接“${conn.accountLabel}”，API Key 已保存到系统凭据库`
+    addNotice.value = `已保存“${conn.accountLabel}”的 API Key`
     resetAddForm()
   } catch (e) {
     addError.value = `添加失败：${errText(e)}（API Key 输入框已清空，请重新输入）`
@@ -504,7 +504,7 @@ function cancel() {
           <h2 v-else>{{ headerName }}</h2>
           <div class="head-meta">
             <StatusTag :tone="headerStatus.tone">{{ headerStatus.text }}</StatusTag>
-            <span>{{ connectionTotal }} 个连接</span>
+            <span>{{ connectionTotal }} 个账号或密钥</span>
             <span class="sep" aria-hidden="true">|</span>
             <span>{{ draft?.adapterReady === false || !draft ? (draft ? '适配器待接入' : '') : protocolText(draft.protocols) }}</span>
           </div>
@@ -534,8 +534,10 @@ function cancel() {
       <section class="panel" aria-label="连接">
         <div class="panel-head">
           <div class="panel-title">
-            <h3>连接</h3>
-            <p>管理该提供商的连接账号，支持多个账号并行使用</p>
+            <h3>账号与密钥</h3>
+            <p v-if="supportsOAuth && canAddKey">可以填写 {{ draft.name }} 的 API Key，或使用登录验证；支持多个账号</p>
+            <p v-else-if="supportsOAuth">登录 {{ draft.name }} 账号后即可使用，支持多个账号</p>
+            <p v-else>填写从 {{ draft.name }} 官网获取的 API Key，支持添加多个密钥</p>
           </div>
           <div class="test-tools">
             <button type="button" class="btn" :disabled="readonly || batchTesting || !draft.connections.length" @click="testBatch">
@@ -570,7 +572,7 @@ function cancel() {
           />
           全选
         </label>
-        <p v-else class="empty">还没有连接。</p>
+        <p v-else class="empty">还没有添加账号或 API Key。</p>
 
         <ul class="conns">
           <ConnectionRow
@@ -613,9 +615,9 @@ function cancel() {
           @close="closeOAuth"
         />
 
-        <form v-if="addOpen" class="add-form" aria-label="添加 API Key 连接" @submit.prevent="submitAdd">
+        <form v-if="addOpen" class="add-form" aria-label="添加 API Key" @submit.prevent="submitAdd">
           <label class="field">
-            <span>名称</span>
+            <span>备注名称</span>
             <input
               v-model="addLabel"
               class="input"
@@ -648,13 +650,13 @@ function cancel() {
           <p v-if="addError" class="issues" role="alert">{{ addError }}</p>
           <div class="add-actions">
             <button type="button" class="btn" :disabled="adding" @click="resetAddForm">取消</button>
-            <button type="submit" class="btn btn-primary" :disabled="adding">{{ adding ? '保存中…' : '保存连接' }}</button>
+            <button type="submit" class="btn btn-primary" :disabled="adding">{{ adding ? '保存中…' : '保存 API Key' }}</button>
           </div>
         </form>
 
         <div class="add-row">
           <button v-if="canAddKey" type="button" class="btn btn-primary add" :disabled="saving || adding" @click="toggleAdd">
-            <Plus :size="14" /> 添加连接
+            <Plus :size="14" /> 添加 API Key
           </button>
           <button
             v-else-if="showDisabledApiKeyAdd"
@@ -663,7 +665,7 @@ function cancel() {
             disabled
             :title="pendingReason ?? undefined"
           >
-            <Plus :size="14" /> 添加连接
+            <Plus :size="14" /> 添加 API Key
           </button>
           <button
             v-if="supportsOAuth"

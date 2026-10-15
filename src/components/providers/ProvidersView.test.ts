@@ -46,7 +46,7 @@ const cardOf = (w: VueWrapper, name: string) =>
 
 // 注意：VTU 的 teleport 桩会在每次重渲染时重建弹窗内的 DOM（真实浏览器里不会，已用预览验证），
 // 所以交互之后一律重新 find，不持有旧的元素引用。
-const ADD_FORM = 'form[aria-label="添加 API Key 连接"]'
+const ADD_FORM = 'form[aria-label="添加 API Key"]'
 const addForm = (w: VueWrapper) => w.find(ADD_FORM)
 const addKeyEl = (w: VueWrapper) => w.find(`${ADD_FORM} input[aria-label="API Key"]`)
 const addLabelEl = (w: VueWrapper) => w.find(`${ADD_FORM} input[aria-label="名称"]`)
@@ -195,6 +195,18 @@ describe('录入 API Key', () => {
     await flushPromises()
   }
 
+  it('免费额度供应商也明确提示填写 API Key', async () => {
+    const w = await mountView()
+    await cardOf(w, 'OpenRouter').trigger('click')
+    await flushPromises()
+    expect(button(w, '添加 API Key')).toBeDefined()
+    expect(w.text()).toContain('填写从 OpenRouter 官网获取的 API Key')
+    await button(w, '添加 API Key')!.trigger('click')
+    expect(addForm(w).exists()).toBe(true)
+    expect(addForm(w).text()).toContain('备注名称')
+    expect(addForm(w).text()).toContain('保存 API Key')
+  })
+
   it('就绪的提供商弹出内嵌表单：密码框，官网链接；提交后立即清空，store 与页面里都没有密钥', async () => {
     const spy = vi.spyOn(providersMock, 'addConnection')
     let release!: () => void
@@ -209,7 +221,7 @@ describe('录入 API Key', () => {
     await openOpenAi(w)
 
     expect(addForm(w).exists()).toBe(false)
-    await button(w, '添加连接')!.trigger('click')
+    await button(w, '添加 API Key')!.trigger('click')
     expect(addForm(w).exists()).toBe(true)
     expect(addKeyEl(w).attributes('type')).toBe('password')
     expect(addKeyEl(w).attributes('autocomplete')).toBe('new-password')
@@ -231,7 +243,7 @@ describe('录入 API Key', () => {
     // 成功：表单收起并清空，连接出现在列表里，状态刷新
     expect(addForm(w).exists()).toBe(false)
     expect(w.text()).toContain('个人账号')
-    expect(w.text()).toContain('已添加连接')
+    expect(w.text()).toContain('已保存“个人账号”的 API Key')
 
     const store = useProvidersStore()
     expect(JSON.stringify(store.$state)).not.toContain('SUPERSECRET')
@@ -244,7 +256,7 @@ describe('录入 API Key', () => {
   it('不再提示“有未保存的修改”：连接是立即持久化的，不属于草稿', async () => {
     const w = await mountView()
     await openOpenAi(w)
-    await button(w, '添加连接')!.trigger('click')
+    await button(w, '添加 API Key')!.trigger('click')
     await addLabelEl(w).setValue('k')
     await addKeyEl(w).setValue(SECRET)
     await addForm(w).trigger('submit')
@@ -258,7 +270,7 @@ describe('录入 API Key', () => {
     const spy = vi.spyOn(providersMock, 'addConnection')
     const w = await mountView()
     await openOpenAi(w)
-    await button(w, '添加连接')!.trigger('click')
+    await button(w, '添加 API Key')!.trigger('click')
 
     await addForm(w).trigger('submit')
     expect(addForm(w).text()).toContain('请填写名称')
@@ -284,11 +296,11 @@ describe('录入 API Key', () => {
   it('取消表单会清空已输入的密钥', async () => {
     const w = await mountView()
     await openOpenAi(w)
-    await button(w, '添加连接')!.trigger('click')
+    await button(w, '添加 API Key')!.trigger('click')
     await addKeyEl(w).setValue(SECRET)
     await addForm(w).findAll('button').find((b) => b.text() === '取消')!.trigger('click')
     expect(addForm(w).exists()).toBe(false)
-    await button(w, '添加连接')!.trigger('click')
+    await button(w, '添加 API Key')!.trigger('click')
     expect(valueOf(addKeyEl(w))).toBe('')
   })
 
@@ -296,7 +308,7 @@ describe('录入 API Key', () => {
     const spy = vi.spyOn(providersMock, 'updateConnectionCredential')
     const w = await mountView()
     await openOpenAi(w)
-    await button(w, '添加连接')!.trigger('click')
+    await button(w, '添加 API Key')!.trigger('click')
     await addLabelEl(w).setValue('acct')
     await addKeyEl(w).setValue('sk-first-key')
     await addForm(w).trigger('submit')

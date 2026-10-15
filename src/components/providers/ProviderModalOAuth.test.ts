@@ -97,7 +97,7 @@ describe('ProviderModal：OAuth 入口', () => {
   it('OAuth 分类仅显示“登录验证”，不展示 API Key 添加入口', async () => {
     const w = await open(detail())
     expect(apiMock.oauthListProviders).toHaveBeenCalledTimes(1)
-    expect(btn(w, '添加连接')).toBeUndefined()
+    expect(btn(w, '添加 API Key')).toBeUndefined()
     expect(btn(w, '登录验证')!.attributes('disabled')).toBeUndefined()
     expect(w.text()).not.toContain('授权流程待接入')
     expect(w.find('section[aria-label="上游地址"]').exists()).toBe(false)
@@ -116,7 +116,7 @@ describe('ProviderModal：OAuth 入口', () => {
     const d = detail({ adapterReady: false, status: 'unsupported', pendingReason: 'OAuth 授权流程待接入' })
     const w = await open(d, { ...summary, adapterReady: false, status: 'unsupported' })
     expect(btn(w, '登录验证')!.attributes('disabled')).toBeUndefined()
-    expect(btn(w, '添加连接')).toBeUndefined()
+    expect(btn(w, '添加 API Key')).toBeUndefined()
     expect(w.find('[data-testid="oauth-forward-note"]').text()).toContain('授权后暂不能用于转发')
     expect(w.find('[data-testid="oauth-forward-note"]').text()).toContain('OAuth 授权流程待接入')
     expect(btn(w, '保存修改')!.attributes('disabled')).toBeDefined()
