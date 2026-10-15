@@ -1,6 +1,6 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
-  "productName": "Router Desktop",
+  "productName": "FreeApiBox",
   "version": "0.5.99",
   "identifier": "app.routerdesktop.client",
   "build": {
@@ -12,7 +12,7 @@
   "app": {
     "windows": [
       {
-        "title": "Router Desktop",
+        "title": "FreeApiBox",
         "width": 1440,
         "height": 900,
         "minWidth": 1080,

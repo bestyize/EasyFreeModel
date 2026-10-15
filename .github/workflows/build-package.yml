@@ -86,7 +86,7 @@ jobs:
           set -euo pipefail
           gh release create "$RELEASE_TAG" release-assets/* \
             --target "$GITHUB_SHA" \
-            --title "EasyFreeModel $RELEASE_TAG" \
+            --title "FreeApiBox $RELEASE_TAG" \
             --generate-notes \
             --draft
           gh release edit "$RELEASE_TAG" --draft=false

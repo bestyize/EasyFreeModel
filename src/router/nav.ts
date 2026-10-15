@@ -14,7 +14,7 @@ import {
 } from 'lucide-vue-next'
 import type { Component } from 'vue'
 
-export const APP_NAME = 'Router Desktop'
+export const APP_NAME = 'FreeApiBox'
 export const APP_VERSION = '0.5.99'
 
 export interface NavItem {

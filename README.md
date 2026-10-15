@@ -1,8 +1,22 @@
-# Router Desktop 设计包
+# FreeApiBox · 免费 API 盒子
 
-本文件夹包含 Rust + Tauri 2 + Vue 3 跨平台桌面 AI API 中转客户端的产品与 UI 设计基线。
+免费使用的桌面 AI 模型 API 连接工具。将多个模型供应商、账户和 API 协议集中到一个本地入口，管理 API 密钥、查看用量与配额，并接入 Codex、Claude Code 等客户端。
 
-- `PRODUCT_DESIGN.md`：产品定位、十个一级功能、视觉规范、页面交互、Rust 技术架构、协议转换风险、安全要求、验收与路线图。
-- `designs/`：四张经过多轮讨论确定的高保真静态设计稿（提供商、提供商详情弹窗、配额跟踪、使用情况）。
+软件本身免费；可用模型、免费额度及调用费用由各供应商决定。FreeApiBox 不提供免费调用所有模型的承诺。
 
-建议先阅读 `PRODUCT_DESIGN.md`，然后按照设计稿拆分前端组件。图片中的演示统计数值不是实际业务数据。未出图的六个一级页面，在文档中已有功能规范，可在后续迭代补充设计稿。
+## 下载与开发
+
+Windows x64 和 macOS Apple Silicon 的安装包通过手动触发的 [BuildPackage](https://github.com/bestyize/EasyFreeModel/actions/workflows/build-package.yml) 工作流构建，并发布在 [Releases](https://github.com/bestyize/EasyFreeModel/releases)。
+
+本地开发需要 Node.js 22 与 Rust（1.98 或更新版本）：
+
+```bash
+npm ci
+npm run tauri -- dev
+```
+
+## 项目资料
+
+- [产品与 UI 设计规范](PRODUCT_DESIGN.md)
+- [设计稿](designs/)
+- [第三方声明](THIRD_PARTY_NOTICES.txt)

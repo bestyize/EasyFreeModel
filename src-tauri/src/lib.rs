@@ -89,5 +89,5 @@ pub fn run() {
             commands::proxy::test_proxy_nodes,
         ])
         .run(tauri::generate_context!())
-        .expect("error while running Router Desktop");
+        .expect("error while running FreeApiBox");
 }

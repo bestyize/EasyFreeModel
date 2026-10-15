@@ -1,4 +1,4 @@
-# Router Desktop — 产品与 UI 设计规范
+# FreeApiBox（免费 API 盒子）— 产品与 UI 设计规范
 
 > 版本：v1.0 · 2026-10-13  
 > 目标平台：Windows 10/11（x64、可选 arm64）、macOS 13+（Apple Silicon / Intel）  
