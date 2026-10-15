@@ -98,7 +98,7 @@ describe('ConnectPanel · 连接参数', () => {
     expect(clipboard).toHaveBeenCalledWith(SECRET)
   })
 
-  it('多个密钥时默认选放行全部协议的那个；停用、过期、没存明文的不出现', async () => {
+  it('多个密钥时默认选第一把可用密钥；停用、过期、没存明文的不出现', async () => {
     await mountPanel({
       keys: [
         keyInfo({ id: 'narrow', name: 'Narrow', protocols: ['openai-chat'], secret: 'sk-narrow' }),
@@ -110,10 +110,10 @@ describe('ConnectPanel · 连接参数', () => {
     })
     const select = q('[data-testid="key-select"]') as HTMLSelectElement
     expect([...select.options].map((o) => o.value)).toEqual(['narrow', 'full'])
-    expect(select.value).toBe('full')
-    expect(text('[data-testid="key-full"]')).toBe('sk-full')
-    await pick('[data-testid="key-select"]', 'narrow')
+    expect(select.value).toBe('narrow')
     expect(text('[data-testid="key-full"]')).toBe('sk-narrow')
+    await pick('[data-testid="key-select"]', 'full')
+    expect(text('[data-testid="key-full"]')).toBe('sk-full')
   })
 
   it('没有密钥：一键创建，创建后立刻可用', async () => {

@@ -52,19 +52,14 @@ fn mask(suffix: &str) -> String {
     format!("{SECRET_PREFIX}…{suffix}")
 }
 
-fn parse_list<T: serde::de::DeserializeOwned>(json: &str) -> Vec<T> {
-    serde_json::from_str(json).unwrap_or_default()
-}
-
 pub fn to_info(row: &ApiKeyRow) -> ApiKeyInfo {
-    let protocols: Vec<String> = parse_list(&row.protocols_json);
     ApiKeyInfo {
         id: row.id.clone(),
         name: row.name.clone(),
         masked: mask(&row.key_suffix),
         secret: row.key_secret.clone(),
-        protocols: protocols.iter().filter_map(|p| Protocol::parse(p)).collect(),
-        allowed_models: parse_list(&row.allowed_models_json),
+        protocols: Protocol::ALL.to_vec(),
+        allowed_models: vec![],
         rpm_limit: row.rpm_limit,
         tpm_limit: row.tpm_limit,
         total_limit: row.total_limit,
@@ -134,25 +129,6 @@ async fn create_at(pool: &SqlitePool, input: CreateApiKeyInput, now: DateTime<Ut
     validate_limit("TPM 限制", input.tpm_limit)?;
     validate_limit("累计限额", input.total_limit)?;
 
-    let mut protocols: Vec<&str> = Vec::new();
-    for p in &input.protocols {
-        if !protocols.contains(&p.as_str()) {
-            protocols.push(p.as_str());
-        }
-    }
-    let mut models: Vec<String> = Vec::new();
-    for m in input.allowed_models.iter().map(|m| m.trim()).filter(|m| !m.is_empty()) {
-        if m.len() > 256 || m.chars().any(|c| c.is_control()) {
-            return Err(AppError::msg("允许模型名称无效"));
-        }
-        if !models.iter().any(|x| x == m) {
-            models.push(m.to_string());
-        }
-    }
-    if models.len() > 500 {
-        return Err(AppError::msg("允许模型最多 500 个"));
-    }
-
     let secret = generate_secret();
     let row = ApiKeyRow {
         id: new_id(),
@@ -160,8 +136,8 @@ async fn create_at(pool: &SqlitePool, input: CreateApiKeyInput, now: DateTime<Ut
         key_hash: hash_secret(&secret),
         key_suffix: suffix_of(&secret),
         key_secret: Some(secret.clone()),
-        protocols_json: serde_json::to_string(&protocols)?,
-        allowed_models_json: serde_json::to_string(&models)?,
+        protocols_json: serde_json::to_string(&Protocol::ALL)?,
+        allowed_models_json: "[]".into(),
         rpm_limit: input.rpm_limit,
         tpm_limit: input.tpm_limit,
         total_limit: input.total_limit,
@@ -175,7 +151,7 @@ async fn create_at(pool: &SqlitePool, input: CreateApiKeyInput, now: DateTime<Ut
     Ok(ApiKeySecretResult { key: to_info(&row), secret })
 }
 
-/// 轮换：生成新密钥，旧密钥立即失效；名称、权限、调用次数等保留。
+/// 轮换：生成新密钥，旧密钥立即失效；名称、限额、调用次数等保留。
 pub async fn rotate(pool: &SqlitePool, id: &str) -> AppResult<ApiKeySecretResult> {
     let secret = generate_secret();
     repo::replace_secret(pool, id, &hash_secret(&secret), &suffix_of(&secret), Some(&secret)).await?;
@@ -231,16 +207,10 @@ pub async fn verify_at(pool: &SqlitePool, bearer: &str, now: DateTime<Utc>) -> O
         tracing::warn!("更新密钥使用记录失败（id={}）：{e}", row.id);
     }
 
-    let protocols: Vec<String> = parse_list::<String>(&row.protocols_json);
     Some(VerifiedKey {
         id: row.id.clone(),
-        // 约定：未限制协议（空列表）= 允许全部协议；allowed_models 为空 = 不限制模型
-        allowed_protocols: if protocols.is_empty() {
-            Protocol::ALL.iter().map(|p| p.as_str().to_string()).collect()
-        } else {
-            protocols
-        },
-        allowed_models: parse_list(&row.allowed_models_json),
+        allowed_protocols: Protocol::ALL.iter().map(|p| p.as_str().to_string()).collect(),
+        allowed_models: vec![],
         rpm_limit: row.rpm_limit.and_then(|v| u32::try_from(v).ok()),
         tpm_limit: row.tpm_limit.and_then(|v| u32::try_from(v).ok()),
     })
@@ -311,8 +281,8 @@ mod tests {
 
         let v = verify_at(&pool, &created.secret, Utc::now()).await.expect("valid key");
         assert_eq!(v.id, created.key.id);
-        assert_eq!(v.allowed_protocols, vec!["openai-chat".to_string()]);
-        assert_eq!(v.allowed_models, vec!["gpt-x".to_string()]);
+        assert_eq!(v.allowed_protocols.len(), Protocol::ALL.len());
+        assert!(v.allowed_models.is_empty());
         assert_eq!(v.rpm_limit, Some(60));
 
         verify_at(&pool, &created.secret, Utc::now()).await.unwrap();
@@ -443,12 +413,14 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn empty_protocols_expand_to_all() {
+    async fn existing_restricted_keys_are_unrestricted() {
         let pool = store::open_memory().await.unwrap();
-        let mut inp = input("all");
-        inp.protocols.clear();
-        inp.allowed_models.clear();
-        let k = create(&pool, inp).await.unwrap();
+        let k = create(&pool, input("legacy")).await.unwrap();
+        sqlx::query("UPDATE api_keys SET protocols_json = '[\"openai-chat\"]', allowed_models_json = '[\"gpt-x\"]' WHERE id = ?1")
+            .bind(&k.key.id).execute(&pool).await.unwrap();
+        let info = list(&pool).await.unwrap();
+        assert_eq!(info[0].protocols, Protocol::ALL);
+        assert!(info[0].allowed_models.is_empty());
         let v = verify_at(&pool, &k.secret, Utc::now()).await.unwrap();
         assert_eq!(v.allowed_protocols.len(), Protocol::ALL.len());
         assert!(v.allowed_models.is_empty());

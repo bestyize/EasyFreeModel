@@ -1,4 +1,5 @@
-import type { CreateApiKeyInput, Protocol } from '@/types'
+import type { CreateApiKeyInput } from '@/types'
+import { PROTOCOL_OPTIONS } from '@/components/settings/protocols'
 
 export type LimitParse = { ok: true; value: number | null } | { ok: false; error: string }
 
@@ -16,19 +17,12 @@ export interface CreateKeyForm {
   name: string
   /** yyyy-mm-dd，空表示永不过期 */
   expiresDate: string
-  protocols: Protocol[]
-  /** 以换行 / 逗号 / 空白分隔，空表示不限制模型 */
-  modelsText: string
   rpm: string
   tpm: string
   total: string
 }
 
-export type CreateKeyErrors = Partial<Record<'name' | 'expiresDate' | 'protocols' | 'rpm' | 'tpm' | 'total', string>>
-
-export function parseModels(text: string): string[] {
-  return [...new Set(text.split(/[\s,，;；]+/).map((m) => m.trim()).filter(Boolean))]
-}
+export type CreateKeyErrors = Partial<Record<'name' | 'expiresDate' | 'rpm' | 'tpm' | 'total', string>>
 
 export function validateCreateForm(
   form: CreateKeyForm,
@@ -53,8 +47,6 @@ export function validateCreateForm(
     }
   }
 
-  if (form.protocols.length === 0) errors.protocols = '至少选择一种协议'
-
   const rpm = parseOptionalPositiveInt(form.rpm, 'RPM')
   const tpm = parseOptionalPositiveInt(form.tpm, 'TPM')
   const total = parseOptionalPositiveInt(form.total, '累计限额')
@@ -69,8 +61,8 @@ export function validateCreateForm(
     input: {
       name,
       expiresAt,
-      protocols: [...form.protocols],
-      allowedModels: parseModels(form.modelsText),
+      protocols: PROTOCOL_OPTIONS.filter((p) => p.implemented).map((p) => p.id),
+      allowedModels: [],
       rpmLimit: rpm.value,
       tpmLimit: tpm.value,
       totalLimit: total.value,

@@ -1,5 +1,6 @@
 import type { ApiKeysApi } from '../types'
 import type { ApiKeyInfo, CreateApiKeyInput } from '@/types'
+import { PROTOCOL_OPTIONS } from '@/components/settings/protocols'
 
 /**
  * 浏览器预览用的内存 mock（仅非 Tauri 环境生效）。
@@ -24,7 +25,7 @@ function find(id: string): ApiKeyInfo {
 }
 
 export const apiKeysMock: ApiKeysApi = {
-  listApiKeys: async () => store.map((k) => ({ ...k })),
+  listApiKeys: async () => store.map((k) => ({ ...k, protocols: PROTOCOL_OPTIONS.map((p) => p.id), allowedModels: [] })),
   createApiKey: async (input: CreateApiKeyInput) => {
     const secret = randomSecret()
     const key: ApiKeyInfo = {
@@ -32,8 +33,8 @@ export const apiKeysMock: ApiKeysApi = {
       name: input.name,
       masked: mask(secret),
       secret,
-      protocols: input.protocols,
-      allowedModels: input.allowedModels,
+      protocols: PROTOCOL_OPTIONS.map((p) => p.id),
+      allowedModels: [],
       rpmLimit: input.rpmLimit,
       tpmLimit: input.tpmLimit,
       totalLimit: input.totalLimit,

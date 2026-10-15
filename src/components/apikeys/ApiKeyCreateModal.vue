@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, watch } from 'vue'
 import BaseModal from '@/components/BaseModal.vue'
-import { PROTOCOL_OPTIONS } from '@/components/settings/protocols'
 import { errorMessage } from '@/components/media/format'
 import { useApiKeysStore } from '@/stores/apiKeys'
 import type { ApiKeySecretResult } from '@/types'
@@ -13,7 +12,7 @@ const emit = defineEmits<{ 'update:modelValue': [value: boolean]; created: [resu
 const store = useApiKeysStore()
 
 function blank(): CreateKeyForm {
-  return { name: '', expiresDate: '', protocols: ['openai-chat'], modelsText: '', rpm: '', tpm: '', total: '' }
+  return { name: '', expiresDate: '', rpm: '', tpm: '', total: '' }
 }
 
 const form = reactive<CreateKeyForm>(blank())
@@ -51,9 +50,6 @@ async function submit() {
   }
 }
 
-function toggleProtocol(id: (typeof PROTOCOL_OPTIONS)[number]['id'], checked: boolean) {
-  form.protocols = checked ? [...new Set([...form.protocols, id])] : form.protocols.filter((p) => p !== id)
-}
 </script>
 
 <template>
@@ -72,26 +68,7 @@ function toggleProtocol(id: (typeof PROTOCOL_OPTIONS)[number]['id'], checked: bo
         <p v-else class="hint">留空表示永不过期，到期当天 23:59:59 失效。</p>
       </div>
 
-      <fieldset class="field">
-        <legend>允许协议</legend>
-        <label v-for="p in PROTOCOL_OPTIONS" :key="p.id" class="check">
-          <input
-            type="checkbox"
-            :checked="form.protocols.includes(p.id)"
-            :data-testid="`proto-${p.id}`"
-            @change="toggleProtocol(p.id, ($event.target as HTMLInputElement).checked)"
-          />
-          <span>{{ p.label }}</span>
-          <span v-if="!p.implemented" class="pending">适配器待实现</span>
-        </label>
-        <p v-if="errors.protocols" class="err" role="alert">{{ errors.protocols }}</p>
-      </fieldset>
-
-      <div class="field">
-        <label for="ck-models">允许模型（可选）</label>
-        <textarea id="ck-models" v-model="form.modelsText" class="input area" rows="2" placeholder="每行或以逗号分隔，例如 openai/gpt-4o-mini" />
-        <p class="hint">留空表示允许全部模型。</p>
-      </div>
+      <p class="hint">密钥支持全部协议和模型，无需配置使用范围。</p>
 
       <div class="limits">
         <div class="field">
@@ -125,10 +102,7 @@ function toggleProtocol(id: (typeof PROTOCOL_OPTIONS)[number]['id'], checked: bo
 <style scoped>
 .form { display: flex; flex-direction: column; gap: 16px; }
 .field { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; border: 0; min-width: 0; }
-label, legend { font-size: var(--fs-small); font-weight: 500; padding: 0; }
-.area { height: auto; padding: 8px 12px; resize: vertical; }
-.check { display: flex; align-items: center; gap: 8px; font-weight: 400; padding: 3px 0; }
-.pending { padding: 1px 6px; border-radius: 4px; background: var(--c-surface-2); color: var(--c-text-2); font-size: var(--fs-caption); }
+label { font-size: var(--fs-small); font-weight: 500; padding: 0; }
 .limits { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 .hint { margin: 0; color: var(--c-text-2); font-size: var(--fs-caption); }
 .err { margin: 0; color: var(--c-danger); font-size: var(--fs-caption); }

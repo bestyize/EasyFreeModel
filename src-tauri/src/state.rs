@@ -73,6 +73,11 @@ impl AppState {
         let state = Self::try_new(db, vault)?;
         state.proxy_pool.reload().await?;
         crate::proxy::install_global(state.proxy_pool.clone());
+        let settings = store::settings::load(&state.db).await?;
+        if let Err(e) = state.gateway.start(&settings.listen_address, settings.port, state.key_verifier()).await {
+            // 端口被占用时仍让主窗口打开，错误留在网关状态中供设置页展示。
+            tracing::warn!("应用启动时网关未能启动：{e}");
+        }
         Ok(state)
     }
 

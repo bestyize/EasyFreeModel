@@ -51,6 +51,7 @@ beforeEach(() => {
   setActivePinia(createPinia())
   Object.values(h.api).forEach((f) => f.mockReset())
   h.api.listGatewayModels.mockResolvedValue([])
+  Object.defineProperty(navigator, 'clipboard', { configurable: true, value: { writeText: vi.fn().mockResolvedValue(undefined) } })
 })
 afterEach(() => {
   wrapper?.unmount()
@@ -58,9 +59,11 @@ afterEach(() => {
 })
 
 describe('ApiKeysView', () => {
-  it('每把可用密钥都可从操作区打开客户端列表并选择模型', async () => {
+  it('每把可用密钥都可在密钥旁打开客户端列表并选择模型', async () => {
     h.api.listGatewayModels.mockResolvedValue([{ id: 'deepseek-chat', providerId: 'deepseek', providerName: 'DeepSeek' }])
     await mountView('127.0.0.1', [keyInfo({ id: 'k1', secret: SECRET, protocols: ['anthropic-messages'] })])
+    expect(wrapper.get('[data-testid="import-k1"]').element.closest('.key-card')).not.toBeNull()
+    expect(wrapper.get('[data-testid="import-k1"]').text()).toContain('一键导入')
     await wrapper.get('[data-testid="import-k1"]').trigger('click')
     await flushPromises()
     expect(q('[data-testid="import-target-list"]')?.textContent).toContain('Claude Desktop')
@@ -102,6 +105,30 @@ describe('ApiKeysView', () => {
     expect(q('[role="status"]')?.textContent).toContain('配置已写入')
   })
 
+  it('Claude Desktop 可配置并复制多个模型，不写入 Claude Code 配置', async () => {
+    h.api.listGatewayModels.mockResolvedValue([
+      { id: 'first', providerId: 'a', providerName: 'A' },
+      { id: 'second', providerId: 'a', providerName: 'A' },
+    ])
+    await mountView('127.0.0.1', [keyInfo({ secret: SECRET, protocols: ['openai-chat'] })])
+    await wrapper.get('[data-testid="import-k1"]').trigger('click')
+    q('[data-testid="pick-desktop"]')!.click()
+    await flushPromises()
+    expect(q('[data-testid="setup-desktop"]')?.textContent).toContain('模型列表')
+    q('[data-testid="add-desktop-model"]')!.click()
+    await flushPromises()
+    const extra = q('#import-desktop-model-0') as HTMLInputElement
+    extra.value = 'second'
+    extra.dispatchEvent(new Event('input'))
+    await flushPromises()
+    expect(q('[data-testid="desktop-copy-model-0"]')?.textContent).toContain('first')
+    expect(q('[data-testid="desktop-copy-model-1"]')?.textContent).toContain('second')
+    q('[data-testid="copy-desktop-models"]')!.click()
+    await flushPromises()
+    expect(navigator.clipboard.writeText).toHaveBeenCalledWith('first\nsecond')
+    expect(h.api.previewClientImport).not.toHaveBeenCalled()
+  })
+
   it('停用或已过期的密钥不可导入', async () => {
     await mountView('127.0.0.1', [
       keyInfo({ id: 'disabled', disabled: true, secret: SECRET }),
@@ -139,7 +166,7 @@ describe('ApiKeysView', () => {
     expect(q('[data-testid="secret-value"]')).toBeNull()
   })
 
-  it('列表中的密钥支持切换显示完整密钥与再次弹窗查看', async () => {
+  it('列表中的密钥只有一个显示按钮，可切换明文和掩码', async () => {
     await mountView('127.0.0.1', [keyInfo({ id: 'k1', masked: 'sk-r…a9f2', secret: SECRET })])
     // 初始显示掩码
     expect(wrapper.get('[data-testid="key-value-k1"]').text()).toBe('sk-r…a9f2')
@@ -152,12 +179,7 @@ describe('ApiKeysView', () => {
     await wrapper.get('[data-testid="toggle-plain-k1"]').trigger('click')
     expect(wrapper.get('[data-testid="key-value-k1"]').text()).toBe('sk-r…a9f2')
 
-    // 点击操作列的查看按钮打开弹窗再次查看
-    await wrapper.get('[data-testid="view-k1"]').trigger('click')
-    expect(q('[data-testid="secret-value"]')?.textContent).toBe(SECRET)
-    q('[data-testid="close-secret"]')!.click()
-    await flushPromises()
-    expect(q('[data-testid="secret-value"]')).toBeNull()
+    expect(wrapper.find('[data-testid="view-k1"]').exists()).toBe(false)
   })
 
   it('创建时限额非法则不提交并提示', async () => {

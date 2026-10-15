@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { parseModels, parseOptionalPositiveInt, validateCreateForm, type CreateKeyForm } from './validation'
+import { parseOptionalPositiveInt, validateCreateForm, type CreateKeyForm } from './validation'
 
 function form(over: Partial<CreateKeyForm> = {}): CreateKeyForm {
-  return { name: 'dev', expiresDate: '', protocols: ['openai-chat'], modelsText: '', rpm: '', tpm: '', total: '', ...over }
+  return { name: 'dev', expiresDate: '', rpm: '', tpm: '', total: '', ...over }
 }
 
 describe('parseOptionalPositiveInt', () => {
@@ -24,9 +24,6 @@ describe('validateCreateForm', () => {
     expect(r.input).toBeNull()
     expect(r.errors.name).toBeTruthy()
   })
-  it('至少选择一种协议', () => {
-    expect(validateCreateForm(form({ protocols: [] })).errors.protocols).toBeTruthy()
-  })
   it('RPM / TPM / 累计限额逐项校验', () => {
     const r = validateCreateForm(form({ rpm: '0', tpm: 'x', total: '1.2' }))
     expect(r.input).toBeNull()
@@ -40,13 +37,8 @@ describe('validateCreateForm', () => {
     expect(ok.input?.expiresAt).toBeTruthy()
   })
   it('合法输入产出请求体', () => {
-    const r = validateCreateForm(form({ rpm: '60', modelsText: 'a/b, c/d\na/b' }))
-    expect(r.input).toMatchObject({ name: 'dev', rpmLimit: 60, tpmLimit: null, totalLimit: null, allowedModels: ['a/b', 'c/d'] })
-  })
-})
-
-describe('parseModels', () => {
-  it('去重并按空白 / 逗号切分', () => {
-    expect(parseModels('x, y  z\nx')).toEqual(['x', 'y', 'z'])
+    const r = validateCreateForm(form({ rpm: '60' }))
+    expect(r.input).toMatchObject({ name: 'dev', rpmLimit: 60, tpmLimit: null, totalLimit: null,
+      protocols: ['openai-chat', 'openai-responses', 'anthropic-messages', 'gemini'], allowedModels: [] })
   })
 })

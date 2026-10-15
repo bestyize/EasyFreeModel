@@ -2,9 +2,10 @@ import { defineStore } from 'pinia'
 import { computed, ref, watch } from 'vue'
 import { api } from '@/api'
 import { errorMessage } from '@/components/media/format'
-import { PROTOCOL_OPTIONS } from '@/components/settings/protocols'
 import { useApiKeysStore } from '@/stores/apiKeys'
 import type { ApiKeyInfo, GatewayModel } from '@/types'
+
+import { PROTOCOL_OPTIONS } from '@/components/settings/protocols'
 
 const ALL_PROTOCOLS = PROTOCOL_OPTIONS.filter((p) => p.implemented).map((p) => p.id)
 
@@ -31,8 +32,7 @@ export const useConnectStore = defineStore('connect', () => {
     usableKeys,
     (list) => {
       if (list.some((k) => k.id === keyId.value)) return
-      const best = list.find((k) => ALL_PROTOCOLS.every((p) => k.protocols.includes(p))) ?? list[0]
-      keyId.value = best?.id ?? ''
+      keyId.value = list[0]?.id ?? ''
     },
     { immediate: true },
   )

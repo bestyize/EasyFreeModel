@@ -14,7 +14,7 @@ let settings: AppSettings = {
   fontScale: 1,
   redactLogs: true,
 }
-let running = false
+let running = true
 let error: string | null = null
 
 function gateway(): GatewayStatus {

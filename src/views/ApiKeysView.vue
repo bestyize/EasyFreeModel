@@ -8,7 +8,6 @@ import ApiKeyCreateModal from '@/components/apikeys/ApiKeyCreateModal.vue'
 import KeyImportFlow from '@/components/guide/KeyImportFlow.vue'
 import SecretRevealModal from '@/components/apikeys/SecretRevealModal.vue'
 import { isLoopbackAddress } from '@/components/settings/address'
-import { protocolLabel } from '@/components/settings/protocols'
 import { errorMessage, formatDateTime } from '@/components/media/format'
 import { useApiKeysStore } from '@/stores/apiKeys'
 import { useSettingsStore } from '@/stores/settings'
@@ -29,8 +28,8 @@ const importOpen = computed({
 })
 const actionError = ref<string | null>(null)
 
-/** 用于创建、轮换及查看密钥弹窗展示 */
-const revealed = ref<{ name: string; secret: string; mode: 'create' | 'rotate' | 'view' } | null>(null)
+/** 用于创建、轮换密钥弹窗展示 */
+const revealed = ref<{ name: string; secret: string; mode: 'create' | 'rotate' } | null>(null)
 const revealOpen = computed({
   get: () => revealed.value !== null,
   set: (v) => {
@@ -43,10 +42,6 @@ const copiedId = ref<string | null>(null)
 
 function toggleShowPlain(id: string) {
   showPlainMap.value[id] = !showPlainMap.value[id]
-}
-
-function viewKey(k: ApiKeyInfo) {
-  revealed.value = { name: k.name, secret: k.secret || k.masked, mode: 'view' }
 }
 
 async function copyKey(k: ApiKeyInfo) {
@@ -92,17 +87,13 @@ function statusOf(k: ApiKeyInfo): { label: string; tone: 'success' | 'neutral' |
   return { label: '启用中', tone: 'success' }
 }
 
-function scopeText(k: ApiKeyInfo): { protocols: string; models: string; limits: string } {
+function limitText(k: ApiKeyInfo): string {
   const limits = [
     k.rpmLimit != null ? `RPM ${k.rpmLimit}` : null,
     k.tpmLimit != null ? `TPM ${k.tpmLimit}` : null,
     k.totalLimit != null ? `累计 ${k.totalLimit}` : null,
   ].filter(Boolean)
-  return {
-    protocols: k.protocols.map(protocolLabel).join('、') || '无协议',
-    models: k.allowedModels.length ? `${k.allowedModels.length} 个模型` : '全部模型',
-    limits: limits.length ? limits.join(' · ') : '无限额',
-  }
+  return limits.length ? limits.join(' · ') : '无限额'
 }
 
 function canImport(k: ApiKeyInfo): boolean {
@@ -166,7 +157,7 @@ onActivated(() => {
       <ShieldAlert :size="18" aria-hidden="true" />
       <span>
         本地服务未仅绑定回环地址（127.0.0.1 / localhost），局域网或外网设备可能访问到网关。
-        请务必启用密钥认证、限制协议与模型范围，并避免将密钥发给不受信任的人。
+        请务必启用密钥认证，并避免将密钥发给不受信任的人。
       </span>
     </div>
 
@@ -195,7 +186,7 @@ onActivated(() => {
           <tr>
             <th>名称</th>
             <th>密钥</th>
-            <th>权限范围</th>
+            <th>限额</th>
             <th class="num">调用次数</th>
             <th>创建时间</th>
             <th>最后使用</th>
@@ -210,52 +201,45 @@ onActivated(() => {
               <div v-if="k.expiresAt" class="sub">到期 {{ formatDateTime(k.expiresAt) }}</div>
             </td>
             <td>
-              <div class="key-cell">
-                <code class="mask" :title="k.secret || k.masked" :data-testid="`key-value-${k.id}`">
-                  {{ showPlainMap[k.id] && k.secret ? k.secret : k.masked }}
-                </code>
-                <button
-                  v-if="k.secret"
-                  class="mini-btn"
-                  type="button"
-                  :title="showPlainMap[k.id] ? '隐藏完整密钥' : '显示完整密钥'"
-                  :aria-label="showPlainMap[k.id] ? '隐藏完整密钥' : '显示完整密钥'"
-                  :data-testid="`toggle-plain-${k.id}`"
-                  @click="toggleShowPlain(k.id)"
-                >
-                  <component :is="showPlainMap[k.id] ? EyeOff : Eye" :size="14" aria-hidden="true" />
-                </button>
-                <button
-                  class="mini-btn"
-                  type="button"
-                  :title="copiedId === k.id ? '已复制' : '复制密钥'"
-                  :aria-label="copiedId === k.id ? '已复制' : '复制密钥'"
-                  :data-testid="`copy-${k.id}`"
-                  @click="copyKey(k)"
-                >
-                  <Copy :size="14" aria-hidden="true" />
+              <div class="key-card">
+                <div class="key-cell">
+                  <code class="mask" :data-testid="`key-value-${k.id}`">
+                    {{ showPlainMap[k.id] && k.secret ? k.secret : k.masked }}
+                  </code>
+                  <button
+                    v-if="k.secret"
+                    class="mini-btn"
+                    type="button"
+                    :title="showPlainMap[k.id] ? '隐藏完整密钥' : '显示完整密钥'"
+                    :aria-label="showPlainMap[k.id] ? '隐藏完整密钥' : '显示完整密钥'"
+                    :data-testid="`toggle-plain-${k.id}`"
+                    @click="toggleShowPlain(k.id)"
+                  >
+                    <component :is="showPlainMap[k.id] ? EyeOff : Eye" :size="14" aria-hidden="true" />
+                  </button>
+                  <button
+                    class="mini-btn"
+                    type="button"
+                    :title="copiedId === k.id ? '已复制' : '复制密钥'"
+                    :aria-label="copiedId === k.id ? '已复制' : '复制密钥'"
+                    :data-testid="`copy-${k.id}`"
+                    @click="copyKey(k)"
+                  >
+                    <Copy :size="14" aria-hidden="true" />
+                  </button>
+                </div>
+                <button class="btn import-btn" type="button" :disabled="isBusy(k.id) || !canImport(k)" :title="canImport(k) ? '选择要导入的客户端' : '需要启用中的完整密钥'" :data-testid="'import-' + k.id" @click="importKey = k">
+                  <Link2 :size="14" aria-hidden="true" /> 一键导入
                 </button>
               </div>
             </td>
-            <td class="scope">
-              <div :title="k.allowedModels.join('\n') || undefined">{{ scopeText(k).protocols }}</div>
-              <div class="sub">{{ scopeText(k).models }} · {{ scopeText(k).limits }}</div>
-            </td>
+            <td class="scope">{{ limitText(k) }}</td>
             <td class="num">{{ k.callCount.toLocaleString() }}</td>
             <td>{{ formatDateTime(k.createdAt) }}</td>
             <td>{{ formatDateTime(k.lastUsedAt, '从未使用') }}</td>
             <td><StatusTag :tone="statusOf(k).tone">{{ statusOf(k).label }}</StatusTag></td>
             <td>
               <div class="actions">
-                <button class="btn import-btn" type="button" :disabled="isBusy(k.id) || !canImport(k)" :title="canImport(k) ? '选择要接入的客户端' : '需要启用中的完整密钥'" :data-testid="'import-' + k.id" @click="importKey = k">
-                  <Link2 :size="15" aria-hidden="true" /> 接入客户端
-                </button>
-                <button
-                  class="icon" type="button" :disabled="isBusy(k.id)" :aria-label="`查看 ${k.name}`" title="查看完整密钥"
-                  :data-testid="`view-${k.id}`" @click="viewKey(k)"
-                >
-                  <Eye :size="16" aria-hidden="true" />
-                </button>
                 <button class="btn" type="button" :disabled="isBusy(k.id)" :data-testid="`toggle-${k.id}`" @click="toggleDisabled(k)">
                   {{ k.disabled ? '启用' : '停用' }}
                 </button>
@@ -322,6 +306,7 @@ tbody tr:last-child td { border-bottom: 0; }
 .name { font-weight: 500; }
 .sub { margin-top: 2px; color: var(--c-text-2); font-size: var(--fs-caption); font-weight: 400; }
 .mask { font-family: var(--font-mono); }
+.key-card { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
 .key-cell { display: inline-flex; align-items: center; gap: 6px; }
 .mini-btn { display: grid; place-items: center; width: 26px; height: 26px; border: 1px solid var(--c-border); border-radius: 6px; background: var(--c-canvas); color: var(--c-text-2); padding: 0; cursor: pointer; }
 .mini-btn:hover { background: var(--c-surface-2); color: var(--c-text); }

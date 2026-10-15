@@ -7,7 +7,7 @@ const props = defineProps<{
   modelValue: boolean
   secret: string
   keyName: string
-  mode: 'create' | 'rotate' | 'view'
+  mode: 'create' | 'rotate'
 }>()
 const emit = defineEmits<{ 'update:modelValue': [value: boolean] }>()
 
@@ -39,7 +39,7 @@ async function copy() {
 <template>
   <BaseModal
     :model-value="modelValue"
-    :title="mode === 'view' ? '查看密钥' : mode === 'create' ? '密钥已创建' : '密钥已轮换'"
+    :title="mode === 'create' ? '密钥已创建' : '密钥已轮换'"
     width="560px"
     @update:model-value="emit('update:modelValue', $event)"
   >

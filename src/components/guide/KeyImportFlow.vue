@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { computed, nextTick, ref, watch } from 'vue'
-import { ArrowLeft, ArrowRight, Check, Copy, Laptop, Sparkles, Terminal, Workflow } from 'lucide-vue-next'
+import { ArrowLeft, ArrowRight, Check, Copy, Laptop, Plus, Sparkles, Terminal, Trash2, Workflow } from 'lucide-vue-next'
 import { api } from '@/api'
 import { openCcSwitchLink } from '@/api/openExternal'
 import BaseModal from '@/components/BaseModal.vue'
@@ -25,6 +25,7 @@ const model = ref('')
 const haiku = ref('')
 const sonnet = ref('')
 const opus = ref('')
+const desktopModels = ref<string[]>([])
 const ccApp = ref<'claude' | 'codex'>('claude')
 const preview = ref<ClientImportPreview | null>(null)
 const previewKey = ref('')
@@ -41,20 +42,9 @@ const choices: { id: Target; name: string; description: string; icon: typeof Ter
   { id: 'ccswitch', name: 'CC Switch', description: '唤起本机导入确认', icon: Workflow },
 ]
 const label = computed(() => choices.find((x) => x.id === target.value)?.name || '')
-const allowedModels = computed(() => props.apiKey?.allowedModels || [])
-const options = computed(() => allowedModels.value.length
-  ? modelNames.value.filter((name) => allowedModels.value.includes(name)).concat(allowedModels.value.filter((name) => !modelNames.value.includes(name)))
-  : modelNames.value)
-const chosenModels = computed(() => target.value === 'claude' || (target.value === 'ccswitch' && ccApp.value === 'claude')
-  ? [model.value, haiku.value, sonnet.value, opus.value]
-  : [model.value])
-const validModels = computed(() => chosenModels.value.every((name) => {
-  const value = name.trim()
-  return !value || !allowedModels.value.length || allowedModels.value.includes(value)
-}) && !!model.value.trim())
-const protocol = computed(() => target.value === 'codex' || (target.value === 'ccswitch' && ccApp.value === 'codex')
-  ? 'openai-responses' : 'anthropic-messages')
-const supported = computed(() => !props.apiKey?.protocols.length || props.apiKey.protocols.includes(protocol.value))
+const options = computed(() => modelNames.value)
+const validModels = computed(() => !!model.value.trim())
+const desktopModelList = computed(() => [...new Set([model.value, ...desktopModels.value].map((name) => name.trim()).filter(Boolean))])
 const key = computed(() => props.apiKey?.secret || '')
 const request = computed<ClientImportInput>(() => ({
   client: target.value as ImportClient,
@@ -66,7 +56,7 @@ const request = computed<ClientImportInput>(() => ({
   opusModel: opus.value.trim(),
 }))
 const requestFingerprint = computed(() => JSON.stringify(request.value))
-const canProceed = computed(() => !!key.value && !!origin.value && validModels.value && supported.value && !busy.value)
+const canProceed = computed(() => !!key.value && !!origin.value && validModels.value && !busy.value)
 
 watch(() => props.modelValue, async (open) => {
   if (!open) { pickerOpen.value = false; target.value = null; return }
@@ -92,6 +82,7 @@ function choose(id: Target) {
   haiku.value = ''
   sonnet.value = ''
   opus.value = ''
+  desktopModels.value = []
   ccApp.value = 'claude'
   preview.value = null
   previewKey.value = ''
@@ -196,7 +187,6 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
       <template v-else>
         <p v-if="!running" class="notice">本地网关尚未运行；配置可以先保存，但客户端要等网关启动后才能连接。</p>
         <p v-if="modelError" class="notice">读取模型列表失败：{{ modelError }}。可以手动填写模型名。</p>
-        <p v-if="!supported" class="notice">这把密钥没有开放 {{ protocol }} 协议，请换一把支持该协议的密钥。</p>
 
         <div v-if="target === 'ccswitch'" class="field">
           <label for="import-cc-app">导入到</label>
@@ -219,18 +209,32 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
           </template>
           <datalist id="import-model-options"><option v-for="name in options" :key="name" :value="name" /></datalist>
         </div>
+        <div v-if="target === 'desktop'" class="desktop-models">
+          <p class="hint">Claude Desktop 的模型列表可以加入多个模型，第一个模型作为默认选项。</p>
+          <div v-for="(_, index) in desktopModels" :key="index" class="field desktop-model-row">
+            <label :for="'import-desktop-model-' + index">额外模型 {{ index + 1 }}</label>
+            <div class="model-input-row">
+              <input :id="'import-desktop-model-' + index" v-model="desktopModels[index]" list="import-model-options" placeholder="选择或输入模型名" autocomplete="off" spellcheck="false" />
+              <button class="btn" type="button" :aria-label="'移除额外模型 ' + (index + 1)" @click="desktopModels.splice(index, 1)"><Trash2 :size="15" /></button>
+            </div>
+          </div>
+          <button class="btn add-model" type="button" data-testid="add-desktop-model" @click="desktopModels.push('')"><Plus :size="15" /> 添加模型</button>
+        </div>
         <p v-if="target === 'claude' || (target === 'ccswitch' && ccApp === 'claude')" class="hint">三个档位可分别指定模型；留空时沿用默认模型。</p>
         <p v-if="!options.length" class="hint">还没有已启用的模型。先在“提供商”中启用模型，也可以输入已有的公开模型别名。</p>
         <p v-if="!model.trim()" class="notice">请填写默认模型。</p>
-        <p v-else-if="!validModels && allowedModels.length" class="notice">模型必须在这把密钥允许的模型范围内。</p>
 
         <template v-if="target === 'desktop'">
           <div class="desktop-guide">
             <strong>Claude Desktop 需要在应用内配置第三方推理</strong>
-            <p>打开 Claude Desktop → Help → Troubleshooting → Enable Developer Mode；重启后打开 Developer → Configure Third-Party Inference。填写下方本地网关地址与密钥，并在桌面应用中选择模型。普通 Chat 界面与 Code 模式的支持范围以 Claude Desktop 当前版本为准。</p>
+            <p>打开 Claude Desktop → Help → Troubleshooting → Enable Developer Mode，再打开 Developer → Configure Third-Party Inference。选择 Gateway，填写下方地址与密钥，在 Models 中逐个添加模型并应用更改。明确填写模型列表可让非 Claude 命名的模型出现在选择器中。</p>
             <div><code>{{ origin }}</code><button class="btn" type="button" @click="copy(origin, '地址')"><Copy :size="14" /> {{ copied === '地址' ? '已复制' : '复制地址' }}</button></div>
             <div><code>{{ apiKey?.masked }}</code><button class="btn" type="button" @click="copy(key, '密钥')"><Copy :size="14" /> {{ copied === '密钥' ? '已复制' : '复制密钥' }}</button></div>
-            <div v-if="model"><code>{{ model }}</code><button class="btn" type="button" @click="copy(model, '模型')"><Copy :size="14" /> {{ copied === '模型' ? '已复制' : '复制模型' }}</button></div>
+            <div v-for="(name, index) in desktopModelList" :key="name" :data-testid="'desktop-copy-model-' + index">
+              <code>{{ index === 0 ? '默认：' : '' }}{{ name }}</code>
+              <button class="btn" type="button" @click="copy(name, '模型' + index)"><Copy :size="14" /> {{ copied === '模型' + index ? '已复制' : '复制模型' }}</button>
+            </div>
+            <button v-if="desktopModelList.length > 1" class="btn" type="button" data-testid="copy-desktop-models" @click="copy(desktopModelList.join('\n'), '模型列表')"><Copy :size="14" /> {{ copied === '模型列表' ? '已复制模型列表' : '复制全部模型名' }}</button>
           </div>
         </template>
 
@@ -281,6 +285,12 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .field { display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-small); }
 .field input,.field select { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--c-border); border-radius: 8px; background: var(--c-canvas); color: var(--c-text); }
+.desktop-models { display: flex; flex-direction: column; gap: 10px; }
+.desktop-models .hint { margin: 0; }
+.model-input-row { display: flex; gap: 8px; }
+.model-input-row input { flex: 1; }
+.model-input-row button { flex: none; }
+.add-model { align-self: flex-start; }
 .preview,.desktop-guide { display: flex; flex-direction: column; gap: 9px; padding: 14px; border: 1px solid var(--c-border); border-radius: 9px; font-size: var(--fs-small); }
 .preview > code,.desktop-guide code,.muted code { overflow-wrap: anywhere; }
 .preview details summary { cursor: pointer; color: var(--c-brand); }
