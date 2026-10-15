@@ -13,6 +13,7 @@ const h = vi.hoisted(() => ({
     setApiKeyDisabled: vi.fn(),
     deleteApiKey: vi.fn(),
     getSettings: vi.fn(),
+    listGatewayModels: vi.fn(),
   },
 }))
 vi.mock('@/api', () => ({ api: h.api }))
@@ -47,6 +48,7 @@ async function mountView(listenAddress = '127.0.0.1', keys: ApiKeyInfo[] = [keyI
 beforeEach(() => {
   setActivePinia(createPinia())
   Object.values(h.api).forEach((f) => f.mockReset())
+  h.api.listGatewayModels.mockResolvedValue([])
 })
 afterEach(() => {
   wrapper?.unmount()
@@ -54,6 +56,19 @@ afterEach(() => {
 })
 
 describe('ApiKeysView', () => {
+  it('密钥表下面是连接参数和一键接入；选中的密钥和模型就是接入面板里用的', async () => {
+    h.api.listGatewayModels.mockResolvedValue([{ id: 'deepseek-chat', providerId: 'deepseek', providerName: 'DeepSeek' }])
+    await mountView('127.0.0.1', [keyInfo({ id: 'k1', secret: SECRET })])
+    const headings = [...wrapper.element.querySelectorAll('section h2')].map((h2) => h2.textContent)
+    expect(headings).toEqual(['连接参数', '一键接入'])
+    expect(wrapper.get('[data-testid="key-full"]').text()).toBe(SECRET)
+    expect((wrapper.get('[data-testid="model-input"]').element as HTMLInputElement).value).toBe('deepseek-chat')
+    expect((wrapper.get('[data-testid="open-codex"]').element as HTMLButtonElement).disabled).toBe(false)
+    const table = wrapper.element.querySelector('table')!
+    const panel = wrapper.element.querySelector('#g-params')!
+    expect(table.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  })
+
   it('列表显示掩码密钥与状态，完整密钥不出现', async () => {
     await mountView()
     expect(wrapper.text()).toContain('sk-r…a9f2')

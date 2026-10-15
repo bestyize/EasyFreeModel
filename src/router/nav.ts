@@ -29,8 +29,8 @@ export interface NavItem {
 
 /** 一级菜单；媒体类入口暂时隐藏，代理池按用户要求置于设置页上方。 */
 export const NAV_ITEMS: NavItem[] = [
-  { path: '/api-keys', name: 'api-keys', label: 'API 密钥', subtitle: '管理对外提供的本地访问密钥、权限与有效期', icon: KeyRound },
-  { path: '/api-guide', name: 'api-guide', label: 'API 接入', subtitle: '网关地址、请求示例，以及 Codex / Claude Code / CC Switch 的一键配置', icon: Link2 },
+  { path: '/api-keys', name: 'api-keys', label: 'API 密钥', subtitle: '管理本地访问密钥，并一键接入 Codex / Claude Code / CC Switch', icon: KeyRound },
+  { path: '/api-guide', name: 'api-guide', label: 'API 接入', subtitle: '网关地址与各协议的请求示例', icon: Link2 },
   { path: '/providers', name: 'providers', label: '提供商', subtitle: '管理您的 AI 提供商、账户与模型', icon: Database },
   { path: '/usage', name: 'usage', label: '使用情况', subtitle: '监控您的 API 请求、Token 消耗和调用趋势', icon: ChartColumn },
   { path: '/quota', name: 'quota', label: '配额跟踪', subtitle: '跟踪和管理您的 API 配额限制', icon: ChartPie },

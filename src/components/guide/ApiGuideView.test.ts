@@ -1,35 +1,30 @@
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { ApiKeyInfo, AppSettings, ClientImportPreview, SystemStatus } from '@/types'
+import type { ApiKeyInfo, AppSettings, SystemStatus } from '@/types'
 
 const SECRET = 'sk-r-FULLSECRET-0123456789'
 
 const h = vi.hoisted(() => ({
   api: {
     listApiKeys: vi.fn(),
-    createApiKey: vi.fn(),
     getSettings: vi.fn(),
     listGatewayModels: vi.fn(),
     systemStatus: vi.fn(),
     startGateway: vi.fn(),
     stopGateway: vi.fn(),
-    previewClientImport: vi.fn(),
-    applyClientImport: vi.fn(),
   },
-  openCcSwitchLink: vi.fn(),
 }))
 vi.mock('@/api', () => ({ api: h.api }))
-vi.mock('@/api/openExternal', () => ({ openCcSwitchLink: h.openCcSwitchLink, openExternal: vi.fn() }))
 
 import ApiGuideView from '@/views/ApiGuideView.vue'
+import { useConnectStore } from '@/stores/connect'
 import { useSystemStore } from '@/stores/system'
-
-const ALL = ['openai-chat', 'openai-responses', 'anthropic-messages', 'gemini'] as const
 
 function keyInfo(over: Partial<ApiKeyInfo> = {}): ApiKeyInfo {
   return {
-    id: 'k1', name: 'Cursor', masked: 'sk-r…6789', secret: SECRET, protocols: [...ALL], allowedModels: [], rpmLimit: null,
+    id: 'k1', name: 'Cursor', masked: 'sk-r…6789', secret: SECRET,
+    protocols: ['openai-chat', 'openai-responses', 'anthropic-messages', 'gemini'], allowedModels: [], rpmLimit: null,
     tpmLimit: null, totalLimit: null, callCount: 0, createdAt: '2026-10-01T08:00:00Z', lastUsedAt: null, expiresAt: null, disabled: false, ...over,
   }
 }
@@ -40,33 +35,20 @@ const settings = (over: Partial<AppSettings> = {}): AppSettings => ({
 const status = (running: boolean, address = '127.0.0.1', port = 20128, error: string | null = null): SystemStatus => ({
   gateway: { running, address, port, error }, apiRequests: 0, successRate: null, avgLatencyMs: null,
 })
-const preview = (over: Partial<ClientImportPreview> = {}): ClientImportPreview => ({
-  client: 'codex', path: '/Users/me/.codex/config.toml', exists: true, unchanged: false, error: null,
-  changes: [
-    { field: 'model', before: 'old-model', after: 'openai/gpt-4o-mini' },
-    { field: 'model_providers.router.experimental_bearer_token', before: null, after: SECRET },
-    { field: 'model_providers.router.env_key', before: 'ROUTER_API_KEY', after: null },
-  ],
-  ...over,
-})
 
 const q = (sel: string) => document.body.querySelector<HTMLElement>(sel)
 const text = (sel: string) => q(sel)?.textContent ?? ''
 let wrapper: VueWrapper
-let clipboard: ReturnType<typeof vi.fn>
 
 async function mountView(opts: { keys?: ApiKeyInfo[]; set?: AppSettings; running?: boolean; models?: { id: string; providerId: string; providerName: string }[] } = {}) {
   h.api.listApiKeys.mockResolvedValue(opts.keys ?? [keyInfo()])
   h.api.getSettings.mockResolvedValue(opts.set ?? settings())
   h.api.listGatewayModels.mockResolvedValue(opts.models ?? [{ id: 'openai/gpt-4o-mini', providerId: 'openai', providerName: 'OpenAI' }])
-  wrapper = mount(ApiGuideView, { attachTo: document.body })
+  wrapper = mount(ApiGuideView, {
+    attachTo: document.body,
+    global: { stubs: { RouterLink: { props: ['to'], template: '<a :href="to"><slot /></a>' } } },
+  })
   useSystemStore().status = status(opts.running ?? true)
-  await flushPromises()
-}
-async function pick(sel: string, value: string) {
-  const el = q(sel) as HTMLSelectElement | HTMLInputElement
-  el.value = value
-  el.dispatchEvent(new Event(el.tagName === 'SELECT' ? 'change' : 'input'))
   await flushPromises()
 }
 async function click(sel: string) {
@@ -79,79 +61,31 @@ async function click(sel: string) {
 beforeEach(() => {
   setActivePinia(createPinia())
   Object.values(h.api).forEach((f) => f.mockReset())
-  h.openCcSwitchLink.mockReset()
-  h.api.previewClientImport.mockResolvedValue(preview())
-  clipboard = vi.fn().mockResolvedValue(undefined)
-  Object.defineProperty(navigator, 'clipboard', { value: { writeText: clipboard }, configurable: true })
 })
-afterEach(() => wrapper?.unmount())
+afterEach(() => {
+  wrapper?.unmount()
+  document.body.innerHTML = ''
+})
 
-describe('ApiGuideView · 页面', () => {
-  it('密钥以明文展示并可复制，默认选好第一个模型，示例里直接是真实密钥', async () => {
+describe('ApiGuideView · 网关地址', () => {
+  it('网关地址是页面最前面的模块，连接参数和一键接入不在这个页面', async () => {
     await mountView()
-    expect(text('[data-testid="key-full"]')).toBe(SECRET)
-    expect((q('[data-testid="model-input"]') as HTMLInputElement).value).toBe('openai/gpt-4o-mini')
-    expect(text('[data-testid="example-code"]')).toContain(`Bearer ${SECRET}`)
-    expect(text('[data-testid="example-code"]')).toContain('"model": "openai/gpt-4o-mini"')
-
-    q('.keyline button')!.click()
-    await flushPromises()
-    expect(clipboard).toHaveBeenCalledWith(SECRET)
+    const sections = [...document.body.querySelectorAll('section')]
+    expect(sections.map((s) => s.querySelector('h2')?.textContent)).toEqual(['网关地址', '请求示例'])
+    expect(q('#g-params')).toBeNull()
+    expect(q('#g-import')).toBeNull()
+    expect(q('[data-testid="open-codex"]')).toBeNull()
   })
 
-  it('多个密钥时默认选放行全部协议的那个；停用、过期、没存明文的不出现', async () => {
-    await mountView({
-      keys: [
-        keyInfo({ id: 'narrow', name: 'Narrow', protocols: ['openai-chat'], secret: 'sk-narrow' }),
-        keyInfo({ id: 'full', name: 'Full', secret: 'sk-full' }),
-        keyInfo({ id: 'off', name: 'Off', disabled: true }),
-        keyInfo({ id: 'old', name: 'Old', expiresAt: '2020-01-01T00:00:00Z' }),
-        keyInfo({ id: 'legacy', name: 'Legacy', secret: undefined }),
-      ],
-    })
-    const select = q('[data-testid="key-select"]') as HTMLSelectElement
-    expect([...select.options].map((o) => o.value)).toEqual(['narrow', 'full'])
-    expect(select.value).toBe('full')
-    expect(text('[data-testid="key-full"]')).toBe('sk-full')
-    await pick('[data-testid="key-select"]', 'narrow')
-    expect(text('[data-testid="key-full"]')).toBe('sk-narrow')
+  it('列出各协议地址与 Base URL', async () => {
+    await mountView()
+    expect(text('[data-testid="addr-openai-chat"]')).toContain('http://127.0.0.1:20128/v1/chat/completions')
+    expect(text('[data-testid="addr-openai-chat"]')).toContain('http://127.0.0.1:20128/v1')
+    expect(text('[data-testid="addr-anthropic-messages"]')).toContain('http://127.0.0.1:20128/v1/messages')
+    expect(q('[data-testid="stopped-banner"]')).toBeNull()
   })
 
-  it('没有密钥：一键创建，创建后立刻可用', async () => {
-    await mountView({ keys: [] })
-    expect(text('[data-testid="no-key"]')).toContain('还没有可用的 API 密钥')
-    expect((q('[data-testid="open-codex"]') as HTMLButtonElement).disabled).toBe(true)
-    expect(text('[data-testid="example-code"]')).toContain('Bearer YOUR_API_KEY')
-
-    h.api.createApiKey.mockResolvedValue({ key: keyInfo({ id: 'new', name: 'Router 接入' }), secret: SECRET })
-    await click('[data-testid="create-key"]')
-    expect(h.api.createApiKey).toHaveBeenCalledWith({
-      name: 'Router 接入', expiresAt: null, protocols: [...ALL], allowedModels: [], rpmLimit: null, tpmLimit: null, totalLimit: null,
-    })
-    expect(q('[data-testid="no-key"]')).toBeNull()
-    expect(text('[data-testid="key-full"]')).toBe(SECRET)
-    expect((q('[data-testid="open-codex"]') as HTMLButtonElement).disabled).toBe(false)
-  })
-
-  it('只有旧密钥（没存明文）时给出对应说明；创建失败显示原因', async () => {
-    await mountView({ keys: [keyInfo({ secret: undefined })] })
-    expect(text('[data-testid="no-key"]')).toContain('没有保存明文')
-    h.api.createApiKey.mockRejectedValue('数据库忙')
-    await click('[data-testid="create-key"]')
-    expect(text('[data-testid="create-error"]')).toContain('数据库忙')
-  })
-
-  it('没有模型时按钮不可用并提示；手动输入后可用', async () => {
-    await mountView({ models: [] })
-    expect(q('[data-testid="no-models"]')).not.toBeNull()
-    expect((q('[data-testid="open-claude"]') as HTMLButtonElement).disabled).toBe(true)
-    expect(q('[data-testid="import-disabled-hint"]')).not.toBeNull()
-    await pick('[data-testid="model-input"]', 'deepseek-chat')
-    expect((q('[data-testid="open-claude"]') as HTMLButtonElement).disabled).toBe(false)
-    expect(text('[data-testid="example-code"]')).toContain('"model": "deepseek-chat"')
-  })
-
-  it('地址表：运行中以实际监听为准；通配地址给局域网提示', async () => {
+  it('运行中以实际监听地址为准；通配地址显示局域网提示', async () => {
     await mountView({ set: settings({ listenAddress: '0.0.0.0', port: 9000 }), running: false })
     expect(text('[data-testid="addr-models"]')).toContain('http://127.0.0.1:9000/v1/models')
     expect(q('[data-testid="wildcard-hint"]')).not.toBeNull()
@@ -160,148 +94,63 @@ describe('ApiGuideView · 页面', () => {
     expect(text('[data-testid="addr-models"]')).toContain('http://10.0.0.8:9100/v1/models')
   })
 
-  it('网关未运行：提示并可一键启动，失败显示后端错误', async () => {
+  it('网关未运行：提示放在地址模块里，可一键启动，失败显示后端错误', async () => {
     h.api.startGateway.mockResolvedValue({ running: false, address: '127.0.0.1', port: 20128, error: '端口 20128 已被占用' })
     h.api.systemStatus.mockResolvedValue(status(false, '127.0.0.1', 20128, '端口 20128 已被占用'))
     await mountView({ running: false })
+    expect(q('section[aria-labelledby="g-addr"] [data-testid="stopped-banner"]')).not.toBeNull()
     await click('[data-testid="start-gateway"]')
     expect(h.api.startGateway).toHaveBeenCalled()
     expect(text('[data-testid="start-error"]')).toContain('已被占用')
   })
+})
 
-  it('请求示例：切换协议与语言；Gemini 只有 curl', async () => {
+describe('ApiGuideView · 请求示例', () => {
+  it('示例直接用「API 密钥」页选好的密钥和模型，并说明来源', async () => {
+    await mountView()
+    expect(text('[data-testid="example-code"]')).toContain(`Bearer ${SECRET}`)
+    expect(text('[data-testid="example-code"]')).toContain('"model": "openai/gpt-4o-mini"')
+    const link = q('[data-testid="example-source"] a')!
+    expect(link.getAttribute('href')).toBe('/api-keys')
+    expect(link.textContent).toBe('API 密钥')
+  })
+
+  it('在别处改了模型，示例跟着变', async () => {
+    await mountView()
+    useConnectStore().model = 'deepseek-chat'
+    await flushPromises()
+    expect(text('[data-testid="example-code"]')).toContain('"model": "deepseek-chat"')
+  })
+
+  it('没有可用密钥或模型时用占位符', async () => {
+    await mountView({ keys: [], models: [] })
+    const code = text('[data-testid="example-code"]')
+    expect(code).toContain('Bearer YOUR_API_KEY')
+    expect(code).toContain('YOUR_MODEL')
+  })
+
+  it('切换协议和语言；Gemini 只有 curl，切过去时语言自动回到 curl', async () => {
     await mountView()
     await click('[data-testid="tab-anthropic-messages"]')
+    expect(text('[data-testid="example-code"]')).toContain('/v1/messages')
     expect(text('[data-testid="example-code"]')).toContain('x-api-key')
     await click('[data-testid="tab-python"]')
     expect(text('[data-testid="example-code"]')).toContain('anthropic.Anthropic(')
+    await click('[data-testid="tab-openai-responses"]')
+    expect(text('[data-testid="example-code"]')).toContain('client.responses.create(')
+    await click('[data-testid="tab-node"]')
     await click('[data-testid="tab-gemini"]')
     expect(q('[data-testid="tab-python"]')).toBeNull()
     expect(text('[data-testid="example-code"]')).toContain('x-goog-api-key')
-  })
-})
-
-describe('ApiGuideView · Codex / Claude Code 弹窗', () => {
-  it('点按钮出弹窗，展示目标文件、字段变化和说明；此时还没有写入任何东西', async () => {
-    await mountView()
-    await click('[data-testid="open-codex"]')
-    expect(h.api.previewClientImport).toHaveBeenCalledWith({ client: 'codex', origin: 'http://127.0.0.1:20128', apiKey: SECRET, model: 'openai/gpt-4o-mini' })
-    expect(text('[data-testid="import-path"]')).toBe('/Users/me/.codex/config.toml')
-    expect(text('[data-testid="file-state"]')).toContain('修改现有文件')
-    const rows = [...document.body.querySelectorAll('[data-testid="changes"] tbody tr')].map((r) =>
-      [...r.querySelectorAll('td')].map((td) => td.textContent!.trim()),
-    )
-    expect(rows).toEqual([
-      ['model', 'old-model', 'openai/gpt-4o-mini'],
-      ['model_providers.router.experimental_bearer_token', '（无）', SECRET],
-      ['model_providers.router.env_key', 'ROUTER_API_KEY', '（删除）'],
-    ])
-    const modal = text('[data-testid="import-modal-codex"]')
-    expect(modal).toContain('自动备份')
-    expect(modal).toContain('切换为 router')
-    expect(modal).toContain('重启 Codex')
-    expect(h.api.applyClientImport).not.toHaveBeenCalled()
+    expect(text('[data-testid="example-code"]')).toContain('curl ')
   })
 
-  it('确认后写入，显示结果与备份路径', async () => {
+  it('点复制放进剪贴板的是完整示例', async () => {
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true })
     await mountView()
-    await click('[data-testid="open-codex"]')
-    h.api.applyClientImport.mockResolvedValue({ path: '/Users/me/.codex/config.toml', backupPath: '/Users/me/.codex/config.toml.router-bak-20261015-103000', changed: true })
-    await click('[data-testid="confirm-import"]')
-    expect(h.api.applyClientImport).toHaveBeenCalledWith({ client: 'codex', origin: 'http://127.0.0.1:20128', apiKey: SECRET, model: 'openai/gpt-4o-mini' })
-    expect(text('[data-testid="import-done"]')).toContain('已导入到 Codex')
-    expect(text('[data-testid="backup-path"]')).toContain('router-bak-20261015-103000')
-    await click('[data-testid="done"]')
-    expect(q('[data-testid="import-modal-codex"]')).toBeNull()
-  })
-
-  it('取消不会写入', async () => {
-    await mountView()
-    await click('[data-testid="open-claude"]')
-    expect(h.api.previewClientImport).toHaveBeenCalledWith(expect.objectContaining({ client: 'claude' }))
-    ;[...document.body.querySelectorAll('button')].find((b) => b.textContent?.trim() === '取消')!.click()
+    q('[data-testid="example-code"] button[aria-label="复制"]')!.click()
     await flushPromises()
-    expect(h.api.applyClientImport).not.toHaveBeenCalled()
-    expect(q('[data-testid="import-modal-claude"]')).toBeNull()
-  })
-
-  it('现有文件无法解析：显示原因并禁用确认', async () => {
-    h.api.previewClientImport.mockResolvedValue(preview({ changes: [], error: '现有 config.toml 不是合法的 TOML（第 3 行），为避免覆盖已拒绝合并。' }))
-    await mountView()
-    await click('[data-testid="open-codex"]')
-    expect(text('[data-testid="preview-error"]')).toContain('已拒绝合并')
-    expect(q('[data-testid="changes"]')).toBeNull()
-    expect((q('[data-testid="confirm-import"]') as HTMLButtonElement).disabled).toBe(true)
-  })
-
-  it('配置已是最新：提示无需导入，没有确认按钮', async () => {
-    h.api.previewClientImport.mockResolvedValue(preview({ unchanged: true }))
-    await mountView()
-    await click('[data-testid="open-codex"]')
-    expect(text('[data-testid="file-state"]')).toContain('已是最新')
-    expect(q('[data-testid="unchanged-note"]')).not.toBeNull()
-    expect(q('[data-testid="confirm-import"]')).toBeNull()
-  })
-
-  it('写入失败：显示后端错误，可以重试', async () => {
-    await mountView()
-    await click('[data-testid="open-claude"]')
-    h.api.applyClientImport.mockRejectedValueOnce('写入 /Users/me/.claude/settings.json 失败：Permission denied')
-    await click('[data-testid="confirm-import"]')
-    expect(text('[data-testid="import-failure"]')).toContain('Permission denied')
-    expect(q('[data-testid="import-done"]')).toBeNull()
-    expect((q('[data-testid="confirm-import"]') as HTMLButtonElement).disabled).toBe(false)
-  })
-
-  it('读取预览本身失败也能看到原因', async () => {
-    h.api.previewClientImport.mockRejectedValue('无法确定用户主目录')
-    await mountView()
-    await click('[data-testid="open-codex"]')
-    expect(text('[data-testid="import-failure"]')).toContain('无法确定用户主目录')
-    expect((q('[data-testid="confirm-import"]') as HTMLButtonElement).disabled).toBe(true)
-  })
-})
-
-describe('ApiGuideView · CC Switch 弹窗', () => {
-  it('展示将导入的信息；确认前不会唤起 CC Switch', async () => {
-    await mountView()
-    await click('[data-testid="open-ccswitch"]')
-    const facts = text('[data-testid="cc-facts"]')
-    expect(facts).toContain('Router Desktop')
-    expect(facts).toContain('http://127.0.0.1:20128')
-    expect(facts).toContain('openai/gpt-4o-mini')
-    expect(facts).toContain(SECRET)
-    expect(h.openCcSwitchLink).not.toHaveBeenCalled()
-  })
-
-  it('默认导入为 Claude Code；切到 Codex 后接口地址带 /v1，确认时用对应链接', async () => {
-    await mountView()
-    await click('[data-testid="open-ccswitch"]')
-    h.openCcSwitchLink.mockResolvedValue(undefined)
-    await click('[data-testid="confirm-import"]')
-    const claude = new URL(h.openCcSwitchLink.mock.calls[0][0] as string)
-    expect(claude.searchParams.get('app')).toBe('claude')
-    expect(claude.searchParams.get('endpoint')).toBe('http://127.0.0.1:20128')
-    expect(claude.searchParams.get('apiKey')).toBe(SECRET)
-    expect(text('[data-testid="cc-sent"]')).toContain('Claude Code')
-
-    await click('[data-testid="cc-done"]')
-    await click('[data-testid="open-ccswitch"]')
-    await click('[data-testid="tab-codex"]')
-    expect(text('[data-testid="cc-facts"]')).toContain('http://127.0.0.1:20128/v1')
-    await click('[data-testid="confirm-import"]')
-    const codex = new URL(h.openCcSwitchLink.mock.calls[1][0] as string)
-    expect(codex.searchParams.get('app')).toBe('codex')
-    expect(codex.searchParams.get('endpoint')).toBe('http://127.0.0.1:20128/v1')
-  })
-
-  it('唤起失败：给出可操作的提示，仍可重试', async () => {
-    await mountView()
-    await click('[data-testid="open-ccswitch"]')
-    h.openCcSwitchLink.mockRejectedValue(new Error('no handler'))
-    await click('[data-testid="confirm-import"]')
-    expect(text('[data-testid="cc-failure"]')).toContain('请确认已安装 CC Switch')
-    expect(q('[data-testid="cc-sent"]')).toBeNull()
-    expect((q('[data-testid="confirm-import"]') as HTMLButtonElement).disabled).toBe(false)
+    expect(writeText.mock.calls[0][0]).toContain(`Bearer ${SECRET}`)
   })
 })

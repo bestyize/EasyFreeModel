@@ -5,6 +5,7 @@ import ConfirmDialog from '@/components/ConfirmDialog.vue'
 import EmptyState from '@/components/EmptyState.vue'
 import StatusTag from '@/components/StatusTag.vue'
 import ApiKeyCreateModal from '@/components/apikeys/ApiKeyCreateModal.vue'
+import ConnectPanel from '@/components/guide/ConnectPanel.vue'
 import SecretRevealModal from '@/components/apikeys/SecretRevealModal.vue'
 import { isLoopbackAddress } from '@/components/settings/address'
 import { protocolLabel } from '@/components/settings/protocols'
@@ -264,6 +265,8 @@ onActivated(() => {
         </tbody>
       </table>
     </div>
+
+    <ConnectPanel v-if="store.loaded" />
 
     <ApiKeyCreateModal v-model="createOpen" @created="onCreated" />
 
