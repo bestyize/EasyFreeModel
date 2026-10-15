@@ -22,7 +22,7 @@ vi.mock('@/api', async () => {
 })
 
 const catalog = catalogJson as unknown as { id: string; category: string; serviceKinds: string[] }[]
-const status = statusJson as Record<string, { adapter: string | null }>
+const status = statusJson as unknown as Record<string, { adapter: string | null }>
 const ready = (id: string) => status[id]?.adapter != null
 const SECRET = 'sk-ui-SUPERSECRET-9876'
 
@@ -170,7 +170,6 @@ describe('第四组：API Key 提供商', () => {
     expect(cardOf(w, 'Cursor IDE')).toBeUndefined()
     expect(w.text()).not.toContain('Cursor IDE')
   })
-
 })
 
 describe('录入 API Key', () => {
