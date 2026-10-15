@@ -2,10 +2,8 @@
 /**
  * 提供商页。分组顺序：自定义 → OAuth → 免费额度 → API Key。
  *
- * 第四组「API Key 提供商」是对 PRODUCT_DESIGN.md §4.2「固定三组」的有意扩展：目录对齐 9Router 后共 133 家，
- * 其中 87 家（API Key 与网页会话类）放不进原三组。该组默认折叠成一行摘要“共 N 家”，展开后四列卡片，
- * 支持按能力（聊天/图像/语音/视频/搜索/嵌入）筛选，并响应顶部全局搜索；卡片显示能力小标签，
- * 适配器未接入的显示 pendingReason（卡片上省略 + title，弹窗里完整展示）。
+ * 只展示适配器已接入的提供商；未就绪项仍留在本地目录与已有配置中。
+ * API Key 组支持按能力筛选和全局搜索。
  */
 import { computed, onMounted, ref } from 'vue'
 import { ChevronDown, ChevronUp, LayoutGrid, List, Play, Plus } from 'lucide-vue-next'
@@ -35,17 +33,20 @@ onMounted(() => {
   if (!store.loaded) store.fetchProviders()
 })
 
+function visibleGroup(group: ProviderGroup) {
+  return store.byGroup(group).filter((p) => p.adapterReady)
+}
+
 function groupItems(group: ProviderGroup) {
-  return filterProviders(store.byGroup(group), ui.globalQuery)
+  return filterProviders(visibleGroup(group), ui.globalQuery)
 }
 const custom = computed(() => groupItems('custom'))
 const oauth = computed(() => groupItems('oauth'))
 const free = computed(() => groupItems('free'))
-const customTotal = computed(() => store.byGroup('custom').length)
+const customTotal = computed(() => visibleGroup('custom').length)
 const searching = computed(() => ui.globalQuery.trim() !== '')
 
-const apikeyAll = computed(() => store.byGroup('apikey'))
-const apikeyReadyCount = computed(() => apikeyAll.value.filter((p) => p.adapterReady).length)
+const apikeyAll = computed(() => visibleGroup('apikey'))
 const apikeySearched = computed(() => groupItems('apikey'))
 const apikeyShown = computed(() =>
   capFilter.value === 'all'
@@ -205,7 +206,7 @@ const gridClass = computed(() => (layout.value === 'card' ? 'grid' : 'list'))
         <header class="group-head">
           <div>
             <h2 id="g-apikey" class="section-title">API Key 提供商</h2>
-            <p class="desc">使用各厂商的 API Key 直接接入；适配器尚未接入的会如实标注“待接入”</p>
+            <p class="desc">使用各厂商的 API Key 直接接入，当前仅展示已接入适配器的提供商</p>
           </div>
           <div class="actions">
             <button
@@ -235,7 +236,7 @@ const gridClass = computed(() => (layout.value === 'card' ? 'grid' : 'list'))
 
         <div v-if="!apikeyOpen" class="summary-row" data-testid="apikey-summary">
           <strong>共 {{ apikeyAll.length }} 家</strong>
-          <span>可用 {{ apikeyReadyCount }} 家 · 待接入 {{ apikeyAll.length - apikeyReadyCount }} 家</span>
+          <span>可用提供商</span>
         </div>
 
         <div v-else id="apikey-body">
