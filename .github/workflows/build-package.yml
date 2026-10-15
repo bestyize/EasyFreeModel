@@ -1,0 +1,92 @@
+name: BuildPackage
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: build-package-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Windows x64
+            runner: windows-2022
+            bundle: nsis
+            artifact: package-windows-x64
+            path: src-tauri/target/release/bundle/nsis/*.exe
+          - name: macOS ARM64
+            runner: macos-15
+            bundle: dmg
+            artifact: package-macos-arm64
+            path: src-tauri/target/release/bundle/dmg/*.dmg
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: src-tauri -> target
+      - name: Install dependencies
+        run: npm ci
+      - name: Build installer
+        run: npm run tauri -- build --bundles ${{ matrix.bundle }}
+        env:
+          # An ad-hoc signature is required for downloaded Apple Silicon apps.
+          APPLE_SIGNING_IDENTITY: ${{ matrix.bundle == 'dmg' && '-' || '' }}
+      - name: Upload installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact }}
+          path: ${{ matrix.path }}
+          if-no-files-found: error
+
+  release:
+    name: Publish Release
+    needs: build
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: package-*
+          path: release-assets
+          merge-multiple: true
+      - name: Verify assets and version
+        id: version
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$(find release-assets -maxdepth 1 -name '*.exe' -type f | wc -l)" -eq 1
+          test "$(find release-assets -maxdepth 1 -name '*.dmg' -type f | wc -l)" -eq 1
+          version=$(python3 -c 'import json; print(json.load(open("src-tauri/tauri.conf.json"))["version"])')
+          test "$version" = "$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')"
+          echo "tag=v$version" >> "$GITHUB_OUTPUT"
+          (cd release-assets && sha256sum -- * > SHA256SUMS.txt)
+      - name: Create draft Release with installers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          RELEASE_TAG: ${{ steps.version.outputs.tag }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh release create "$RELEASE_TAG" release-assets/* \
+            --target "$GITHUB_SHA" \
+            --title "EasyFreeModel $RELEASE_TAG" \
+            --generate-notes \
+            --draft
+          gh release edit "$RELEASE_TAG" --draft=false
