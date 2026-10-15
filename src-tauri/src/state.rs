@@ -11,7 +11,7 @@ use crate::oauth::{ClientCredentialAdmin, OAuthHub, OAuthService};
 use crate::providers::catalog;
 use crate::proxy::ProxyPool;
 use crate::routing::Runtime;
-use crate::security::{CredentialVault, DbKeyVerifier, LocalVault, VaultClientCredentials, VaultTokenStore};
+use crate::security::{api_keys, CredentialVault, DbKeyVerifier, LocalVault, VaultClientCredentials, VaultTokenStore};
 use crate::store;
 
 /// 系统凭据库中使用的 service 名，与 tauri.conf.json 的 identifier 保持一致。
@@ -68,6 +68,7 @@ impl AppState {
     pub async fn init(data_dir: &Path) -> AppResult<Self> {
         let db = store::open(&data_dir.join(DB_FILE)).await?;
         catalog::seed(&db).await?;
+        api_keys::ensure_default(&db).await?;
         let vault = Arc::new(LocalVault::new(data_dir.join("vault.json")));
         let state = Self::try_new(db, vault)?;
         state.proxy_pool.reload().await?;
