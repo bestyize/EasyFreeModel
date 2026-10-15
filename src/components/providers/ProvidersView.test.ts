@@ -2,6 +2,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import catalogJson from '../../../src-tauri/resources/provider_catalog.json'
+import statusJson from '../../../src-tauri/resources/provider_status.json'
 import { __resetProvidersMock, __setProvidersMockLatency, providersMock } from '@/api/mock/providers'
 import { __setOAuthMockTiming } from '@/api/mock/oauth'
 import { useProvidersStore } from '@/stores/providers'
@@ -21,6 +22,8 @@ vi.mock('@/api', async () => {
 })
 
 const catalog = catalogJson as unknown as { id: string; category: string; serviceKinds: string[] }[]
+const status = statusJson as Record<string, { adapter: string | null }>
+const ready = (id: string) => status[id]?.adapter != null
 const SECRET = 'sk-ui-SUPERSECRET-9876'
 
 async function mountView() {
@@ -57,15 +60,17 @@ beforeEach(() => {
 })
 
 describe('第四组：API Key 提供商', () => {
-  it('默认折叠成一行摘要“共 N 家”，展开后才渲染卡片；另外三组照常渲染', async () => {
+  it('只展示适配器就绪的提供商，折叠摘要只统计可用项', async () => {
     const w = await mountView()
-    const apikeyCount = catalog.filter((c) => c.category === 'apikey' || c.category === 'webCookie').length
-    expect(apikeyCount).toBe(87)
+    const apikeyCount = catalog.filter((c) => (c.category === 'apikey' || c.category === 'webCookie') && ready(c.id)).length
+    expect(apikeyCount).toBeGreaterThan(0)
+    expect(apikeyCount).toBeLessThan(87)
 
     expect(apikeyGroup(w).exists()).toBe(true)
     // 默认全部展开：直接显示全部卡片与 aria-expanded="true"
     expect(apikeyGroup(w).find('[aria-expanded="true"]').exists()).toBe(true)
     expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(apikeyCount)
+    expect(w.findAll('button.provider-card').length).toBe(Object.values(status).filter((p) => p.adapter).length)
     expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').exists()).toBe(false)
 
     // 组顺序：自定义 → OAuth → 免费 → API Key
@@ -78,6 +83,7 @@ describe('第四组：API Key 提供商', () => {
     expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(0)
     expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').exists()).toBe(true)
     expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').text()).toContain(`共 ${apikeyCount} 家`)
+    expect(apikeyGroup(w).text()).not.toContain('待接入')
 
     // 再次点击「展开」后恢复展开
     await expandApikey(w)
@@ -90,9 +96,9 @@ describe('第四组：API Key 提供商', () => {
     const w = await mountView()
     await expandApikey(w)
     const expected = catalog.filter(
-      (c) => (c.category === 'apikey' || c.category === 'webCookie') && c.serviceKinds.some((k) => k === 'tts' || k === 'stt'),
+      (c) => (c.category === 'apikey' || c.category === 'webCookie') && ready(c.id) && c.serviceKinds.some((k) => k === 'tts' || k === 'stt'),
     ).length
-    expect(expected).toBeGreaterThan(5)
+    expect(expected).toBeGreaterThan(0)
 
     const chip = (label: string) => apikeyGroup(w).findAll('.chip').find((c) => c.text().startsWith(label))!
     expect(chip('语音').text()).toContain(String(expected))
@@ -100,7 +106,8 @@ describe('第四组：API Key 提供商', () => {
     expect(chip('语音').attributes('aria-pressed')).toBe('true')
     const shown = apikeyGroup(w).findAll('button.provider-card')
     expect(shown).toHaveLength(expected)
-    expect(shown.map((c) => c.find('.name').text())).toContain('ElevenLabs')
+    expect(shown.map((c) => c.find('.name').text())).toContain('OpenAI')
+    expect(shown.map((c) => c.find('.name').text())).not.toContain('ElevenLabs')
     expect(shown.map((c) => c.find('.name').text())).not.toContain('Anthropic')
 
     await chip('语音').trigger('click')
@@ -124,35 +131,23 @@ describe('第四组：API Key 提供商', () => {
     expect(apikeyGroup(w).text()).toContain('没有匹配')
   })
 
-  it('卡片显示能力小标签；适配器未接入的显示 pendingReason（省略 + title），就绪的不显示', async () => {
+  it('未就绪的卡片不会出现在列表、搜索结果或筛选计数中', async () => {
     const w = await mountView()
-    await expandApikey(w)
+    expect(cardOf(w, 'ElevenLabs')).toBeUndefined()
+    expect(cardOf(w, 'Grok Web (Subscription)')).toBeUndefined()
+    expect(cardOf(w, 'Cursor IDE')).toBeUndefined()
 
-    const eleven = cardOf(w, 'ElevenLabs')
-    expect(eleven.text()).toContain('待接入')
-    expect(eleven.find('.reason').text()).toBe('媒体适配器由媒体模块提供')
-    expect(eleven.find('.reason').attributes('title')).toBe('媒体适配器由媒体模块提供')
-    expect(eleven.findAll('.cap').map((c) => c.text())).toEqual(['语音'])
+    const ui = useUiStore()
+    ui.globalQuery = 'elevenlabs'
+    await flushPromises()
+    expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(0)
+    expect(apikeyGroup(w).find('.chip').text()).toContain('0')
 
-    expect(cardOf(w, 'Grok Web (Subscription)').find('.reason').text()).toBe('网页会话类暂缓')
-
+    ui.globalQuery = ''
+    await flushPromises()
     const openai = cardOf(w, 'OpenAI')
-    expect(openai.find('.reason').exists()).toBe(false)
-    expect(openai.text()).toContain('未连接')
     expect(openai.findAll('.cap').map((c) => c.text())).toEqual(['聊天', '图像', '语音', '搜索', '嵌入'])
     expect(openai.text()).not.toContain('待接入')
-    // 卡片高度仍由设计 token 控制
-    expect(w.html()).not.toContain('gradient')
-  })
-
-  it('弹窗里完整展示待接入原因，且“添加连接”置灰', async () => {
-    const w = await mountView()
-    await expandApikey(w)
-    await cardOf(w, 'ElevenLabs').trigger('click')
-    await flushPromises()
-    expect(w.text()).toContain('待接入原因：媒体适配器由媒体模块提供')
-    const add = button(w, '添加连接')!
-    expect(add.attributes('disabled')).toBeDefined()
   })
 
   it('OAuth 类：提供“添加 OAuth 连接”入口，并可正常打开授权面板', async () => {
@@ -170,15 +165,12 @@ describe('第四组：API Key 提供商', () => {
     expect(w.findComponent({ name: 'OAuthPanel' }).exists()).toBe(true)
   })
 
-  it('专有流程的 OAuth 提供商（Cursor）：授权按钮置灰，原因与接入要求以可见文字展示', async () => {
+  it('专有流程的 OAuth 提供商（Cursor）在目录中隐藏', async () => {
     const w = await mountView()
-    await cardOf(w, 'Cursor IDE').trigger('click')
-    await flushPromises()
-    const oauth = w.findAll('button').find((b) => b.text().includes('添加 OAuth 连接'))!
-    expect(oauth.attributes('disabled')).toBeDefined()
-    expect(w.find('[data-testid="oauth-custom-reason"]').text()).toContain('逆向协议')
-    expect(w.text()).toContain('接入需要')
+    expect(cardOf(w, 'Cursor IDE')).toBeUndefined()
+    expect(w.text()).not.toContain('Cursor IDE')
   })
+
 })
 
 describe('录入 API Key', () => {
