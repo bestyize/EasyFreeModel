@@ -301,25 +301,31 @@ impl OpenAiStreamDecoder {
     }
 
     fn handle_delta(&mut self, delta: &Value, out: &mut Vec<StreamEvent>) {
-        for key in ["reasoning_content", "reasoning"] {
-            if let Some(t) = delta.get(key).and_then(Value::as_str).filter(|s| !s.is_empty()) {
-                if let Some(i) = self.text_block.take() {
-                    out.push(StreamEvent::ContentBlockStop { index: i });
+        let content = delta.get("content").and_then(Value::as_str).filter(|s| !s.is_empty());
+        // Some OpenAI-compatible gateways (including CodeBuddy) interleave
+        // reasoning_content with the final answer, sometimes in the *same*
+        // SSE delta and sometimes in later deltas. Once answer text begins,
+        // don't reopen a thinking block for every token: that closes and
+        // recreates text blocks, which can render as one word per line in
+        // Anthropic/Responses clients. Keep genuine newlines untouched.
+        if self.text_block.is_none() && content.is_none() {
+            for key in ["reasoning_content", "reasoning"] {
+                if let Some(t) = delta.get(key).and_then(Value::as_str).filter(|s| !s.is_empty()) {
+                    let idx = match self.thinking_block {
+                        Some(i) => i,
+                        None => {
+                            let i = self.alloc();
+                            self.thinking_block = Some(i);
+                            out.push(StreamEvent::ContentBlockStart { index: i, block: BlockStart::Thinking });
+                            i
+                        }
+                    };
+                    out.push(StreamEvent::ContentBlockDelta { index: idx, delta: BlockDelta::Thinking { text: t.to_string() } });
+                    break;
                 }
-                let idx = match self.thinking_block {
-                    Some(i) => i,
-                    None => {
-                        let i = self.alloc();
-                        self.thinking_block = Some(i);
-                        out.push(StreamEvent::ContentBlockStart { index: i, block: BlockStart::Thinking });
-                        i
-                    }
-                };
-                out.push(StreamEvent::ContentBlockDelta { index: idx, delta: BlockDelta::Thinking { text: t.to_string() } });
-                break;
             }
         }
-        if let Some(t) = delta.get("content").and_then(Value::as_str).filter(|s| !s.is_empty()) {
+        if let Some(t) = content {
             if let Some(i) = self.thinking_block.take() {
                 out.push(StreamEvent::ContentBlockStop { index: i });
             }
@@ -790,6 +796,36 @@ mod tests {
                 "end:ToolUse",
             ]
         );
+    }
+
+    #[test]
+    fn codebuddy_interleaved_reasoning_keeps_text_contiguous() {
+        // Every SSE chunk is a token fragment, not a paragraph. Empty
+        // tool_calls arrays and stray reasoning chunks must not split text.
+        let chunks = [
+            json!({"id":"c","model":"m","choices":[{"delta":{"reasoning_content":"planning"}}]}),
+            json!({"id":"c","model":"m","choices":[{"delta":{"content":"你好","tool_calls":[]}}]}),
+            json!({"id":"c","model":"m","choices":[{"delta":{"content":"，","reasoning_content":"stale","tool_calls":[]}}]}),
+            json!({"id":"c","model":"m","choices":[{"delta":{"reasoning_content":"late"}}]}),
+            json!({"id":"c","model":"m","choices":[{"delta":{"content":"世界","tool_calls":[]}}]}),
+            json!({"id":"c","model":"m","choices":[{"delta":{"content":"\n下一行"}}]}),
+            json!({"id":"c","model":"m","choices":[{"delta":{},"finish_reason":"stop"}]}),
+        ];
+        let mut decoder = OpenAiStreamDecoder::new();
+        let events = run(&mut decoder, &oa(&chunks, true)).unwrap();
+        let text_blocks = events.iter().filter(|event| matches!(
+            event, StreamEvent::ContentBlockStart { block: BlockStart::Text, .. }
+        )).count();
+        assert_eq!(text_blocks, 1, "response text must be one content block");
+        let text: String = events.iter().filter_map(|event| match event {
+            StreamEvent::ContentBlockDelta { delta: BlockDelta::Text { text }, .. } => Some(text.as_str()),
+            _ => None,
+        }).collect();
+        assert_eq!(text, "你好，世界\n下一行");
+        assert_eq!(events.iter().filter(|event| matches!(
+            event, StreamEvent::ContentBlockStart { block: BlockStart::Thinking, .. }
+        )).count(), 1);
+        assert!(decoder.is_terminated());
     }
 
     #[test]
