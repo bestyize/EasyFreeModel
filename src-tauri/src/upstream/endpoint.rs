@@ -23,12 +23,14 @@ pub struct ResolvedEndpoint {
     pub path: Option<String>,
     /// 流式请求时是否向 OpenAI 兼容上游发送 `stream_options.include_usage`。
     pub stream_usage: bool,
+    /// 有些内置上游只接受流式聊天。网关对非流式客户端收集完整流后再返回 JSON。
+    pub force_stream: bool,
     pub anthropic_version: String,
 }
 
 impl ResolvedEndpoint {
     pub fn new(kind: AdapterKind, base_url: Url, auth: AuthStyle) -> Self {
-        Self { kind, base_url, auth, path: None, stream_usage: true, anthropic_version: DEFAULT_ANTHROPIC_VERSION.to_string() }
+        Self { kind, base_url, auth, path: None, stream_usage: true, force_stream: false, anthropic_version: DEFAULT_ANTHROPIC_VERSION.to_string() }
     }
 }
 

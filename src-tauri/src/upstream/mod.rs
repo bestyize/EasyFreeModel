@@ -14,6 +14,7 @@
 pub mod anthropic_compat;
 pub mod auth;
 pub mod client;
+pub mod code_assist;
 pub mod endpoint;
 pub mod gemini_compat;
 pub mod ollama_compat;
@@ -74,17 +75,20 @@ pub enum AdapterKind {
     OpenAiResponses,
     /// Google AI Studio 的 Gemini API（`x-goog-api-key`）。
     Gemini,
+    /// Google Code Assist OAuth（Gemini CLI / Antigravity）的 v1internal 信封。
+    CodeAssist,
     /// Vertex AI，**仅 express 模式**（API Key）。服务账号 / OAuth 访问令牌的配置尚未接入。
     Vertex,
     Ollama,
 }
 
 impl AdapterKind {
-    pub const ALL: [AdapterKind; 6] = [
+    pub const ALL: [AdapterKind; 7] = [
         AdapterKind::OpenAiCompatible,
         AdapterKind::AnthropicCompatible,
         AdapterKind::OpenAiResponses,
         AdapterKind::Gemini,
+        AdapterKind::CodeAssist,
         AdapterKind::Vertex,
         AdapterKind::Ollama,
     ];
@@ -95,6 +99,7 @@ impl AdapterKind {
             AdapterKind::AnthropicCompatible => "anthropic-compatible",
             AdapterKind::OpenAiResponses => "openai-responses",
             AdapterKind::Gemini => "gemini",
+            AdapterKind::CodeAssist => "code-assist",
             AdapterKind::Vertex => "vertex",
             AdapterKind::Ollama => "ollama",
         }
@@ -111,7 +116,7 @@ impl AdapterKind {
             AdapterKind::OpenAiCompatible => ProtocolKind::OpenAiChat,
             AdapterKind::AnthropicCompatible => ProtocolKind::AnthropicMessages,
             AdapterKind::OpenAiResponses => ProtocolKind::OpenAiResponses,
-            AdapterKind::Gemini => ProtocolKind::Gemini,
+            AdapterKind::Gemini | AdapterKind::CodeAssist => ProtocolKind::Gemini,
             AdapterKind::Vertex => ProtocolKind::Vertex,
             AdapterKind::Ollama => ProtocolKind::Ollama,
         }
@@ -123,6 +128,7 @@ impl AdapterKind {
             AdapterKind::AnthropicCompatible => AuthStyle::XApiKey,
             // Gemini 的 `?key=` 查询参数形式不使用：密钥一律走请求头
             AdapterKind::Gemini | AdapterKind::Vertex => AuthStyle::Header(gemini_compat::API_KEY_HEADER.into()),
+            AdapterKind::CodeAssist => AuthStyle::Bearer,
         }
     }
 
@@ -132,6 +138,7 @@ impl AdapterKind {
             AdapterKind::AnthropicCompatible => &anthropic_compat::AnthropicCompatAdapter,
             AdapterKind::OpenAiResponses => &responses_compat::ResponsesAdapter,
             AdapterKind::Gemini => &gemini_compat::GeminiAdapter,
+            AdapterKind::CodeAssist => &code_assist::CodeAssistAdapter,
             AdapterKind::Vertex => &vertex_compat::VertexAdapter,
             AdapterKind::Ollama => &ollama_compat::OllamaAdapter,
         }

@@ -17,12 +17,13 @@
 //! - `stream`：首帧探测与拉取式（带背压）的流式转发。
 
 mod auth;
+pub(crate) mod collect;
 pub(crate) mod convert;
 mod forward;
 mod rate_limit;
 mod response;
 mod server;
-mod stream;
+pub(crate) mod stream;
 
 #[cfg(test)]
 mod pipeline_tests;

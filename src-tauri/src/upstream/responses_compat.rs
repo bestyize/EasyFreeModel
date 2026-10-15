@@ -3,10 +3,11 @@
 //! 鉴权默认 `Authorization: Bearer`。base 已以 `/responses` 结尾（完整端点）时原样使用，否则追加 `responses`。
 //! 模型列表沿用 OpenAI 风格的 `GET <base>/models`。
 
+use serde_json::Value;
 use url::Url;
 
 use super::endpoint::join_path;
-use super::{Adapter, AdapterKind, Capabilities, UpstreamTarget};
+use super::{Adapter, AdapterKind, Capabilities, UpstreamRequest, UpstreamTarget};
 
 pub struct ResponsesAdapter;
 
@@ -44,6 +45,20 @@ impl Adapter for ResponsesAdapter {
             return u;
         }
         join_path(base, "models")
+    }
+
+    fn prepare_body(&self, body: &mut Value, _req: &UpstreamRequest, target: &UpstreamTarget) {
+        if target.provider_id != "codex" { return; }
+        let Some(obj) = body.as_object_mut() else { return; };
+        // ChatGPT Codex 的 Responses 入口要求明确的 instructions / store，并只接受其子集。
+        obj.retain(|k, _| matches!(k.as_str(),
+            "model" | "input" | "instructions" | "tools" | "tool_choice" |
+            "parallel_tool_calls" | "reasoning" | "include" | "stream" | "store" | "text"
+        ));
+        if !obj.get("instructions").is_some_and(|v| v.as_str().is_some_and(|s| !s.trim().is_empty())) {
+            obj.insert("instructions".into(), Value::String("You are a helpful assistant.".into()));
+        }
+        obj.insert("store".into(), Value::Bool(false));
     }
 }
 

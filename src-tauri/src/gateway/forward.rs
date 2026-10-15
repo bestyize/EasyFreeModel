@@ -20,7 +20,8 @@ use axum::Json;
 use bytes::Bytes;
 use serde_json::{json, Value};
 
-use super::convert::{build_outbound, convert_response, upstream_error_body, wants_stream, warnings_header, ConvertedResponse};
+use super::collect::collect_complete;
+use super::convert::{build_outbound, convert_response, encode_collected_response, upstream_error_body, wants_stream, warnings_header, ConvertedResponse};
 use super::response::error_response;
 use super::stream::{client_encoder, prime, PrimeOutcome, Pump, PumpConfig, WireFormat};
 use super::VerifiedKey;
@@ -126,7 +127,8 @@ pub(crate) async fn proxy_inbound(rt: Arc<Runtime>, key: VerifiedKey, inbound: I
     };
 
     let want_stream = wants_stream(protocol, &value, path_stream);
-    let outbound = match build_outbound(protocol, upstream_protocol, value, &resolved.model.upstream_model_id, &headers, want_stream) {
+    let force_collect = resolved.endpoint.force_stream && !want_stream;
+    let outbound = match build_outbound(protocol, upstream_protocol, value, &resolved.model.upstream_model_id, &headers, want_stream || force_collect) {
         Ok(o) => o,
         Err(e) => return error_response(protocol, &e),
     };
@@ -137,23 +139,46 @@ pub(crate) async fn proxy_inbound(rt: Arc<Runtime>, key: VerifiedKey, inbound: I
 
     let mut guard = UsageGuard::new(rt.db().clone(), Some(key.id.clone()), &resolved.provider.id, &public_name, protocol.id(), estimated_input);
     let passthrough = outbound.passthrough;
-    let stream = outbound.stream;
+    let stream = want_stream;
     let client_wants_usage = outbound.client_wants_usage;
     let tool_names = outbound.tool_names;
+    let mut upstream_body = outbound.body;
+    if force_collect {
+        if let Some(obj) = upstream_body.as_object_mut() {
+            obj.insert("stream".into(), Value::Bool(true));
+            obj.remove("stream_options");
+        }
+    }
     let req = UpstreamRequest {
-        body: outbound.body,
+        body: upstream_body,
         model: resolved.model.upstream_model_id.clone(),
-        stream,
-        passthrough,
+        stream: stream || force_collect,
+        passthrough: passthrough && !force_collect,
         extra_headers: outbound.extra_headers,
     };
     let http = rt.client.clone();
 
     if !stream {
+        let idle = rt.request_timeout().await;
         let result = rt
             .dispatch(&resolved.provider, &resolved.endpoint, |target| {
                 let (http, req, names) = (http.clone(), req.clone(), tool_names.clone());
+                let rt = rt.clone();
                 async move {
+                    if force_collect {
+                        return match open_stream(&rt, adapter, &http, target, req).await {
+                            Err(e) => Attempt::Failed(e),
+                            Ok(StreamOpen::Rejected(reply)) => Attempt::Rejected(reply),
+                            Ok(StreamOpen::Stream(us)) => match prime(us.body, kind, idle).await {
+                                PrimeOutcome::InBandError(reply) => Attempt::Rejected(reply),
+                                PrimeOutcome::Failed(e) => Attempt::Failed(e),
+                                PrimeOutcome::Ready(p) => match collect_complete(p, kind, names, idle).await {
+                                    Ok(c) => Attempt::Ok(encode_collected_response(protocol, &c)),
+                                    Err(e) => Attempt::Failed(e),
+                                },
+                            },
+                        };
+                    }
                     match adapter.invoke(&http, &target, req).await {
                         Ok(reply) if reply.is_success() => match convert_response(protocol, upstream_protocol, passthrough, &reply.body, &names) {
                             Ok(c) => Attempt::Ok(c),

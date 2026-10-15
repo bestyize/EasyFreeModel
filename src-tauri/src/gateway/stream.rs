@@ -44,7 +44,7 @@ pub(crate) fn new_decoder(kind: AdapterKind, names: ToolNameMap) -> Box<dyn Stre
         AdapterKind::OpenAiCompatible => Box::new(OpenAiStreamDecoder::new()),
         AdapterKind::AnthropicCompatible => Box::new(AnthropicStreamDecoder::new()),
         AdapterKind::OpenAiResponses => Box::new(BytesStreamDecoder::new(ResponsesStreamDecoder::new())),
-        AdapterKind::Gemini | AdapterKind::Vertex => Box::new(BytesStreamDecoder::new(GeminiStreamDecoder::with_name_map(names))),
+        AdapterKind::Gemini | AdapterKind::CodeAssist | AdapterKind::Vertex => Box::new(BytesStreamDecoder::new(GeminiStreamDecoder::with_name_map(names))),
         AdapterKind::Ollama => Box::new(BytesStreamDecoder::new(OllamaStreamDecoder::new())),
     }
 }
@@ -231,7 +231,7 @@ fn inband_error(kind: AdapterKind, frame: &RawFrame) -> Option<(u16, String)> {
             }
             None
         }
-        AdapterKind::Gemini | AdapterKind::Vertex => {
+        AdapterKind::Gemini | AdapterKind::CodeAssist | AdapterKind::Vertex => {
             let e = v.get("error").filter(|e| e.is_object())?;
             Some((status_from_error_object(e), frame.data.clone()))
         }

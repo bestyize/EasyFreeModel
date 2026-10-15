@@ -59,7 +59,7 @@ impl Adapter for OpenAiCompatAdapter {
             if let Some(so) = so.as_object_mut() {
                 so.insert("include_usage".into(), Value::Bool(true));
             }
-        } else if !req.passthrough {
+        } else if !req.passthrough || target.endpoint.force_stream {
             obj.remove("stream_options");
         }
     }

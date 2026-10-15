@@ -18,11 +18,9 @@
     "reason": null
   },
   "antigravity": {
-    "adapter": "gemini",
+    "adapter": "code-assist",
     "baseUrl": "https://cloudcode-pa.googleapis.com/v1internal",
-    "auth": {
-      "header": "x-goog-api-key"
-    },
+    "auth": "bearer",
     "reason": null
   },
   "assemblyai": {
@@ -206,11 +204,9 @@
     "reason": null
   },
   "gemini-cli": {
-    "adapter": "gemini",
+    "adapter": "code-assist",
     "baseUrl": "https://cloudcode-pa.googleapis.com/v1internal",
-    "auth": {
-      "header": "x-goog-api-key"
-    },
+    "auth": "bearer",
     "reason": null
   },
   "gemini": {

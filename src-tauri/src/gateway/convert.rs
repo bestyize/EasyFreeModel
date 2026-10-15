@@ -10,7 +10,7 @@ use axum::http::{HeaderMap, HeaderName, HeaderValue};
 use bytes::Bytes;
 use serde_json::Value;
 
-use crate::protocols::canonical::{ContentPart, Usage};
+use crate::protocols::canonical::{CanonicalResponse, ContentPart, Usage};
 use crate::protocols::gemini::{self, ToolNameMap};
 use crate::protocols::{anthropic, ollama, openai_chat, openai_responses, vertex, ApiError, ApiErrorKind, ProtocolKind};
 
@@ -173,6 +173,23 @@ pub(crate) struct ConvertedResponse {
     pub body: Bytes,
     pub usage: Usage,
     pub output_bytes: usize,
+}
+
+/// 上游只支持流式，而客户端请求非流式时，把已完整解码的结果编码成客户端协议的 JSON。
+pub(crate) fn encode_collected_response(client: ProtocolKind, canonical: &CanonicalResponse) -> ConvertedResponse {
+    let value = match client {
+        ProtocolKind::OpenAiChat => openai_chat::encode_response(canonical),
+        ProtocolKind::AnthropicMessages => anthropic::encode_response(canonical),
+        ProtocolKind::OpenAiResponses => openai_responses::encode_response(canonical),
+        ProtocolKind::Gemini => gemini::encode_response(canonical),
+        ProtocolKind::Ollama => ollama::encode_response(canonical),
+        ProtocolKind::Vertex => unreachable!("Vertex is upstream-only"),
+    };
+    ConvertedResponse {
+        body: Bytes::from(value.to_string()),
+        usage: canonical.usage.clone(),
+        output_bytes: canonical.content.iter().map(ContentPart::text_bytes).sum(),
+    }
 }
 
 /// 非流式 2xx 响应：解析（用于记账）并按需转换。解析失败返回 502 风格的错误。

@@ -14,9 +14,11 @@ use serde_json::{json, Value};
 
 use crate::error::AppResult;
 use crate::gateway::convert::{build_outbound, scrub};
+use crate::gateway::collect::probe_first_content;
+use crate::gateway::stream::{prime, PrimeOutcome};
 use crate::models::TestResult;
 use crate::protocols::{anthropic, gemini, ollama, openai_chat, openai_responses, ProtocolKind};
-use crate::upstream::{UpstreamReply, UpstreamRequest, NOT_READY_MARKER};
+use crate::upstream::{StreamOpen, UpstreamReply, UpstreamRequest, NOT_READY_MARKER};
 
 use super::dispatch::{Attempt, DispatchError, DispatchFailure};
 use super::endpoint::endpoint_for;
@@ -25,6 +27,11 @@ use super::{describe_upstream_error, Runtime};
 
 /// 探测请求的最大输出 token：取小值以尽量少消耗额度，又要足够大以免被上游判为无效请求。
 const PROBE_MAX_TOKENS: u32 = 16;
+
+enum ProbeReply {
+    Json(UpstreamReply),
+    Stream(bool),
+}
 
 impl Runtime {
     /// 模型级探测：对 `provider_id` 下的 `model_id` 发起一次最小真实请求。
@@ -59,12 +66,13 @@ impl Runtime {
         };
 
         // 统一用 OpenAI Chat 的最小请求经规范化转换：一条代码路径即可为 6 种上游协议生成合法请求体。
-        // 显式带上 model 与 stream：各协议解码器都要求 model，且写死非流式让探测语义与上游行为确定。
+        // 流式专用端点必须请求增量；读到第一个真实内容后即可关闭探测流。
+        let force_stream = endpoint.force_stream;
         let body = json!({
             "model": model.upstream_model_id,
             "messages": [{ "role": "user", "content": "ping" }],
             "max_tokens": PROBE_MAX_TOKENS,
-            "stream": false,
+            "stream": force_stream,
         });
         let upstream_proto = endpoint.kind.native_protocol();
         let outbound = match build_outbound(
@@ -73,29 +81,51 @@ impl Runtime {
             body,
             &model.upstream_model_id,
             &HeaderMap::new(),
-            false,
+            force_stream,
         ) {
             Ok(o) => o,
             Err(e) => return Ok(fail(format!("无法构造探测请求：{}", e.message))),
         };
+        let mut upstream_body = outbound.body;
+        if force_stream {
+            if let Some(obj) = upstream_body.as_object_mut() {
+                obj.insert("stream".into(), Value::Bool(true));
+                obj.remove("stream_options");
+            }
+        }
         let req = UpstreamRequest {
-            body: outbound.body,
+            body: upstream_body,
             model: model.upstream_model_id.clone(),
-            stream: false,
-            passthrough: outbound.passthrough,
+            stream: force_stream,
+            passthrough: outbound.passthrough && !force_stream,
             extra_headers: outbound.extra_headers,
         };
 
         let adapter = endpoint.kind.adapter();
         let client = self.client.clone();
+        let idle = self.request_timeout().await;
         let started = Instant::now();
         let outcome = self
             .dispatch(&provider, &endpoint, |target| {
                 let req = req.clone();
                 let client = client.clone();
                 async move {
+                    if force_stream {
+                        return match adapter.stream(&client, &target, req).await {
+                            Err(e) => Attempt::Failed(e),
+                            Ok(StreamOpen::Rejected(reply)) => Attempt::Rejected(reply),
+                            Ok(StreamOpen::Stream(us)) => match prime(us.body, adapter.kind(), idle).await {
+                                PrimeOutcome::InBandError(reply) => Attempt::Rejected(reply),
+                                PrimeOutcome::Failed(e) => Attempt::Failed(e),
+                                PrimeOutcome::Ready(p) => match probe_first_content(p, adapter.kind(), idle).await {
+                                    Ok(found) => Attempt::Ok(ProbeReply::Stream(found)),
+                                    Err(e) => Attempt::Failed(e),
+                                },
+                            },
+                        };
+                    }
                     match adapter.invoke(&client, &target, req).await {
-                        Ok(reply) if reply.is_success() => Attempt::Ok(reply),
+                        Ok(reply) if reply.is_success() => Attempt::Ok(ProbeReply::Json(reply)),
                         Ok(reply) => Attempt::Rejected(reply),
                         Err(e) => Attempt::Failed(e),
                     }
@@ -106,7 +136,11 @@ impl Runtime {
 
         match outcome {
             // 2xx 还不够：上游可能在 200 里塞一个错误对象或空结果（9Router 同样会检查响应体）。
-            Ok(d) => match validate_reply(&d.value, upstream_proto) {
+            Ok(d) => match (match &d.value {
+                ProbeReply::Json(reply) => validate_reply(reply, upstream_proto),
+                ProbeReply::Stream(true) => Ok(()),
+                ProbeReply::Stream(false) => Err("上游流未返回任何内容（该模型可能不可用）"),
+            }) {
                 Ok(()) => Ok(TestResult {
                     connection_id: String::new(),
                     provider_id: Some(provider_id.to_string()),

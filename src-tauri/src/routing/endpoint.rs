@@ -29,6 +29,12 @@ fn kind_for(adapter_id: &str) -> Result<AdapterKind, NotReady> {
 /// 本机 Ollama（内置 `ollama-local`）不需要鉴权。
 const LOCAL_NO_AUTH_PROVIDER: &str = "ollama-local";
 
+/// 这些内置端点的聊天接口只接受 `stream: true`。不影响自定义兼容端点。
+const STREAM_ONLY_PROVIDERS: &[&str] = &[
+    "codebuddy-cn", "codebuddy-intl", "codex", "grok-cli", "zed", "api-airforce",
+    "opencode", "opencode-go", "opencode-zen",
+];
+
 fn auth_for(spec: &AuthSpec) -> AuthStyle {
     match spec {
         AuthSpec::Scheme(AuthScheme::Bearer) => AuthStyle::Bearer,
@@ -65,7 +71,13 @@ pub fn endpoint_for(p: &ProviderCfg) -> Result<ResolvedEndpoint, NotReady> {
     if kind == AdapterKind::Vertex {
         check_express_config(&base_url, &auth).map_err(NotReady)?;
     }
-    Ok(ResolvedEndpoint::new(kind, base_url, auth))
+    let mut endpoint = ResolvedEndpoint::new(kind, base_url, auth);
+    endpoint.force_stream = p.kind == "builtin" && STREAM_ONLY_PROVIDERS.contains(&p.id.as_str());
+    if endpoint.force_stream {
+        // 这些端点未必接受 OpenAI 的 `stream_options` 扩展。
+        endpoint.stream_usage = false;
+    }
+    Ok(endpoint)
 }
 
 #[cfg(test)]
@@ -98,6 +110,18 @@ mod tests {
         assert_eq!(e.kind, AdapterKind::AnthropicCompatible);
         assert_eq!(e.auth, AuthStyle::XApiKey);
         assert_eq!(e.base_url.as_str(), "https://api.anthropic.com/v1/messages");
+    }
+
+    #[test]
+    fn stream_only_is_scoped_to_builtin_providers() {
+        let builtin = endpoint_for(&row("codebuddy-cn", "builtin", "none", true, None)).unwrap();
+        assert!(builtin.force_stream);
+        assert!(!builtin.stream_usage);
+        let custom = endpoint_for(&row("codebuddy-cn", "custom", "openai-compatible", true, Some("https://example.com/v1"))).unwrap();
+        assert!(!custom.force_stream);
+        let google = endpoint_for(&row("gemini-cli", "builtin", "none", true, None)).unwrap();
+        assert_eq!(google.kind, AdapterKind::CodeAssist);
+        assert_eq!(google.auth, AuthStyle::Bearer);
     }
 
     #[test]
