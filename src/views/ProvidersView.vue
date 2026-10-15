@@ -13,10 +13,12 @@ import ProviderCard from '@/components/providers/ProviderCard.vue'
 import ProviderModal from '@/components/providers/ProviderModal.vue'
 import { CAPABILITIES, hasCapability, type CapabilityId } from '@/components/providers/status'
 import { filterProviders, useProvidersStore } from '@/stores/providers'
+import { useOAuthStore } from '@/stores/oauth'
 import { useUiStore } from '@/stores/ui'
 import type { CustomProtocol, ProviderGroup, ProviderSummary } from '@/types'
 
 const store = useProvidersStore()
+const oauthStore = useOAuthStore()
 const ui = useUiStore()
 
 const layout = ref<'card' | 'list'>('card')
@@ -31,10 +33,16 @@ const capFilter = ref<CapabilityId | 'all'>('all')
 
 onMounted(() => {
   if (!store.loaded) store.fetchProviders()
+  if (!oauthStore.loaded) oauthStore.fetchProviders()
 })
 
 function visibleGroup(group: ProviderGroup) {
-  return store.byGroup(group).filter((p) => p.adapterReady)
+  return store.byGroup(group).filter((p) => {
+    if (!p.adapterReady || p.status === 'unsupported') return false
+    if (group !== 'oauth') return true
+    const info = oauthStore.infoFor(p.id)
+    return !!info && info.status !== 'custom' && !info.tokenExchangePending
+  })
 }
 
 function groupItems(group: ProviderGroup) {
@@ -150,7 +158,7 @@ const gridClass = computed(() => (layout.value === 'card' ? 'grid' : 'list'))
               class="btn"
               :disabled="store.testingGroup !== null"
               aria-label="测试全部 OAuth 提供商"
-              @click="store.testGroup('oauth')"
+              @click="store.testGroup('oauth', 3, 10, visibleGroup('oauth').map((p) => p.id))"
             >
               <Play :size="14" /> {{ store.testingGroup === 'oauth' ? '测试中…' : '测试全部' }}
             </button>

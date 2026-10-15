@@ -94,25 +94,25 @@ beforeEach(async () => {
 afterEach(() => vi.useRealTimers())
 
 describe('ProviderModal：OAuth 入口', () => {
-  it('支持 OAuth 的提供商并排显示“添加连接”（API Key）与“添加 OAuth 连接”', async () => {
+  it('OAuth 分类仅显示“登录验证”，不展示 API Key 添加入口', async () => {
     const w = await open(detail())
     expect(apiMock.oauthListProviders).toHaveBeenCalledTimes(1)
-    expect(btn(w, '添加连接')!.attributes('disabled')).toBeUndefined()
-    expect(btn(w, '添加 OAuth 连接')!.attributes('disabled')).toBeUndefined()
+    expect(btn(w, '添加连接')).toBeUndefined()
+    expect(btn(w, '登录验证')!.attributes('disabled')).toBeUndefined()
     expect(w.text()).not.toContain('授权流程待接入')
   })
 
   it('只支持 API Key 的提供商不拉取 OAuth 信息、没有 OAuth 按钮', async () => {
     const w = await open(detail({ authModes: ['apiKey'] }), { ...summary, authModes: ['apiKey'] })
     expect(apiMock.oauthListProviders).not.toHaveBeenCalled()
-    expect(btn(w, '添加 OAuth 连接')).toBeUndefined()
+    expect(btn(w, '登录验证')).toBeUndefined()
   })
 
-  it('适配器未就绪也能授权，但如实提示“授权后暂不能用于转发”；API Key 添加仍置灰、模型区只读', async () => {
+  it('适配器未就绪时详情仍如实提示转发限制，模型区只读', async () => {
     const d = detail({ adapterReady: false, status: 'unsupported', pendingReason: 'OAuth 授权流程待接入' })
     const w = await open(d, { ...summary, adapterReady: false, status: 'unsupported' })
-    expect(btn(w, '添加 OAuth 连接')!.attributes('disabled')).toBeUndefined()
-    expect(btn(w, '添加连接')!.attributes('disabled')).toBeDefined()
+    expect(btn(w, '登录验证')!.attributes('disabled')).toBeUndefined()
+    expect(btn(w, '添加连接')).toBeUndefined()
     expect(w.find('[data-testid="oauth-forward-note"]').text()).toContain('授权后暂不能用于转发')
     expect(w.find('[data-testid="oauth-forward-note"]').text()).toContain('OAuth 授权流程待接入')
     expect(btn(w, '保存修改')!.attributes('disabled')).toBeDefined()
@@ -124,10 +124,10 @@ describe('ProviderModal：OAuth 入口', () => {
   ])('custom 提供商 %s：按钮置灰，原因与接入要求可见', async (id, snippet) => {
     const s = { ...summary, id, name: id, adapterReady: false, status: 'unsupported' as const }
     const w = await open(detail({ ...s, id }), s)
-    expect(btn(w, '添加 OAuth 连接')!.attributes('disabled')).toBeDefined()
+    expect(btn(w, '登录验证')!.attributes('disabled')).toBeDefined()
     expect(w.find('[data-testid="oauth-custom-reason"]').text()).toContain(snippet)
     expect(w.find('[data-testid="oauth-custom-notice"]').text()).toContain('接入需要')
-    await btn(w, '添加 OAuth 连接')!.trigger('click')
+    await btn(w, '登录验证')!.trigger('click')
     expect(w.find('section[aria-label$="OAuth 授权"]').exists()).toBe(false)
   })
 })
@@ -142,10 +142,10 @@ describe('ProviderModal：授权流程', () => {
     const w = await open(detail())
     apiMock.oauthStart.mockResolvedValue({ ...started, expiresAt: new Date(Date.now() + 300_000).toISOString() })
     apiMock.oauthPoll.mockResolvedValue({ status: 'succeeded', connectionId: 'oc1' })
-    await btn(w, '添加 OAuth 连接')!.trigger('click')
+    await btn(w, '登录验证')!.trigger('click')
     expect(w.find('section[aria-label="Claude Code OAuth 授权"]').exists()).toBe(true)
-    await btn(w, '开始授权')!.trigger('click')
     await flushPromises()
+    expect(apiMock.oauthStart).toHaveBeenCalledWith('claude', '')
     expect(w.find('[data-testid="oauth-user-code"]').text()).toBe('ABCD-1234')
 
     apiMock.listProviders.mockClear()
@@ -165,8 +165,7 @@ describe('ProviderModal：授权流程', () => {
   it('授权码流程失败时只显示映射文案', async () => {
     const w = await open(detail())
     apiMock.oauthStart.mockRejectedValue(new OAuthApiError('listen_failed'))
-    await btn(w, '添加 OAuth 连接')!.trigger('click')
-    await btn(w, '开始授权')!.trigger('click')
+    await btn(w, '登录验证')!.trigger('click')
     await flushPromises()
     expect(w.text()).toContain(oauthErrorText('listen_failed'))
   })
@@ -175,8 +174,7 @@ describe('ProviderModal：授权流程', () => {
     const w = await open(detail())
     apiMock.oauthStart.mockResolvedValue({ ...started, expiresAt: new Date(Date.now() + 300_000).toISOString() })
     apiMock.oauthPoll.mockResolvedValue({ status: 'pending' })
-    await btn(w, '添加 OAuth 连接')!.trigger('click')
-    await btn(w, '开始授权')!.trigger('click')
+    await btn(w, '登录验证')!.trigger('click')
     await flushPromises()
     await w.setProps({ modelValue: false })
     await flushPromises()

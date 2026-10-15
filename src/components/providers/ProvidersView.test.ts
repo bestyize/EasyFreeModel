@@ -3,6 +3,7 @@ import { flushPromises, mount, type VueWrapper } from '@vue/test-utils'
 import { createPinia, setActivePinia } from 'pinia'
 import catalogJson from '../../../src-tauri/resources/provider_catalog.json'
 import statusJson from '../../../src-tauri/resources/provider_status.json'
+import oauthJson from '../../../src-tauri/resources/oauth_providers.json'
 import { __resetProvidersMock, __setProvidersMockLatency, providersMock } from '@/api/mock/providers'
 import { __setOAuthMockTiming } from '@/api/mock/oauth'
 import { useProvidersStore } from '@/stores/providers'
@@ -20,10 +21,14 @@ vi.mock('@/api', async () => {
   })
   return { api }
 })
+vi.mock('@/api/openExternal', () => ({ openExternal: vi.fn().mockResolvedValue(undefined) }))
 
-const catalog = catalogJson as unknown as { id: string; category: string; serviceKinds: string[] }[]
+const catalog = catalogJson as unknown as { id: string; name: string; category: string; serviceKinds: string[] }[]
 const status = statusJson as unknown as Record<string, { adapter: string | null }>
 const ready = (id: string) => status[id]?.adapter != null
+const oauthFlows = new Map(oauthJson.providers.map((p) => [p.id, p.flow]))
+const visible = (c: (typeof catalog)[number]) => ready(c.id) && (c.category !== 'oauth' ||
+  (!!oauthFlows.get(c.id) && oauthFlows.get(c.id) !== 'custom' && c.id !== 'github' && c.id !== 'muse'))
 const SECRET = 'sk-ui-SUPERSECRET-9876'
 
 async function mountView() {
@@ -70,7 +75,7 @@ describe('第四组：API Key 提供商', () => {
     // 默认全部展开：直接显示全部卡片与 aria-expanded="true"
     expect(apikeyGroup(w).find('[aria-expanded="true"]').exists()).toBe(true)
     expect(apikeyGroup(w).findAll('button.provider-card')).toHaveLength(apikeyCount)
-    expect(w.findAll('button.provider-card').length).toBe(Object.values(status).filter((p) => p.adapter).length)
+    expect(w.findAll('button.provider-card')).toHaveLength(catalog.filter(visible).length)
     expect(apikeyGroup(w).find('[data-testid="apikey-summary"]').exists()).toBe(false)
 
     // 组顺序：自定义 → OAuth → 免费 → API Key
@@ -150,16 +155,27 @@ describe('第四组：API Key 提供商', () => {
     expect(openai.text()).not.toContain('待接入')
   })
 
-  it('OAuth 类：提供“添加 OAuth 连接”入口，并可正常打开授权面板', async () => {
+  it('OAuth 授权流程未接入或令牌兑换待接入的提供商不显示，搜索也找不到', async () => {
+    const w = await mountView()
+    for (const id of ['cline', 'github', 'muse']) {
+      const name = catalog.find((p) => p.id === id)!.name
+      expect(cardOf(w, name)).toBeUndefined()
+      useUiStore().globalQuery = name
+      await flushPromises()
+      expect(w.find('section[aria-labelledby="g-oauth"]').findAll('button.provider-card')).toHaveLength(0)
+    }
+  })
+
+  it('OAuth 类：提供“登录验证”入口，并可正常打开授权面板', async () => {
     const w = await mountView()
     await cardOf(w, 'Claude Code').trigger('click')
     await flushPromises()
     // 旧的置灰“授权流程待接入”按钮已被真实入口取代
     expect(w.findAll('button').some((b) => b.text().includes('授权流程待接入'))).toBe(false)
-    const oauth = w.findAll('button').find((b) => b.text().includes('添加 OAuth 连接'))!
+    const oauth = w.findAll('button').find((b) => b.text().includes('登录验证'))!
     expect(oauth.attributes('disabled')).toBeUndefined()
     expect(w.text()).toContain('风险提示')
-    // 点击添加 OAuth 连接可打开授权面板
+    // 点击登录验证可打开授权面板
     await oauth.trigger('click')
     await flushPromises()
     expect(w.findComponent({ name: 'OAuthPanel' }).exists()).toBe(true)

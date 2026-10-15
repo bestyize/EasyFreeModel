@@ -20,6 +20,8 @@ const props = defineProps<{
   reauthConnection?: Connection | null
   /** 外层已经展示了风险提示时，面板内不再重复 */
   hideRiskNotice?: boolean
+  /** OAuth 分类的快捷入口：加载完成后直接发起登录，跳过可选账户标识 */
+  autoStart?: boolean
 }>()
 const emit = defineEmits<{
   /** 授权成功（连接已创建/恢复） */
@@ -99,6 +101,7 @@ async function load(force = true) {
   if (force || !store.loaded) await store.fetchProviders()
   if (disposed) return
   initializing.value = false
+  if (props.autoStart && info.value?.status === 'ready' && stage.value === 'form') void begin()
 }
 
 function stopTimers() {
@@ -258,6 +261,7 @@ function restart() {
 
 function onCredentialsSaved() {
   forceCredentials.value = false
+  if (props.autoStart) void begin()
 }
 
 const clearBusy = ref(false)
@@ -340,7 +344,7 @@ onBeforeUnmount(() => {
       <div v-if="info.limitation" class="notice neutral" role="note" data-testid="oauth-limitation">
         <span><strong>使用限制：</strong>{{ info.limitation }}</span>
       </div>
-      <label v-if="!isReauth" class="field">
+      <label v-if="!isReauth && !autoStart" class="field">
         <span>账户标识（可选，最多 128 个字符）</span>
         <input
           v-model="label"

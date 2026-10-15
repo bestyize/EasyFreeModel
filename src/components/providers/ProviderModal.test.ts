@@ -161,8 +161,8 @@ describe('ProviderModal', () => {
     const w = await open(d, { ...summary, adapterReady: false, status: 'unsupported' })
     expect(w.text()).toContain('待接入')
     expect(w.text()).not.toContain('已连接')
-    const add = w.findAll('button').find((b) => b.text().includes('添加连接'))!
-    expect(add.attributes('disabled')).toBeDefined()
+    const add = w.findAll('button').find((b) => b.text().includes('添加连接'))
+    expect(add).toBeUndefined()
   })
 
   it('requires confirmation before removing a connection, and removal marks dirty', async () => {

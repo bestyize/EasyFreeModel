@@ -143,11 +143,11 @@ onBeforeUnmount(resetAddForm)
 const dirty = computed(() => !!original.value && !!draft.value && isDetailDirty(original.value, draft.value))
 const issues = computed(() => (draft.value ? validateDetail(draft.value) : []))
 const conflictIds = computed(() => (draft.value ? conflictModelIds(findAliasConflicts(draft.value.models)) : new Set<string>()))
-const canAddKey = computed(() => !!draft.value?.adapterReady && !!draft.value.authModes.includes('apiKey'))
+const canAddKey = computed(() => !!draft.value?.adapterReady && draft.value.group !== 'oauth' && !!draft.value.authModes.includes('apiKey'))
 const supportsOAuth = computed(() => !!draft.value?.authModes.includes('oauth'))
 const oauthInfo = computed(() => (draft.value ? oauthStore.infoFor(draft.value.id) : undefined))
 const oauthIsCustom = computed(() => oauthInfo.value?.status === 'custom')
-const showDisabledApiKeyAdd = computed(() => !!draft.value && (!supportsOAuth.value || draft.value.authModes.includes('apiKey')))
+const showDisabledApiKeyAdd = computed(() => !!draft.value && draft.value.group !== 'oauth' && (!supportsOAuth.value || draft.value.authModes.includes('apiKey')))
 const oauthButtonDisabled = computed(
   () => saving.value || oauthIsCustom.value || (oauthStore.loading && !oauthInfo.value) || oauthPanelOpen.value,
 )
@@ -525,7 +525,6 @@ function cancel() {
           <template v-if="pendingReason"><br /><strong>待接入原因：</strong>{{ pendingReason }}</template>
         </span>
       </div>
-      <p v-if="draft.baseUrl" class="baseurl">上游地址 <code>{{ draft.baseUrl }}</code></p>
       <div v-if="showRisk" class="notice risk" role="note">
         <AlertTriangle :size="16" aria-hidden="true" />
         <span><strong>风险提示：</strong>{{ draft.riskNotice }}</span>
@@ -609,6 +608,7 @@ function cancel() {
           :provider-name="draft.name"
           :reauth-connection="reauthTarget"
           :hide-risk-notice="showRisk"
+          :auto-start="draft.group === 'oauth' && !reauthTarget"
           @done="onOAuthDone"
           @close="closeOAuth"
         />
@@ -672,7 +672,7 @@ function cancel() {
             :disabled="oauthButtonDisabled"
             @click="openOAuth()"
           >
-            <Lock :size="14" /> 添加 OAuth 连接
+            <Lock :size="14" /> {{ draft.group === 'oauth' ? '登录验证' : '添加 OAuth 连接' }}
           </button>
         </div>
         <div v-if="supportsOAuth && oauthIsCustom && oauthInfo" class="oauth-custom" role="note" data-testid="oauth-custom-notice">
@@ -690,7 +690,29 @@ function cancel() {
         </p>
       </section>
 
-      <!-- 分发策略 -->
+      <ModelList
+        v-model:models="draft.models"
+        v-model:thinking-level="draft.thinkingLevel"
+        :conflict-ids="conflictIds"
+        :readonly="readonly"
+        :fetching="modelsBusy"
+        :test-results="store.modelTestResults"
+        :testing-ids="store.testingModelIds"
+        @fetch="onFetchModels"
+        @test="testModel"
+      />
+      <p v-if="modelsError" class="issues" role="alert" data-testid="models-error">{{ modelsError }}</p>
+      <p
+        v-if="modelTestNote"
+        class="model-test-note"
+        :class="{ bad: !modelTestOk }"
+        role="status"
+        data-testid="model-test-note"
+      >
+        {{ modelTestNote }}
+      </p>
+
+      <!-- 高级配置放在模型之后 -->
       <section class="panel" aria-label="分发策略">
         <div class="panel-title"><h3>分发策略</h3><p>控制多个连接之间的请求分发与失败重试</p></div>
         <div class="policy">
@@ -728,28 +750,6 @@ function cancel() {
       </section>
 
       <HeadersEditor v-model="draft.customHeaders" :readonly="readonly" />
-
-      <ModelList
-        v-model:models="draft.models"
-        v-model:thinking-level="draft.thinkingLevel"
-        :conflict-ids="conflictIds"
-        :readonly="readonly"
-        :fetching="modelsBusy"
-        :test-results="store.modelTestResults"
-        :testing-ids="store.testingModelIds"
-        @fetch="onFetchModels"
-        @test="testModel"
-      />
-      <p v-if="modelsError" class="issues" role="alert" data-testid="models-error">{{ modelsError }}</p>
-      <p
-        v-if="modelTestNote"
-        class="model-test-note"
-        :class="{ bad: !modelTestOk }"
-        role="status"
-        data-testid="model-test-note"
-      >
-        {{ modelTestNote }}
-      </p>
     </div>
 
     <template #footer>
@@ -844,8 +844,6 @@ function cancel() {
 .conns { display: flex; flex-direction: column; gap: 8px; margin: 0 0 12px; padding: 0; list-style: none; }
 .policy { display: flex; flex-wrap: wrap; gap: 24px; margin-top: 12px; }
 
-.baseurl { margin: 0; font-size: 12px; color: var(--c-text-2); }
-.baseurl code { font-family: var(--font-mono); color: var(--c-text); word-break: break-all; }
 .notice.pending { align-items: flex-start; }
 .notice-ok { margin: 0 0 10px; font-size: 12px; color: var(--c-success); }
 .add-form { display: flex; flex-direction: column; gap: 10px; margin: 0 0 12px; padding: 12px 14px; border: 1px dashed var(--c-border); border-radius: var(--radius); background: var(--c-sidebar); }

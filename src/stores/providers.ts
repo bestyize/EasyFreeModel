@@ -172,8 +172,11 @@ export const useProvidersStore = defineStore('providers', () => {
    * 批量测试某组：只把“适配器已接入且已有连接”的提供商交给后端 testProviders，
    * 适配器未接入的直接跳过，不会得到任何“通过”状态。按 providerId 把结果归组到卡片上。
    */
-  async function testGroup(group: ProviderGroup, concurrency = 3, chunkSize = 10) {
-    const targets = providers.value.filter((p) => p.group === group && p.adapterReady && p.connectionCount > 0)
+  async function testGroup(group: ProviderGroup, concurrency = 3, chunkSize = 10, visibleIds?: string[]) {
+    const ids = visibleIds ? new Set(visibleIds) : null
+    const targets = providers.value.filter((p) =>
+      p.group === group && p.adapterReady && p.status !== 'unsupported' && p.connectionCount > 0 && (!ids || ids.has(p.id)),
+    )
     batchNote.value = null
     if (!targets.length) {
       batchNote.value = '没有已添加连接的提供商可测试'
