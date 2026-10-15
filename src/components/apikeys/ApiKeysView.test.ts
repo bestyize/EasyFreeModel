@@ -67,12 +67,13 @@ describe('ApiKeysView', () => {
     q('[data-testid="pick-claude"]')!.click()
     await flushPromises()
     expect((q('#import-default-model') as HTMLInputElement).value).toBe('deepseek-chat')
-    expect((q('#import-haiku') as HTMLInputElement).value).toBe('deepseek-chat')
-    expect((q('#import-sonnet') as HTMLInputElement).value).toBe('deepseek-chat')
-    expect((q('#import-opus') as HTMLInputElement).value).toBe('deepseek-chat')
+    expect((q('#import-haiku') as HTMLInputElement).placeholder).toBe('沿用默认模型')
+    expect((q('#import-haiku') as HTMLInputElement).value).toBe('')
+    expect((q('#import-sonnet') as HTMLInputElement).value).toBe('')
+    expect((q('#import-opus') as HTMLInputElement).value).toBe('')
     expect(h.api.previewClientImport).toHaveBeenCalledWith(expect.objectContaining({
       client: 'claude', apiKey: SECRET, model: 'deepseek-chat',
-      haikuModel: 'deepseek-chat', sonnetModel: 'deepseek-chat', opusModel: 'deepseek-chat',
+      haikuModel: '', sonnetModel: '', opusModel: '',
     }))
   })
 

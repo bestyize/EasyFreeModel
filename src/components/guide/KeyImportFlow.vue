@@ -50,8 +50,8 @@ const chosenModels = computed(() => target.value === 'claude' || (target.value =
   : [model.value])
 const validModels = computed(() => chosenModels.value.every((name) => {
   const value = name.trim()
-  return value && (!allowedModels.value.length || allowedModels.value.includes(value))
-}))
+  return !value || !allowedModels.value.length || allowedModels.value.includes(value)
+}) && !!model.value.trim())
 const protocol = computed(() => target.value === 'codex' || (target.value === 'ccswitch' && ccApp.value === 'codex')
   ? 'openai-responses' : 'anthropic-messages')
 const supported = computed(() => !props.apiKey?.protocols.length || props.apiKey.protocols.includes(protocol.value))
@@ -83,18 +83,15 @@ watch(() => props.modelValue, async (open) => {
 watch(options, (list) => {
   if (!target.value || model.value || !list.length) return
   model.value = list[0]
-  haiku.value = list[0]
-  sonnet.value = list[0]
-  opus.value = list[0]
 })
 
 function choose(id: Target) {
   if (!props.apiKey?.secret) return
   pickerOpen.value = false
   model.value = options.value[0] || ''
-  haiku.value = model.value
-  sonnet.value = model.value
-  opus.value = model.value
+  haiku.value = ''
+  sonnet.value = ''
+  opus.value = ''
   ccApp.value = 'claude'
   preview.value = null
   previewKey.value = ''
@@ -206,20 +203,26 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
           <select id="import-cc-app" v-model="ccApp"><option value="claude">Claude Code</option><option value="codex">Codex</option></select>
         </div>
 
+        <div class="model-heading">
+          <strong>模型配置</strong>
+          <span>从已启用模型中选择，也可以输入模型名。</span>
+        </div>
         <div class="fields">
           <div class="field">
             <label for="import-default-model">默认模型</label>
-            <input id="import-default-model" v-model="model" list="import-model-options" placeholder="选择或输入模型名" autocomplete="off" />
+            <input id="import-default-model" v-model="model" list="import-model-options" placeholder="选择或输入模型名" autocomplete="off" spellcheck="false" />
           </div>
           <template v-if="target === 'claude' || (target === 'ccswitch' && ccApp === 'claude')">
-            <div class="field"><label for="import-sonnet">Sonnet 档位</label><input id="import-sonnet" v-model="sonnet" list="import-model-options" /></div>
-            <div class="field"><label for="import-opus">Opus 档位</label><input id="import-opus" v-model="opus" list="import-model-options" /></div>
-            <div class="field"><label for="import-haiku">Haiku 档位</label><input id="import-haiku" v-model="haiku" list="import-model-options" /></div>
+            <div class="field"><label for="import-sonnet">Sonnet 档位</label><input id="import-sonnet" v-model="sonnet" list="import-model-options" placeholder="沿用默认模型" autocomplete="off" spellcheck="false" /></div>
+            <div class="field"><label for="import-opus">Opus 档位</label><input id="import-opus" v-model="opus" list="import-model-options" placeholder="沿用默认模型" autocomplete="off" spellcheck="false" /></div>
+            <div class="field"><label for="import-haiku">Haiku 档位</label><input id="import-haiku" v-model="haiku" list="import-model-options" placeholder="沿用默认模型" autocomplete="off" spellcheck="false" /></div>
           </template>
           <datalist id="import-model-options"><option v-for="name in options" :key="name" :value="name" /></datalist>
         </div>
+        <p v-if="target === 'claude' || (target === 'ccswitch' && ccApp === 'claude')" class="hint">三个档位可分别指定模型；留空时沿用默认模型。</p>
         <p v-if="!options.length" class="hint">还没有已启用的模型。先在“提供商”中启用模型，也可以输入已有的公开模型别名。</p>
-        <p v-if="!validModels && allowedModels.length" class="notice">模型必须在这把密钥允许的模型范围内。</p>
+        <p v-if="!model.trim()" class="notice">请填写默认模型。</p>
+        <p v-else-if="!validModels && allowedModels.length" class="notice">模型必须在这把密钥允许的模型范围内。</p>
 
         <template v-if="target === 'desktop'">
           <div class="desktop-guide">
@@ -273,6 +276,8 @@ const isSecret = (field: string) => /token|api_key|bearer/i.test(field)
 .setup { display: flex; flex-direction: column; gap: 14px; }
 .identity { display: flex; flex-wrap: wrap; gap: 7px 16px; padding: 11px 13px; border-radius: 8px; background: var(--c-surface-2); color: var(--c-text-2); font-size: var(--fs-small); }
 .identity strong,.identity code { color: var(--c-text); }
+.model-heading { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; font-size: var(--fs-small); }
+.model-heading span { color: var(--c-text-2); }
 .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
 .field { display: flex; flex-direction: column; gap: 6px; font-size: var(--fs-small); }
 .field input,.field select { width: 100%; min-width: 0; padding: 9px 10px; border: 1px solid var(--c-border); border-radius: 8px; background: var(--c-canvas); color: var(--c-text); }
