@@ -198,6 +198,22 @@ fn claude_merge_keeps_other_settings_and_key_order() {
 }
 
 #[test]
+fn claude_import_maps_each_model_tier_independently() {
+    let mut request = input(ClientKind::Claude);
+    request.haiku_model = Some("fast".into());
+    request.sonnet_model = Some("balanced".into());
+    request.opus_model = Some("strong".into());
+    let plan = claude::plan(None, &validate(&request).unwrap()).unwrap();
+    let config: Value = serde_json::from_str(&plan.content).unwrap();
+    assert_eq!(config["env"]["ANTHROPIC_MODEL"], "openai/gpt-4o-mini");
+    assert_eq!(config["env"]["ANTHROPIC_DEFAULT_HAIKU_MODEL"], "fast");
+    assert_eq!(config["env"]["ANTHROPIC_DEFAULT_SONNET_MODEL"], "balanced");
+    assert_eq!(config["env"]["ANTHROPIC_DEFAULT_OPUS_MODEL"], "strong");
+    request.haiku_model = Some(" ".into());
+    assert!(validate(&request).is_err());
+}
+
+#[test]
 fn claude_empty_or_missing_file_starts_from_empty_object() {
     for existing in [None, Some(""), Some("  \n\t")] {
         let plan = claude::plan(existing, &claude_params()).unwrap();

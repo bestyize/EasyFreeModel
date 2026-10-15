@@ -54,7 +54,7 @@ export const useConnectStore = defineStore('connect', () => {
     createError.value = null
     try {
       await keys.create({
-        name: 'Router 接入',
+        name: 'FreeApiBox 接入',
         expiresAt: null,
         protocols: ALL_PROTOCOLS,
         allowedModels: [],

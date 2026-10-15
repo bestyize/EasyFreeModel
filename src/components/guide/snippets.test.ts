@@ -98,15 +98,15 @@ describe('Codex', () => {
   it('config.toml：custom provider 走 responses，密钥直接写 experimental_bearer_token（不用环境变量）', () => {
     const t = codexConfigToml(input)
     expect(t).toBe(`model = "openai/gpt-4o-mini"
-model_provider = "router"
+model_provider = "freeapibox"
 
-[model_providers.router]
-name = "Router Desktop"
+[model_providers.freeapibox]
+name = "FreeApiBox"
 base_url = "http://127.0.0.1:20128/v1"
 wire_api = "responses"
 experimental_bearer_token = "sk-r-abc123"`)
     expect(t).not.toContain('env_key')
-    expect(t.indexOf('model_provider =')).toBeLessThan(t.indexOf('[model_providers.router]'))
+    expect(t.indexOf('model_provider =')).toBeLessThan(t.indexOf('[model_providers.freeapibox]'))
   })
 
   it('密钥里的引号和反斜杠被转义成合法的 TOML 字符串', () => {
@@ -129,6 +129,14 @@ describe('Claude Code', () => {
     })
   })
 
+  it('可分别指定三个模型档位', () => {
+    const parsed = JSON.parse(claudeSettingsJson({ ...input, haikuModel: 'fast', sonnetModel: 'balanced', opusModel: 'strong' }))
+    expect(parsed.env.ANTHROPIC_MODEL).toBe('openai/gpt-4o-mini')
+    expect(parsed.env.ANTHROPIC_DEFAULT_HAIKU_MODEL).toBe('fast')
+    expect(parsed.env.ANTHROPIC_DEFAULT_SONNET_MODEL).toBe('balanced')
+    expect(parsed.env.ANTHROPIC_DEFAULT_OPUS_MODEL).toBe('strong')
+  })
+
 })
 
 describe('ccSwitchEndpoint', () => {
@@ -146,12 +154,12 @@ describe('ccSwitchLink', () => {
 
   it('Claude：endpoint 不带 /v1，带三个档位模型', () => {
     const link = ccSwitchLink('claude', input)
-    expect(link.startsWith('ccswitch://v1/import?resource=provider&app=claude&name=Router%20Desktop&')).toBe(true)
+    expect(link.startsWith('ccswitch://v1/import?resource=provider&app=claude&name=FreeApiBox&')).toBe(true)
     expect(parse(link)).toEqual({
       host: 'v1',
       path: '/import',
       params: {
-        resource: 'provider', app: 'claude', name: 'Router Desktop', endpoint: 'http://127.0.0.1:20128', apiKey: 'sk-r-abc123',
+        resource: 'provider', app: 'claude', name: 'FreeApiBox', endpoint: 'http://127.0.0.1:20128', apiKey: 'sk-r-abc123',
         model: 'openai/gpt-4o-mini', haikuModel: 'openai/gpt-4o-mini', sonnetModel: 'openai/gpt-4o-mini', opusModel: 'openai/gpt-4o-mini',
       },
     })
@@ -160,9 +168,14 @@ describe('ccSwitchLink', () => {
   it('Codex：endpoint 带 /v1，没有 Claude 专属参数', () => {
     const { params } = parse(ccSwitchLink('codex', input))
     expect(params).toEqual({
-      resource: 'provider', app: 'codex', name: 'Router Desktop', endpoint: 'http://127.0.0.1:20128/v1', apiKey: 'sk-r-abc123',
+      resource: 'provider', app: 'codex', name: 'FreeApiBox', endpoint: 'http://127.0.0.1:20128/v1', apiKey: 'sk-r-abc123',
       model: 'openai/gpt-4o-mini',
     })
+  })
+
+  it('Claude：导入链接分别携带所选档位', () => {
+    const { params } = parse(ccSwitchLink('claude', { ...input, haikuModel: 'fast', sonnetModel: 'balanced', opusModel: 'strong' }))
+    expect([params.haikuModel, params.sonnetModel, params.opusModel]).toEqual(['fast', 'balanced', 'strong'])
   })
 
   it('特殊字符被完整编码并可无损还原', () => {

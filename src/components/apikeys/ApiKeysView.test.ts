@@ -14,6 +14,8 @@ const h = vi.hoisted(() => ({
     deleteApiKey: vi.fn(),
     getSettings: vi.fn(),
     listGatewayModels: vi.fn(),
+    previewClientImport: vi.fn(),
+    applyClientImport: vi.fn(),
   },
 }))
 vi.mock('@/api', () => ({ api: h.api }))
@@ -56,17 +58,56 @@ afterEach(() => {
 })
 
 describe('ApiKeysView', () => {
-  it('密钥表下面是连接参数和一键接入；选中的密钥和模型就是接入面板里用的', async () => {
+  it('每把可用密钥都可从操作区打开客户端列表并选择模型', async () => {
     h.api.listGatewayModels.mockResolvedValue([{ id: 'deepseek-chat', providerId: 'deepseek', providerName: 'DeepSeek' }])
-    await mountView('127.0.0.1', [keyInfo({ id: 'k1', secret: SECRET })])
-    const headings = [...wrapper.element.querySelectorAll('section h2')].map((h2) => h2.textContent)
-    expect(headings).toEqual(['连接参数', '一键接入'])
-    expect(wrapper.get('[data-testid="key-full"]').text()).toBe(SECRET)
-    expect((wrapper.get('[data-testid="model-input"]').element as HTMLInputElement).value).toBe('deepseek-chat')
-    expect((wrapper.get('[data-testid="open-codex"]').element as HTMLButtonElement).disabled).toBe(false)
-    const table = wrapper.element.querySelector('table')!
-    const panel = wrapper.element.querySelector('#g-params')!
-    expect(table.compareDocumentPosition(panel) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+    await mountView('127.0.0.1', [keyInfo({ id: 'k1', secret: SECRET, protocols: ['anthropic-messages'] })])
+    await wrapper.get('[data-testid="import-k1"]').trigger('click')
+    await flushPromises()
+    expect(q('[data-testid="import-target-list"]')?.textContent).toContain('Claude Desktop')
+    q('[data-testid="pick-claude"]')!.click()
+    await flushPromises()
+    expect((q('#import-default-model') as HTMLInputElement).value).toBe('deepseek-chat')
+    expect((q('#import-haiku') as HTMLInputElement).value).toBe('deepseek-chat')
+    expect((q('#import-sonnet') as HTMLInputElement).value).toBe('deepseek-chat')
+    expect((q('#import-opus') as HTMLInputElement).value).toBe('deepseek-chat')
+    expect(h.api.previewClientImport).toHaveBeenCalledWith(expect.objectContaining({
+      client: 'claude', apiKey: SECRET, model: 'deepseek-chat',
+      haikuModel: 'deepseek-chat', sonnetModel: 'deepseek-chat', opusModel: 'deepseek-chat',
+    }))
+  })
+
+  it('Claude Code 按所选档位预览并写入', async () => {
+    h.api.listGatewayModels.mockResolvedValue([
+      { id: 'fast', providerId: 'a', providerName: 'A' },
+      { id: 'strong', providerId: 'a', providerName: 'A' },
+    ])
+    h.api.previewClientImport.mockImplementation(async () => ({
+      client: 'claude', path: '~/.claude/settings.json', exists: true, unchanged: false, error: null,
+      changes: [{ field: 'env.ANTHROPIC_MODEL', before: 'old', after: 'fast' }],
+    }))
+    h.api.applyClientImport.mockResolvedValue({ path: '~/.claude/settings.json', backupPath: 'settings.json.bak', changed: true })
+    await mountView('127.0.0.1', [keyInfo({ secret: SECRET, protocols: ['anthropic-messages'] })])
+    await wrapper.get('[data-testid="import-k1"]').trigger('click')
+    q('[data-testid="pick-claude"]')!.click()
+    await flushPromises()
+    const opus = q('#import-opus') as HTMLInputElement
+    opus.value = 'strong'
+    opus.dispatchEvent(new Event('input'))
+    await flushPromises()
+    expect(h.api.previewClientImport).toHaveBeenLastCalledWith(expect.objectContaining({ opusModel: 'strong', apiKey: SECRET }))
+    q('[data-testid="confirm-import"]')!.click()
+    await flushPromises()
+    expect(h.api.applyClientImport).toHaveBeenCalledWith(expect.objectContaining({ opusModel: 'strong' }))
+    expect(q('[role="status"]')?.textContent).toContain('配置已写入')
+  })
+
+  it('停用或已过期的密钥不可导入', async () => {
+    await mountView('127.0.0.1', [
+      keyInfo({ id: 'disabled', disabled: true, secret: SECRET }),
+      keyInfo({ id: 'expired', expiresAt: '2020-01-01T00:00:00Z', secret: SECRET }),
+    ])
+    expect((wrapper.get('[data-testid="import-disabled"]').element as HTMLButtonElement).disabled).toBe(true)
+    expect((wrapper.get('[data-testid="import-expired"]').element as HTMLButtonElement).disabled).toBe(true)
   })
 
   it('列表显示掩码密钥与状态，完整密钥不出现', async () => {

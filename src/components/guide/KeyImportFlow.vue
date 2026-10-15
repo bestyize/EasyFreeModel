@@ -80,6 +80,13 @@ watch(() => props.modelValue, async (open) => {
     modelNames.value = [...new Set(list.map((entry) => entry.id))]
   } catch (e) { modelError.value = errorMessage(e) }
 })
+watch(options, (list) => {
+  if (!target.value || model.value || !list.length) return
+  model.value = list[0]
+  haiku.value = list[0]
+  sonnet.value = list[0]
+  opus.value = list[0]
+})
 
 function choose(id: Target) {
   if (!props.apiKey?.secret) return

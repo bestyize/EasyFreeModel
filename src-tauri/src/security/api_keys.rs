@@ -430,6 +430,19 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn default_initialization_preserves_existing_keys() {
+        let pool = store::open_memory().await.unwrap();
+        let existing = create(&pool, input("existing")).await.unwrap();
+        ensure_default(&pool).await.unwrap();
+        let keys = list(&pool).await.unwrap();
+        assert_eq!(keys.len(), 1);
+        assert_eq!(keys[0].id, existing.key.id);
+        delete(&pool, &existing.key.id).await.unwrap();
+        ensure_default(&pool).await.unwrap();
+        assert!(list(&pool).await.unwrap().is_empty());
+    }
+
+    #[tokio::test]
     async fn empty_protocols_expand_to_all() {
         let pool = store::open_memory().await.unwrap();
         let mut inp = input("all");

@@ -121,10 +121,10 @@ describe('ConnectPanel · 连接参数', () => {
     expect(text('[data-testid="no-key"]')).toContain('还没有可用的 API 密钥')
     expect((q('[data-testid="open-codex"]') as HTMLButtonElement).disabled).toBe(true)
 
-    h.api.createApiKey.mockResolvedValue({ key: keyInfo({ id: 'new', name: 'Router 接入' }), secret: SECRET })
+    h.api.createApiKey.mockResolvedValue({ key: keyInfo({ id: 'new', name: 'FreeApiBox 接入' }), secret: SECRET })
     await click('[data-testid="create-key"]')
     expect(h.api.createApiKey).toHaveBeenCalledWith({
-      name: 'Router 接入', expiresAt: null, protocols: [...ALL], allowedModels: [], rpmLimit: null, tpmLimit: null, totalLimit: null,
+      name: 'FreeApiBox 接入', expiresAt: null, protocols: [...ALL], allowedModels: [], rpmLimit: null, tpmLimit: null, totalLimit: null,
     })
     expect(q('[data-testid="no-key"]')).toBeNull()
     expect(text('[data-testid="key-full"]')).toBe(SECRET)
@@ -252,7 +252,7 @@ describe('ConnectPanel · CC Switch 弹窗', () => {
     await mountPanel()
     await click('[data-testid="open-ccswitch"]')
     const facts = text('[data-testid="cc-facts"]')
-    expect(facts).toContain('Router Desktop')
+    expect(facts).toContain('FreeApiBox')
     expect(facts).toContain('http://127.0.0.1:20128')
     expect(facts).toContain('openai/gpt-4o-mini')
     expect(facts).toContain(SECRET)

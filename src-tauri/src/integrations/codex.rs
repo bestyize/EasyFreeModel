@@ -1,6 +1,6 @@
 //! Codex：`~/.codex/config.toml`。
 //!
-//! 写入顶层 `model` / `model_provider`，以及 `[model_providers.router]`：
+//! 写入顶层 `model` / `model_provider`，以及 `[model_providers.freeapibox]`：
 //! `wire_api` 目前只能是 "responses"；密钥直接写 `experimental_bearer_token`（本机客户端图省事，
 //! 0.100 到 0.160 都支持），所以不需要再设环境变量。
 //! 用 toml_edit 就地修改，注释、顺序和其它配置原样保留。
