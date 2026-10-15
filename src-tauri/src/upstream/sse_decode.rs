@@ -828,6 +828,75 @@ mod tests {
         assert!(decoder.is_terminated());
     }
 
+
+    #[test]
+    fn codebuddy_tokens_remain_contiguous_in_claude_and_responses_wires() {
+        use crate::protocols::anthropic::AnthropicStreamEncoder;
+        use crate::protocols::openai_responses::ResponsesStreamEncoder;
+        use crate::protocols::StreamEncoder;
+
+        // The provider sends each word separately, plus empty tool_calls and
+        // intermittent reasoning. Only the model's genuine "\n" survives.
+        let chunks = [
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"reasoning_content":"思考"}}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"这","tool_calls":[]}}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"是","tool_calls":[],"reasoning_content":"late"}}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"reasoning_content":"ignored"}}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"正常","tool_calls":[]}}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"文本。\n第二段","tool_calls":[]}}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{},"finish_reason":"stop"}]}),
+        ];
+        let mut decoder = OpenAiStreamDecoder::new();
+        let events = run(&mut decoder, &oa(&chunks, true)).unwrap();
+        let expected = "这是正常文本。\n第二段";
+
+        // Claude consumes multiple deltas within ONE text block. Block
+        // boundaries are not tokens and must not be sent per token.
+        let mut anthropic = AnthropicStreamEncoder::new();
+        let frames = events.iter().cloned()
+            .flat_map(|e| anthropic.push(e).expect("valid Anthropic events"))
+            .collect::<Vec<_>>();
+        let decoded = frames.iter()
+            .map(|f| serde_json::from_str::<Value>(&f.data).unwrap())
+            .collect::<Vec<_>>();
+        let text_starts = decoded.iter().filter(|v|
+            v.get("type").and_then(Value::as_str) == Some("content_block_start")
+            && v.pointer("/content_block/type").and_then(Value::as_str) == Some("text")
+        ).count();
+        assert_eq!(text_starts, 1);
+        let anth_text: String = decoded.iter().filter_map(|v| {
+            if v.pointer("/delta/type").and_then(Value::as_str) == Some("text_delta") {
+                v.pointer("/delta/text").and_then(Value::as_str)
+            } else {
+                None
+            }
+        }).collect();
+        assert_eq!(anth_text, expected);
+
+        // Codex Responses also must keep one output item even when upstream
+        // sends a word per SSE frame.
+        let mut responses = ResponsesStreamEncoder::new();
+        let frames = events.into_iter()
+            .flat_map(|e| responses.push(e).expect("valid Responses events"))
+            .collect::<Vec<_>>();
+        let decoded = frames.iter()
+            .map(|f| serde_json::from_str::<Value>(&f.data).unwrap())
+            .collect::<Vec<_>>();
+        let output_added = decoded.iter().filter(|v|
+            v.get("type").and_then(Value::as_str) == Some("response.output_item.added")
+            && v.pointer("/item/type").and_then(Value::as_str) == Some("message")
+        ).count();
+        assert_eq!(output_added, 1);
+        let response_text: String = decoded.iter().filter_map(|v| {
+            if v.get("type").and_then(Value::as_str) == Some("response.output_text.delta") {
+                v.get("delta").and_then(Value::as_str)
+            } else {
+                None
+            }
+        }).collect();
+        assert_eq!(response_text, expected);
+    }
+
     #[test]
     fn openai_usage_only_chunk_is_flagged() {
         let mut dec = OpenAiStreamDecoder::new();
