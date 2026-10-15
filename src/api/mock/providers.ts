@@ -354,7 +354,7 @@ export const providersMock: ProvidersApi = {
     if (!d.adapterReady) throw new Error(`${d.name} 暂不能添加连接：${pendingText(d)}`)
     if (!d.authModes.includes('apiKey')) throw new Error(`${d.name} 不支持 API Key 方式`)
     const label = input.accountLabel.trim()
-    if (!label || [...label].length > 128) throw new Error('账户标识需为 1–128 个字符')
+    if (!label || [...label].length > 128) throw new Error('名称需为 1–128 个字符')
     cleanApiKey(input.apiKey) // 只校验，随即丢弃：mock 不保存密钥
     const priority = d.connections.reduce((m, c) => Math.max(m, c.priority), 0) + 1
     const conn = apiKeyConn(d.id, `mock-c-${++seq}`, label, priority)

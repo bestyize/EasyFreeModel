@@ -615,14 +615,14 @@ function cancel() {
 
         <form v-if="addOpen" class="add-form" aria-label="添加 API Key 连接" @submit.prevent="submitAdd">
           <label class="field">
-            <span>账户标识</span>
+            <span>名称</span>
             <input
               v-model="addLabel"
               class="input"
               maxlength="128"
               autocomplete="off"
-              placeholder="例如：个人账号 / 团队 Key"
-              aria-label="账户标识"
+              placeholder="例如：个人 / 团队"
+              aria-label="名称"
               :disabled="adding"
             />
           </label>

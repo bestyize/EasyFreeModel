@@ -49,7 +49,7 @@ const cardOf = (w: VueWrapper, name: string) =>
 const ADD_FORM = 'form[aria-label="添加 API Key 连接"]'
 const addForm = (w: VueWrapper) => w.find(ADD_FORM)
 const addKeyEl = (w: VueWrapper) => w.find(`${ADD_FORM} input[aria-label="API Key"]`)
-const addLabelEl = (w: VueWrapper) => w.find(`${ADD_FORM} input[aria-label="账户标识"]`)
+const addLabelEl = (w: VueWrapper) => w.find(`${ADD_FORM} input[aria-label="名称"]`)
 const valueOf = (wrapper: { element: Element }) => (wrapper.element as HTMLInputElement).value
 
 async function expandApikey(w: VueWrapper) {
@@ -261,7 +261,7 @@ describe('录入 API Key', () => {
     await button(w, '添加连接')!.trigger('click')
 
     await addForm(w).trigger('submit')
-    expect(addForm(w).text()).toContain('请填写账户标识')
+    expect(addForm(w).text()).toContain('请填写名称')
     await addLabelEl(w).setValue('x')
     await addForm(w).trigger('submit')
     expect(addForm(w).text()).toContain('请填写 API Key')

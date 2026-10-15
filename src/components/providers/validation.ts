@@ -69,7 +69,7 @@ export function validateApiKey(key: string): string | null {
 
 export function validateAccountLabel(label: string): string | null {
   const l = label.trim()
-  if (!l) return '请填写账户标识'
-  if ([...l].length > 128) return '账户标识不能超过 128 个字符'
+  if (!l) return '请填写名称'
+  if ([...l].length > 128) return '名称不能超过 128 个字符'
   return null
 }

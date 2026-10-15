@@ -79,7 +79,7 @@ describe('mock 命令遵守同样的红线', () => {
 
   it('addConnection：校验输入，成功返回的 Connection 与后续任何读取都不含密钥', async () => {
     await expect(mock.addConnection({ providerId: 'openai', accountLabel: 'x', apiKey: '   ' })).rejects.toThrow('API Key')
-    await expect(mock.addConnection({ providerId: 'openai', accountLabel: ' ', apiKey: SECRET })).rejects.toThrow('账户标识')
+    await expect(mock.addConnection({ providerId: 'openai', accountLabel: ' ', apiKey: SECRET })).rejects.toThrow('名称')
     const conn = await mock.addConnection({ providerId: 'openai', accountLabel: '  work  ', apiKey: ` ${SECRET} ` })
     expect(conn.accountLabel).toBe('work')
     expect(conn.kind).toBe('apiKey')

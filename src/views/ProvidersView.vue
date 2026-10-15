@@ -214,7 +214,7 @@ const gridClass = computed(() => (layout.value === 'card' ? 'grid' : 'list'))
         <header class="group-head">
           <div>
             <h2 id="g-apikey" class="section-title">API Key 提供商</h2>
-            <p class="desc">使用各厂商的 API Key 直接接入，当前仅展示已接入适配器的提供商</p>
+            <p class="desc">选择厂商后只需填写名称和 API Key；上游地址已内置，聊天客户端可统一使用 FreeApiBox 的 /v1/responses</p>
           </div>
           <div class="actions">
             <button
