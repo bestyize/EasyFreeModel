@@ -91,3 +91,43 @@ jobs:
             --generate-notes \
             --draft
           gh release edit "$RELEASE_TAG" --draft=false
+
+  cleanup:
+    name: Keep latest two BuildPackage runs
+    needs: [build, release]
+    if: ${{ !cancelled() }}
+    runs-on: ubuntu-24.04
+    permissions:
+      actions: write
+    steps:
+      - name: Delete older completed runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CURRENT_RUN_ID: ${{ github.run_id }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          # Get runs for this workflow only, newest first, including all pages.
+          runs=$(gh api --method GET --paginate \
+            "repos/${GH_REPO}/actions/workflows/build-package.yml/runs?per_page=100" \
+            --jq '.workflow_runs[] | [.id, .status, .created_at] | @tsv' \
+            | sort -t $'\t' -k3,3r)
+          count=0
+          while IFS=$'\t' read -r run_id status created_at; do
+            [[ -n "$run_id" ]] || continue
+            count=$((count + 1))
+            # Keep the two most recent runs, regardless of outcome.
+            if (( count <= 2 )); then
+              echo "Keep run ${run_id} (${status})"
+              continue
+            fi
+            # GitHub does not allow deleting the currently running job.
+            # Other active/queued runs are also protected.
+            if [[ "$run_id" == "$CURRENT_RUN_ID" || "$status" != "completed" ]]; then
+              echo "Skip active run ${run_id} (${status})"
+              continue
+            fi
+            echo "Delete old run ${run_id} (created ${created_at})"
+            gh api --method DELETE "repos/${GH_REPO}/actions/runs/${run_id}"
+          done <<< "$runs"
