@@ -28,7 +28,7 @@ use super::VerifiedKey;
 use crate::models::UsageStatus;
 use crate::protocols::canonical::Usage;
 use crate::protocols::{ApiError, ApiErrorKind, ProtocolKind};
-use crate::routing::dispatch::{Attempt, DispatchError, DispatchFailure, NoConnection};
+use crate::routing::dispatch::{minimax_quota_refusal, Attempt, DispatchError, DispatchFailure, NoConnection};
 use crate::routing::repo::ProviderCfg;
 use crate::routing::{describe_upstream_error, Runtime};
 use crate::upstream::{AdapterKind, StreamOpen, UpstreamRequest, NOT_READY_MARKER};
@@ -367,6 +367,15 @@ fn failure_response(
             resp
         }
         DispatchError::Upstream { reply, secrets } => {
+            if minimax_quota_refusal(&provider.id, &reply) {
+                let err = ApiError::new(ApiErrorKind::RateLimit,
+                    "MiniMax Code credits or quota are exhausted for this connection.")
+                    .with_code("minimax_code_quota_exhausted");
+                let mut resp = error_with_status(protocol, 429, &err);
+                resp.headers_mut().insert("x-router-source", HeaderValue::from_static("upstream"));
+                if let Some(d) = reply.retry_after { set_retry_after(&mut resp, d); }
+                return resp;
+            }
             if let Some((status, err)) = codebuddy_provider_error(&provider.id, &reply.body) {
                 let mut resp = error_with_status(protocol, status, &err);
                 resp.headers_mut().insert("x-router-source", HeaderValue::from_static("upstream"));

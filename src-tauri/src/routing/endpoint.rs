@@ -73,6 +73,11 @@ pub fn endpoint_for(p: &ProviderCfg) -> Result<ResolvedEndpoint, NotReady> {
         check_express_config(&base_url, &auth).map_err(NotReady)?;
     }
     let mut endpoint = ResolvedEndpoint::new(kind, base_url, auth);
+    // Kimi Coding's Anthropic /messages endpoint requires the beta flag.
+    // Do not attach it to unrelated custom /messages endpoints.
+    if p.kind == "builtin" && p.id == "kimi" && kind == AdapterKind::AnthropicCompatible {
+        endpoint.base_url.query_pairs_mut().append_pair("beta", "true");
+    }
     endpoint.force_stream = p.kind == "builtin" && STREAM_ONLY_PROVIDERS.contains(&p.id.as_str());
     if endpoint.force_stream {
         // 这些端点未必接受 OpenAI 的 `stream_options` 扩展。
@@ -128,6 +133,16 @@ mod tests {
         assert!(free.force_stream);
         let paid = endpoint_for(&row("opencode-zen", "builtin", "none", true, None)).unwrap();
         assert_eq!(paid.auth, AuthStyle::Bearer);
+    }
+
+    #[test]
+    fn kimi_coding_anthropic_endpoint_has_required_beta_flag() {
+        let e = endpoint_for(&row("kimi", "builtin", "none", true, None)).unwrap();
+        assert_eq!(e.kind, AdapterKind::AnthropicCompatible);
+        assert_eq!(e.base_url.query(), Some("beta=true"));
+        let custom = endpoint_for(&row("custom-kimi", "custom", "anthropic-compatible",
+            true, Some("https://example.com/v1/messages"))).unwrap();
+        assert!(custom.base_url.query().is_none());
     }
 
     #[test]

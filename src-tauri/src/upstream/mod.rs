@@ -18,6 +18,7 @@ pub mod code_assist;
 pub mod codebuddy_compat;
 pub mod endpoint;
 pub mod gemini_compat;
+mod iflow_signing;
 pub mod ollama_compat;
 pub mod openai_compat;
 pub mod responses_compat;
@@ -431,6 +432,23 @@ fn build_headers<A: Adapter + ?Sized>(
         headers.insert("x-ide-name", HeaderValue::from_static(ide));
         headers.insert("x-requested-with", HeaderValue::from_static("XMLHttpRequest"));
         headers.insert("x-codebuddy-request", HeaderValue::from_static("1"));
+    }
+    if target.provider_id == "iflow" {
+        let key = target.api_key.as_ref().ok_or_else(||
+            UpstreamError::Config("iFlow requires an access token to sign requests".into()))?;
+        iflow_signing::add_signature_headers(&mut headers, key.expose())?;
+    }
+    if matches!(target.provider_id.as_str(), "minimax-code" | "minimax-code-global") {
+        // The MiniMax Code agent gateway expects Mavis metadata even on
+        // requests with a valid OAuth bearer token.
+        headers.insert("x-mavis-agent-id", HeaderValue::from_static("main"));
+        headers.insert("x-api-key", HeaderValue::from_static("sk-xxx"));
+        let session = uuid::Uuid::new_v4().to_string();
+        headers.insert("x-mavis-session-id", HeaderValue::from_str(&session)
+            .expect("UUID session is a valid header"));
+        let seconds = chrono::Local::now().offset().local_minus_utc().to_string();
+        headers.insert("x-mavis-timezone-offset", HeaderValue::from_str(&seconds)
+            .expect("numeric timezone offset is a valid header"));
     }
     if target.provider_id == "claude" {
         // Claude OAuth requires the Claude Code beta and OAuth feature flags.

@@ -116,7 +116,19 @@ fn classify(status: u16) -> Class {
 
 /// CodeBuddy 11128 is channel/request verification, *not* a bad account.
 /// CodeBuddy 6004 means provider rate limit even when its HTTP status is 400.
+/// MiniMax Code uses HTTP 402/403 for exhausted credit balances.
+pub(crate) fn minimax_quota_refusal(provider: &str, reply: &UpstreamReply) -> bool {
+    if !matches!(provider, "minimax-code" | "minimax-code-global")
+        || !matches!(reply.status, 402 | 403)
+    { return false; }
+    let lower = String::from_utf8_lossy(&reply.body).to_lowercase();
+    ["insufficient", "balance", "credit", "quota", "exhaust", "limit",
+     "余额", "积分", "额度", "不足", "用完", "上限"]
+        .iter().any(|marker| lower.contains(marker))
+}
+
 fn classify_rejection(provider: &str, reply: &UpstreamReply) -> Class {
+    if minimax_quota_refusal(provider, reply) { return Class::RateLimited; }
     if matches!(provider, "codebuddy-cn" | "codebuddy-intl") {
         if let Ok(body) = serde_json::from_slice::<serde_json::Value>(&reply.body) {
             let code = body.get("code").and_then(serde_json::Value::as_i64);
@@ -329,6 +341,20 @@ mod tests {
         for s in [300, 302, 400, 404, 413, 422] {
             assert_eq!(classify(s), Class::Fatal, "{s}");
         }
+    }
+
+    #[test]
+    fn minimax_credits_403_cools_down_instead_of_disabling_connection() {
+        let refused = UpstreamReply { status: 403, retry_after: None,
+            content_type: Some("application/json".into()),
+            body: bytes::Bytes::from_static(br#"{"message":"insufficient credit balance"}"#) };
+        assert!(minimax_quota_refusal("minimax-code", &refused));
+        assert_eq!(classify_rejection("minimax-code", &refused), Class::RateLimited);
+        assert_eq!(classify_rejection("minimax-code-global", &refused), Class::RateLimited);
+        assert_eq!(classify_rejection("other", &refused), Class::Auth);
+        let invalid = UpstreamReply { body: bytes::Bytes::from_static(br#"{"error":"invalid access token"}"#), ..refused };
+        assert!(!minimax_quota_refusal("minimax-code", &invalid));
+        assert_eq!(classify_rejection("minimax-code", &invalid), Class::Auth);
     }
 
     #[test]
