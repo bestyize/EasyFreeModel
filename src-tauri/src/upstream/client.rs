@@ -1,7 +1,7 @@
 //! 出站 HTTP 客户端。
 //!
 //! 红线：
-//! - `User-Agent` 固定为 `RouterDesktop/<版本>`，调用方无法覆盖。
+//! - 默认 `User-Agent` 为 `RouterDesktop/<版本>`；Codex 使用对应 CLI 的身份头。
 //! - 不禁用 TLS 证书校验，不跟随重定向（避免把自定义密钥头带到其它主机）。
 //! - 错误只暴露分类，不携带 URL / 请求头 / 正文。
 
@@ -17,6 +17,8 @@ use super::UpstreamError;
 use crate::proxy::{ProxyPool, Route};
 
 pub const USER_AGENT_PREFIX: &str = "RouterDesktop";
+pub const CODEX_CLI_VERSION: &str = "0.159.0";
+pub const CODEX_USER_AGENT: &str = "codex_cli_rs/0.159.0";
 
 pub fn user_agent() -> String {
     format!("{USER_AGENT_PREFIX}/{}", env!("CARGO_PKG_VERSION"))
@@ -139,7 +141,8 @@ impl UpstreamClient {
         total_timeout: Option<Duration>,
         header_timeout: Duration,
     ) -> Result<reqwest::Response, UpstreamError> {
-        headers.insert(USER_AGENT, HeaderValue::from_str(&user_agent()).expect("static user agent"));
+        let agent = if provider_id == "codex" { CODEX_USER_AGENT.to_string() } else { user_agent() };
+        headers.insert(USER_AGENT, HeaderValue::from_str(&agent).expect("static user agent"));
         self.send_routed(provider_id, |http| {
             let mut rb = http.post(url.clone()).headers(headers.clone()).body(body.clone());
             if let Some(t) = total_timeout {

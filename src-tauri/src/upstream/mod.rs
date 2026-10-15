@@ -421,6 +421,20 @@ fn build_headers<A: Adapter + ?Sized>(
             headers.insert(n.clone(), v.clone());
         }
     }
+    if target.provider_id == "codex" {
+        headers.insert("originator", HeaderValue::from_static("codex_cli_rs"));
+        headers.insert("version", HeaderValue::from_static(client::CODEX_CLI_VERSION));
+        headers.insert("session_id", HeaderValue::from_str(&target.connection_id)
+            .map_err(|_| UpstreamError::Config("invalid connection id".into()))?);
+        if let Some(r) = req {
+            if matches!(r.model.as_str(), "gpt-6.1-sol" | "gpt-6-sol" | "gpt-6-luna")
+                && !r.body.get("tools").and_then(Value::as_array)
+                    .is_some_and(|tools| tools.iter().any(|t| t.get("type").and_then(Value::as_str) == Some("web_search")))
+            {
+                headers.insert("x-openai-internal-codex-responses-lite", HeaderValue::from_static("true"));
+            }
+        }
+    }
     Ok(headers)
 }
 

@@ -76,7 +76,7 @@ pub async fn fetch_provider_models(
     state: State<'_, AppState>,
     provider_id: String,
 ) -> AppResult<Vec<crate::models::ModelEntry>> {
-    providers::fetch_models(&state.db, &state.vault, &provider_id).await
+    providers::fetch_models(&state.db, &state.vault, &state.oauth, &provider_id).await
 }
 
 /// 模型级可用性探测：对单个已保存模型发起一次最小真实上游请求，如实报告结果。

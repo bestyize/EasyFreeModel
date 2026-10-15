@@ -5,6 +5,8 @@ use std::fmt;
 use std::sync::Mutex;
 
 use async_trait::async_trait;
+use base64::engine::general_purpose::URL_SAFE_NO_PAD;
+use base64::Engine;
 use chrono::{DateTime, Duration, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -51,6 +53,23 @@ impl TokenSet {
         self.extra.get(key).map(Secret::expose)
     }
 
+    /// Codex account binding lives in the signed JWT claims. Only use a short,
+    /// printable claim as an HTTP header; never expose the JWT itself.
+    pub fn chatgpt_account_id(&self) -> Option<String> {
+        [Some(self.access_token.expose()), self.extra_value("id_token")]
+            .into_iter().flatten().find_map(|jwt| {
+                let payload = jwt.split('.').nth(1)?;
+                let bytes = URL_SAFE_NO_PAD.decode(payload.trim_end_matches('=')).ok()?;
+                let claims: Value = serde_json::from_slice(&bytes).ok()?;
+                let id = claims.get("https://api.openai.com/auth")
+                    .and_then(|v| v.get("chatgpt_account_id"))
+                    .or_else(|| claims.get("chatgpt_account_id"))?
+                    .as_str()?;
+                (!id.is_empty() && id.len() <= 128 && id.bytes().all(|b| b.is_ascii_graphic()))
+                    .then(|| id.to_owned())
+            })
+    }
+
     /// 序列化为可写入系统凭据库的 JSON。返回 `Secret`，避免被误打印。
     pub fn to_storage_json(&self) -> Result<Secret, OAuthError> {
         let dto = StoredTokenSet {
@@ -89,6 +108,21 @@ struct StoredTokenSet {
     scopes: Vec<String>,
     #[serde(default)]
     extra: BTreeMap<String, String>,
+}
+
+#[cfg(test)]
+mod account_tests {
+    use super::*;
+
+    #[test]
+    fn account_claim_is_extracted_without_exposing_token() {
+        let claims = serde_json::json!({"https://api.openai.com/auth":{"chatgpt_account_id":"acc_123"}});
+        let payload = URL_SAFE_NO_PAD.encode(claims.to_string());
+        let tokens = TokenSet { access_token: Secret::new(format!("header.{payload}.signature")),
+            refresh_token: None, expires_at: None, scopes: vec![], extra: BTreeMap::new() };
+        assert_eq!(tokens.chatgpt_account_id().as_deref(), Some("acc_123"));
+        assert!(!format!("{tokens:?}").contains("acc_123"));
+    }
 }
 
 /// 令牌存储抽象。数据层用系统凭据库（Keychain / Credential Manager）实现；

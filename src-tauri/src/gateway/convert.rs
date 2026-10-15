@@ -27,6 +27,50 @@ pub(crate) struct Outbound {
     pub tool_names: ToolNameMap,
 }
 
+/// Claude's mid-conversation system messages must become user content. Keep
+/// the top-level system prompt stable so a changing reminder does not bust
+/// the cached conversation prefix on every request (same policy as 9Router).
+fn fold_anthropic_system_messages(body: &mut Value) -> Result<(), ApiError> {
+    let Some(obj) = body.as_object_mut() else { return Ok(()) };
+    let Some(messages) = obj.get_mut("messages").and_then(Value::as_array_mut) else { return Ok(()) };
+    if !messages.iter().any(|m| m.get("role").and_then(Value::as_str) == Some("system")) {
+        return Ok(());
+    }
+    let mut rest = Vec::with_capacity(messages.len());
+    for message in std::mem::take(messages) {
+        if message.get("role").and_then(Value::as_str) != Some("system") {
+            rest.push(message);
+            continue;
+        }
+        let text = match message.get("content") {
+            Some(Value::String(s)) => s.clone(),
+            Some(Value::Array(parts)) if parts.iter().all(|p| p.get("type").and_then(Value::as_str) == Some("text") && p.get("text").and_then(Value::as_str).is_some()) =>
+                parts.iter().filter_map(|p| p.get("text").and_then(Value::as_str)).collect::<Vec<_>>().join("\n"),
+            _ => return Err(ApiError::new(ApiErrorKind::InvalidRequest, "System messages must contain text.")),
+        };
+        if text.trim().is_empty() { continue }
+        let block = serde_json::json!({"type":"text", "text":text});
+        if rest.last().is_some_and(|m: &Value| m.get("role").and_then(Value::as_str) == Some("user")) {
+            let previous = rest.last_mut().expect("checked above");
+            if let Some(obj) = previous.as_object_mut() {
+                let content = obj.entry("content").or_insert(Value::Array(vec![]));
+                match content {
+                    Value::String(s) => {
+                        let text = std::mem::take(s);
+                        *content = Value::Array(vec![serde_json::json!({"type":"text", "text":text}), block]);
+                    }
+                    Value::Array(parts) => parts.push(block),
+                    _ => return Err(ApiError::new(ApiErrorKind::InvalidRequest, "User message content must be text or blocks.")),
+                }
+            }
+        } else {
+            rest.push(serde_json::json!({"role":"user", "content":[block]}));
+        }
+    }
+    *messages = rest;
+    Ok(())
+}
+
 /// 请求是否为流式：Gemini 由 URL 方法决定；Ollama 缺省为流式；其余看 body 里的 `stream`（缺省非流式）。
 pub(crate) fn wants_stream(protocol: ProtocolKind, body: &Value, path_stream: Option<bool>) -> bool {
     match protocol {
@@ -75,11 +119,14 @@ fn encode_upstream_request(
 pub(crate) fn build_outbound(
     client: ProtocolKind,
     upstream: ProtocolKind,
-    value: Value,
+    mut value: Value,
     upstream_model: &str,
     headers: &HeaderMap,
     stream: bool,
 ) -> Result<Outbound, ApiError> {
+    if client == ProtocolKind::AnthropicMessages {
+        fold_anthropic_system_messages(&mut value)?;
+    }
     if client == upstream {
         let mut body = value;
         let Some(obj) = body.as_object_mut() else {
@@ -408,6 +455,25 @@ mod tests {
         let names: Vec<&str> = out.extra_headers.iter().map(|(n, _)| n.as_str()).collect();
         assert_eq!(names, vec!["anthropic-version", "anthropic-beta"]);
         assert_eq!(out.body["cache_control_hint"], 1);
+    }
+
+    #[test]
+    fn mid_conversation_system_is_folded_into_nearest_user_turn() {
+        let body = json!({"model":"alias", "max_tokens":64, "system":"stable prefix", "messages":[
+            {"role":"user", "content":"question"},
+            {"role":"system", "content":"changing reminder"},
+            {"role":"assistant", "content":"answer"},
+            {"role":"system", "content":[{"type":"text", "text":"next reminder"}]},
+            {"role":"user", "content":"follow up"}
+        ]});
+        let out = build_outbound(ProtocolKind::AnthropicMessages, ProtocolKind::AnthropicMessages, body, "claude-real", &HeaderMap::new(), false).unwrap();
+        assert_eq!(out.body["system"], "stable prefix");
+        assert_eq!(out.body["messages"][0]["content"][1]["text"], "changing reminder");
+        assert_eq!(out.body["messages"][2]["role"], "user");
+        assert_eq!(out.body["messages"][2]["content"][0]["text"], "next reminder");
+        assert!(out.body["messages"].as_array().unwrap().iter().all(|m| m["role"] != "system"));
+        let converted = build_outbound(ProtocolKind::AnthropicMessages, ProtocolKind::OpenAiChat, out.body, "other", &HeaderMap::new(), false).unwrap();
+        assert_eq!(converted.body["messages"][0]["role"], "system");
     }
 
     #[test]

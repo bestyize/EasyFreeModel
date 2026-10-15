@@ -9,7 +9,7 @@
 //! - `exchange`：github / muse 授权后令牌兑换步骤的接入状态（未接入，如实报告）
 //!
 //! 约束：令牌、授权码、refresh token、code_verifier 只存在于 `Secret` 中，
-//! 不进日志、错误信息或 Debug；出站 User-Agent 固定为 `RouterDesktop/<版本>`；
+//! 不进日志、错误信息或 Debug；OAuth 令牌请求使用 `RouterDesktop/<版本>`；
 //! 授权必须校验 state；监听只绑定 127.0.0.1。
 
 pub mod config;

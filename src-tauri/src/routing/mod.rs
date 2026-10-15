@@ -269,7 +269,7 @@ impl Runtime {
 
     /// OAuth 连接的访问令牌：未到刷新窗口直接返回，否则先刷新（同账户并发去重）；`force` 无视有效期强制刷新
     /// （上游返回 401 之后）。调用方须先排除需要令牌兑换步骤的提供商（见 `build_target_with`）。
-    async fn oauth_access_token(&self, provider_id: &str, conn: &ConnCfg, force: bool) -> Result<Secret, TargetError> {
+    async fn oauth_tokens(&self, provider_id: &str, conn: &ConnCfg, force: bool) -> Result<crate::oauth::TokenSet, TargetError> {
         let service = self.oauth.as_ref().ok_or(TargetError::OAuth("unavailable"))?;
         let cref = conn.credential_ref.as_deref().ok_or(TargetError::ReauthRequired)?;
         let result = if force {
@@ -278,7 +278,7 @@ impl Runtime {
             service.get_valid_token(provider_id, cref).await
         };
         match result {
-            Ok(tokens) => Ok(Secret::new(tokens.access_token.expose())),
+            Ok(tokens) => Ok(tokens),
             Err(e) => Err(classify_oauth_error(&e)),
         }
     }
@@ -306,13 +306,18 @@ impl Runtime {
         force_refresh: bool,
     ) -> Result<UpstreamTarget, TargetError> {
         let is_oauth = conn.kind == "oauth";
+        let mut codex_account_id = None;
         let api_key = if is_oauth {
             // 兑换步骤未接入的提供商即使不需要密钥头也要如实拒绝
             if let Some(note) = exchange::token_exchange_note(&provider.id) {
                 return Err(TargetError::ExchangePending(note));
             }
             if endpoint.auth.needs_key() {
-                Some(self.oauth_access_token(&provider.id, conn, force_refresh).await?)
+                let tokens = self.oauth_tokens(&provider.id, conn, force_refresh).await?;
+                if provider.id == "codex" {
+                    codex_account_id = tokens.chatgpt_account_id();
+                }
+                Some(Secret::new(tokens.access_token.expose()))
             } else {
                 None
             }
@@ -339,6 +344,9 @@ impl Runtime {
                 h.value.clone().unwrap_or_default()
             };
             extra.push((h.header_key.clone(), Secret::new(value)));
+        }
+        if let Some(account_id) = codex_account_id {
+            extra.push(("ChatGPT-Account-ID".into(), Secret::new(account_id)));
         }
         Ok(UpstreamTarget {
             provider_id: provider.id.clone(),

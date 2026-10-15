@@ -15,6 +15,7 @@ use zeroize::Zeroizing;
 
 use crate::error::{AppError, AppResult};
 use crate::models::*;
+use crate::oauth::OAuthService;
 use crate::security::vault::{self, CredentialVault};
 use crate::store::new_id;
 use crate::store::providers::{
@@ -1038,13 +1039,14 @@ fn to_model_entry(m: repo::ModelRow) -> ModelEntry {
 pub async fn fetch_models(
     pool: &SqlitePool,
     vault: &Arc<dyn CredentialVault>,
+    oauth: &OAuthService,
     provider_id: &str,
 ) -> AppResult<Vec<ModelEntry>> {
     let p = repo::get_provider(pool, provider_id)
         .await?
         .ok_or_else(|| AppError::NotFound(format!("provider {provider_id}")))?;
 
-    let mut fetched = try_fetch_upstream_models(pool, vault, &p).await.unwrap_or_default();
+    let mut fetched = try_fetch_upstream_models(pool, vault, oauth, &p).await.unwrap_or_default();
     if fetched.is_empty() {
         let curated = catalog::curated_models_for(provider_id);
         for m in curated {
@@ -1101,14 +1103,25 @@ pub async fn fetch_models(
 async fn try_fetch_upstream_models(
     pool: &SqlitePool,
     vault: &Arc<dyn CredentialVault>,
+    oauth: &OAuthService,
     provider: &repo::ProviderRow,
 ) -> AppResult<Vec<ModelEntry>> {
     let connections = repo::list_connections(pool, &provider.id).await?;
     let active_conn = connections.iter().find(|c| c.enabled && c.status == "active");
 
+    let mut codex_account_id = None;
     let api_key = if let Some(c) = active_conn {
         if let Some(r) = &c.credential_ref {
-            vault.get(r)?
+            if c.kind == "oauth" {
+                // The vault entry holds a serialized TokenSet, never a bearer token.
+                // Go through the OAuth service so an expiring token is refreshed first.
+                let tokens = oauth.get_valid_token(&provider.id, r).await
+                    .map_err(|e| AppError::msg(format!("OAuth 令牌不可用：{}", e.code())))?;
+                if provider.id == "codex" { codex_account_id = tokens.chatgpt_account_id(); }
+                Some(tokens.access_token.expose().to_owned())
+            } else {
+                vault.get(r)?
+            }
         } else {
             None
         }
@@ -1162,7 +1175,17 @@ async fn try_fetch_upstream_models(
         Adapter::CodeAssist => return Ok(Vec::new()),
     };
 
-    let mut rb = client.get(&url).header("User-Agent", crate::upstream::client::user_agent());
+    let mut rb = client.get(&url).header("User-Agent", if provider.id == "codex" {
+        crate::upstream::client::CODEX_USER_AGENT.to_string()
+    } else {
+        crate::upstream::client::user_agent()
+    });
+    if provider.id == "codex" {
+        rb = rb.header("originator", "codex_cli_rs").header("version", crate::upstream::client::CODEX_CLI_VERSION);
+        if let Some(account_id) = codex_account_id {
+            rb = rb.header("ChatGPT-Account-ID", account_id);
+        }
+    }
     if let Some(key) = &api_key {
         match auth_style {
             "bearer" => {
@@ -1214,10 +1237,10 @@ async fn try_fetch_upstream_models(
         }
     } else if let Some(arr) = body.get("models").and_then(|v| v.as_array()) {
         for item in arr {
-            let id = item.get("name").or_else(|| item.get("model")).and_then(|v| v.as_str());
+            let id = item.get("name").or_else(|| item.get("model")).or_else(|| item.get("slug")).or_else(|| item.get("id")).and_then(|v| v.as_str());
             if let Some(raw_id) = id {
                 let clean_id = raw_id.strip_prefix("models/").unwrap_or(raw_id);
-                let name = item.get("displayName").and_then(|v| v.as_str()).unwrap_or(clean_id);
+                let name = item.get("displayName").or_else(|| item.get("display_name")).and_then(|v| v.as_str()).unwrap_or(clean_id);
                 let alias = format!("{}/{}", provider.id, clean_id);
                 models.push(ModelEntry {
                     id: format!("{}/{}", provider.id, clean_id),
