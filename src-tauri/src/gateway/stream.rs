@@ -601,8 +601,9 @@ mod tests {
     #[test]
     fn openai_passthrough_removes_empty_tool_calls_without_adding_line_breaks() {
         use crate::protocols::sse::parse_sse;
+        let text = "你好，世界".to_owned() + "\n" + "真实换行";
         let delta = json!({"id":"a","choices":[{"index":0,"delta":{
-            "content":"你好，世界\\n真实换行", "reasoning_content":"thought", "tool_calls":[]
+            "content": text, "reasoning_content":"thought", "tool_calls":[]
         }}]});
         let frame = RawFrame { raw: Bytes::new(), event: None, data: delta.to_string() };
         let corrected = normalize_openai_passthrough(&frame).expect("empty tool calls must be stripped");
@@ -611,9 +612,9 @@ mod tests {
         assert_eq!(parsed.len(), 1);
         let output: Value = serde_json::from_str(&parsed[0].data).unwrap();
         assert!(output["choices"][0]["delta"].get("tool_calls").is_none());
-        assert_eq!(output["choices"][0]["delta"]["content"], "你好，世界\\n真实换行");
+        assert_eq!(output["choices"][0]["delta"]["content"], text);
         assert_eq!(output["choices"][0]["delta"]["reasoning_content"], "thought");
-        assert!(!encoded.contains("\\n\\ndata: "), "do not turn token fragments into SSE frames");
+        assert_eq!(encoded.matches("data: ").count(), 1, "one incoming SSE event must stay one event");
     }
 
     #[test]
@@ -624,7 +625,7 @@ mod tests {
         let text = RawFrame { raw: Bytes::new(), event: None,
             data: json!({"choices":[{"delta":{"content":"Hello"}}]}).to_string() };
         assert!(normalize_openai_passthrough(&text).is_none());
-        let done = RawFrame { raw: Bytes::from_static(b"data: [DONE]\\n\\n"), event: None,
+        let done = RawFrame { raw: Bytes::from_static(b"data: [DONE]\n\n"), event: None,
             data: "[DONE]".into() };
         assert!(normalize_openai_passthrough(&done).is_none());
     }
