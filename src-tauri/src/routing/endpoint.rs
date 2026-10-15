@@ -65,7 +65,8 @@ pub fn endpoint_for(p: &ProviderCfg) -> Result<ResolvedEndpoint, NotReady> {
     };
     let base_url = validate_base_url(&raw_url).map_err(NotReady)?;
     let mut auth = auth.unwrap_or_else(|| kind.default_auth());
-    if kind == AdapterKind::Ollama && p.kind == "builtin" && p.id == LOCAL_NO_AUTH_PROVIDER {
+    if p.kind == "builtin" && (p.id == LOCAL_NO_AUTH_PROVIDER
+        || crate::providers::catalog::find(&p.id).is_some_and(|entry| entry.no_auth)) {
         auth = AuthStyle::None;
     }
     if kind == AdapterKind::Vertex {
@@ -122,6 +123,11 @@ mod tests {
         let google = endpoint_for(&row("gemini-cli", "builtin", "none", true, None)).unwrap();
         assert_eq!(google.kind, AdapterKind::CodeAssist);
         assert_eq!(google.auth, AuthStyle::Bearer);
+        let free = endpoint_for(&row("opencode", "builtin", "none", true, None)).unwrap();
+        assert_eq!(free.auth, AuthStyle::None);
+        assert!(free.force_stream);
+        let paid = endpoint_for(&row("opencode-zen", "builtin", "none", true, None)).unwrap();
+        assert_eq!(paid.auth, AuthStyle::Bearer);
     }
 
     #[test]

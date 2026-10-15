@@ -477,6 +477,27 @@ pub async fn insert_api_key_connection(
     get_connection(pool, id).await?.ok_or_else(|| AppError::NotFound(format!("connection {id}")))
 }
 
+/// 免密钥目录项最多一条连接；没有 credential_ref，不访问系统凭据库。
+pub async fn insert_no_auth_connection(
+    pool: &SqlitePool,
+    id: &str,
+    provider_id: &str,
+    account_label: &str,
+) -> AppResult<ConnectionRow> {
+    let now = super::now_ts();
+    sqlx::query(
+        "INSERT INTO connections (id, provider_id, account_label, kind, status, priority, weight, enabled, created_at, updated_at) \
+         VALUES (?1, ?2, ?3, 'none', 'active', 1, 1, 1, ?4, ?4)",
+    )
+    .bind(id)
+    .bind(provider_id)
+    .bind(account_label)
+    .bind(&now)
+    .execute(pool)
+    .await?;
+    get_connection(pool, id).await?.ok_or_else(|| AppError::NotFound(format!("connection {id}")))
+}
+
 /// 新增一条 OAuth 连接（令牌已先写入系统凭据库，这里只落 credential_ref）。priority 排在最后。
 pub async fn insert_oauth_connection(
     pool: &SqlitePool,

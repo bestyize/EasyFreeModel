@@ -77,6 +77,22 @@ beforeEach(() => {
 })
 
 describe('ProviderModal', () => {
+  it('免密钥提供商一键启用，无 API Key 输入框，连接显示免密钥', async () => {
+    const free = { ...summary, id: 'opencode', name: 'OpenCode Free', group: 'free' as const, status: 'disconnected' as const,
+      connectionCount: 0, authModes: ['none' as const], protocols: ['openai-chat' as const] }
+    const w = await open(detail({ ...free, connections: [] }), free)
+    expect(w.find('button').exists()).toBe(true)
+    expect(w.text()).toContain('一键启用')
+    expect(w.find('input[aria-label="API Key"]').exists()).toBe(false)
+    const conn = { id: 'no-key-1', providerId: 'opencode', accountLabel: '免密钥连接', kind: 'none',
+      status: 'active', priority: 1, weight: 1, enabled: true }
+    apiMock.addConnection.mockResolvedValue(conn)
+    await w.findAll('button').find((b) => b.text().includes('一键启用'))!.trigger('click')
+    await flushPromises()
+    expect(apiMock.addConnection).toHaveBeenCalledWith({ providerId: 'opencode', accountLabel: '免密钥连接', apiKey: '' })
+    expect(w.text()).toContain('免密钥连接已启用')
+    expect(w.findAll('button').some((b) => b.text().includes('添加 API Key'))).toBe(false)
+  })
   it('starts clean: not dirty, save disabled', async () => {
     const w = await open()
     expect(w.findComponent(BaseModal).props('dirty')).toBe(false)

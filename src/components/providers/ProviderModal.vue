@@ -144,10 +144,12 @@ const dirty = computed(() => !!original.value && !!draft.value && isDetailDirty(
 const issues = computed(() => (draft.value ? validateDetail(draft.value) : []))
 const conflictIds = computed(() => (draft.value ? conflictModelIds(findAliasConflicts(draft.value.models)) : new Set<string>()))
 const canAddKey = computed(() => !!draft.value?.adapterReady && draft.value.group !== 'oauth' && !!draft.value.authModes.includes('apiKey'))
+const noAuth = computed(() => !!draft.value?.authModes.includes('none'))
+const canEnableNoAuth = computed(() => !!draft.value?.adapterReady && noAuth.value && draft.value.protocols.length > 0 && !draft.value.connections.some((c) => c.kind === 'none'))
 const supportsOAuth = computed(() => !!draft.value?.authModes.includes('oauth'))
 const oauthInfo = computed(() => (draft.value ? oauthStore.infoFor(draft.value.id) : undefined))
 const oauthIsCustom = computed(() => oauthInfo.value?.status === 'custom')
-const showDisabledApiKeyAdd = computed(() => !!draft.value && draft.value.group !== 'oauth' && (!supportsOAuth.value || draft.value.authModes.includes('apiKey')))
+const showDisabledApiKeyAdd = computed(() => !!draft.value && !noAuth.value && draft.value.group !== 'oauth' && (!supportsOAuth.value || draft.value.authModes.includes('apiKey')))
 const oauthButtonDisabled = computed(
   () => saving.value || oauthIsCustom.value || (oauthStore.loading && !oauthInfo.value) || oauthPanelOpen.value,
 )
@@ -380,6 +382,26 @@ async function submitAdd() {
   }
 }
 
+async function enableNoAuth() {
+  const d = draft.value
+  if (!d || !canEnableNoAuth.value || adding.value) return
+  addError.value = null
+  addNotice.value = null
+  adding.value = true
+  try {
+    const conn = await store.addConnection({ providerId: d.id, accountLabel: '免密钥连接', apiKey: '' })
+    for (const target of [original.value, draft.value]) {
+      if (target && !target.connections.some((c) => c.id === conn.id)) target.connections.push({ ...conn })
+    }
+    syncSummary()
+    addNotice.value = '免密钥连接已启用，可直接使用可用模型'
+  } catch (e) {
+    addError.value = `启用失败：${errText(e)}`
+  } finally {
+    adding.value = false
+  }
+}
+
 async function updateCredential(c: Connection, apiKey: string) {
   credBusy.value = new Set(credBusy.value).add(c.id)
   const { [c.id]: _drop, ...rest } = credMsg.value
@@ -535,7 +557,8 @@ function cancel() {
         <div class="panel-head">
           <div class="panel-title">
             <h3>账号与密钥</h3>
-            <p v-if="supportsOAuth && canAddKey">可以填写 {{ draft.name }} 的 API Key，或使用登录验证；支持多个账号</p>
+            <p v-if="noAuth">{{ draft.protocols.length ? '无需账号或 API Key，点击启用即可使用' : '无需 API Key，可直接使用对应的媒体功能' }}</p>
+            <p v-else-if="supportsOAuth && canAddKey">可以填写 {{ draft.name }} 的 API Key，或使用登录验证；支持多个账号</p>
             <p v-else-if="supportsOAuth">登录 {{ draft.name }} 账号后即可使用，支持多个账号</p>
             <p v-else>填写从 {{ draft.name }} 官网获取的 API Key，支持添加多个密钥</p>
           </div>
@@ -572,7 +595,7 @@ function cancel() {
           />
           全选
         </label>
-        <p v-else class="empty">还没有添加账号或 API Key。</p>
+        <p v-else class="empty">{{ noAuth ? '尚未启用免密钥连接。' : '还没有添加账号或 API Key。' }}</p>
 
         <ul class="conns">
           <ConnectionRow
@@ -600,6 +623,7 @@ function cancel() {
         </ul>
 
         <p v-if="addNotice" class="notice-ok" role="status">{{ addNotice }}</p>
+        <p v-if="noAuth && addError" class="issues" role="alert">{{ addError }}</p>
         <p v-if="oauthNotice" class="notice-ok" role="status">{{ oauthNotice }}</p>
         <p v-if="oauthError" class="issues oauth-err" role="alert">{{ oauthError }}</p>
 
@@ -655,6 +679,9 @@ function cancel() {
         </form>
 
         <div class="add-row">
+          <button v-if="canEnableNoAuth" type="button" class="btn btn-primary add" :disabled="saving || adding" @click="enableNoAuth">
+            <Zap :size="14" /> {{ adding ? '启用中…' : '一键启用' }}
+          </button>
           <button v-if="canAddKey" type="button" class="btn btn-primary add" :disabled="saving || adding" @click="toggleAdd">
             <Plus :size="14" /> 添加 API Key
           </button>
@@ -668,7 +695,7 @@ function cancel() {
             <Plus :size="14" /> 添加 API Key
           </button>
           <button
-            v-if="supportsOAuth"
+            v-if="supportsOAuth && !oauthIsCustom"
             type="button"
             class="btn"
             :disabled="oauthButtonDisabled"

@@ -48,7 +48,7 @@ export interface ProvidersApi {
   createCustomProvider(input: CreateCustomProviderInput): Promise<ProviderDetail>
   /** 仅自定义提供商可删除，同时清理其全部凭据 */
   deleteCustomProvider(id: string): Promise<void>
-  /** 录入 API Key 创建连接；返回值不含密钥 */
+  /** 录入 API Key 创建连接；免密钥目录项传空 apiKey 一键启用，返回值不含密钥 */
   addConnection(input: AddConnectionInput): Promise<Connection>
   updateConnectionCredential(connectionId: string, apiKey: string): Promise<void>
   /** 批量测试：逐个返回 TestResult（providerId 归组）；适配器未就绪的如实 ok=false + 原因 */

@@ -36,6 +36,7 @@ interface CatalogJsonEntry {
   format: string | null
   hasOAuth: boolean
   authModes: string[]
+  noAuth?: boolean
   serviceKinds: string[]
   riskNotice: string | null
 }
@@ -79,7 +80,8 @@ function protocolsOf(format: string | null): Protocol[] {
   }
 }
 
-function authModesOf(modes: string[]): CredentialKind[] {
+function authModesOf(modes: string[], noAuth = false): CredentialKind[] {
+  if (noAuth) return ['none']
   const out: CredentialKind[] = []
   for (const m of modes) {
     const k = m.toLowerCase() === 'oauth' ? 'oauth' : m.toLowerCase() === 'apikey' ? 'apiKey' : null
@@ -113,7 +115,7 @@ function blankDetail(e: CatalogJsonEntry): ProviderDetail {
     website: e.website,
     color: normalizeColor(e.color),
     textIcon: e.textIcon,
-    authModes: authModesOf(e.authModes),
+    authModes: authModesOf(e.authModes, e.noAuth),
     pendingReason: ready ? null : (st?.reason ?? '该提供商尚未登记适配器状态，暂不可用'),
     riskNotice: oauthLike ? RISK_NOTICE : null,
     connections: [],
@@ -224,6 +226,7 @@ function checkConnection(d: ProviderDetail, c: Connection): TestResult {
     error,
   })
   if (!d.adapterReady) return fail(`该提供商的适配器尚未接入，无法测试连接（${pendingText(d)}）`)
+  if (c.kind === 'none' && d.authModes.includes('none')) return fail('免密钥连接已配置，但预览模式（mock）不进行真实上游探测，无法确认可用')
   if (c.kind !== 'apiKey') return fail('该连接不是 API Key 连接，当前无法测试')
   if (!credentialed.has(c.id)) return fail('连接缺少 API Key，请重新录入')
   return fail(MOCK_PROBE_NOTE)
@@ -352,6 +355,17 @@ export const providersMock: ProvidersApi = {
     const d = store.get(input.providerId)
     if (!d) throw new Error(`provider not found: ${input.providerId}`)
     if (!d.adapterReady) throw new Error(`${d.name} 暂不能添加连接：${pendingText(d)}`)
+    if (d.authModes.includes('none')) {
+      if (!d.protocols.length) throw new Error('该免密钥提供商不提供聊天连接')
+      if (input.apiKey) throw new Error('该提供商无需 API Key，请直接启用')
+      const existing = d.connections.find((c) => c.kind === 'none')
+      if (existing) return { ...existing }
+      const conn: Connection = { id: `mock-c-${++seq}`, providerId: d.id, accountLabel: '免密钥连接', kind: 'none', status: 'active', priority: 1, weight: 1, enabled: true }
+      d.connections.push(conn)
+      d.connectionCount = d.connections.length
+      d.status = 'connected'
+      return { ...conn }
+    }
     if (!d.authModes.includes('apiKey')) throw new Error(`${d.name} 不支持 API Key 方式`)
     const label = input.accountLabel.trim()
     if (!label || [...label].length > 128) throw new Error('名称需为 1–128 个字符')

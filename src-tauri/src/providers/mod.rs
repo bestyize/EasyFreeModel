@@ -220,6 +220,10 @@ pub async fn save_detail(
         if !seen.insert(id.clone()) {
             return Err(invalid(format!("连接 ID 重复：{id}")));
         }
+        if c.kind == CredentialKind::None && (row.kind != "builtin"
+            || !catalog::find(&provider_id).is_some_and(|entry| entry.no_auth)) {
+            return Err(invalid("只有目录标记为免密钥的提供商可以使用免密钥连接"));
+        }
         if !existing_conns.contains_key(&id) {
             if let Some(owner) = repo::connection_owner(pool, &id).await? {
                 return Err(invalid(format!("连接 ID {id} 已被提供商 {owner} 使用")));
@@ -518,6 +522,19 @@ pub async fn add_connection(
     if !row.adapter_ready {
         return Err(invalid(format!("{} 暂不能添加连接：{}", row.display_name, pending_text(&row))));
     }
+    let no_auth = row.kind == "builtin" && catalog::find(provider_id).is_some_and(|entry| entry.no_auth);
+    if no_auth {
+        if row.adapter == "none" {
+            return Err(invalid("该免密钥提供商不提供聊天连接"));
+        }
+        if !api_key.is_empty() {
+            return Err(invalid("该提供商无需 API Key，请直接启用"));
+        }
+        if let Some(existing) = repo::list_connections(pool, provider_id).await?.into_iter().find(|c| c.kind == "none") {
+            return Ok(connection_from_row(existing));
+        }
+        return Ok(connection_from_row(repo::insert_no_auth_connection(pool, &new_id(), provider_id, "免密钥连接").await?));
+    }
     if !parse_auth_modes(&row.auth_modes_json).contains(&CredentialKind::ApiKey) {
         return Err(invalid(format!("{} 不支持 API Key 方式", row.display_name)));
     }
@@ -787,7 +804,8 @@ pub async fn probe_live(target: &UpstreamTarget, credential: &str) -> ProbeOutco
     if target.auth == AuthSpec::Scheme(status::AuthScheme::XApiKey) || target.provider_id == "anthropic" {
         req = req.header("anthropic-version", "2023-06-01");
     }
-    if !auth_val.is_empty() && target.provider_id != "ollama-local" {
+    if !auth_val.is_empty() && target.provider_id != "ollama-local"
+        && !catalog::find(&target.provider_id).is_some_and(|entry| entry.no_auth) {
         req = req.header(auth_header, auth_val);
     }
 
@@ -904,7 +922,20 @@ async fn check_connection(
         Err(reason) => return fail(format!("提供商配置不完整：{reason}")),
     };
     if CredentialKind::parse(&conn.kind) != Some(CredentialKind::ApiKey) {
-        return fail("该连接不是 API Key 连接，当前无法测试".to_string());
+        if CredentialKind::parse(&conn.kind) == Some(CredentialKind::None)
+            && provider.kind == "builtin"
+            && catalog::find(&provider.id).is_some_and(|entry| entry.no_auth)
+        {
+            return match probe_connection(&target, "").await {
+                ProbeOutcome::Reachable { latency_ms } => TestResult {
+                    connection_id: conn.id.clone(), provider_id: Some(provider.id.clone()), ok: true,
+                    latency_ms: Some(latency_ms), error: None,
+                },
+                ProbeOutcome::Unreachable(msg) => fail(msg),
+                ProbeOutcome::NotImplemented => fail("免密钥连接已配置，但上游连通性探测尚未接入，无法确认可用".to_string()),
+            };
+        }
+        return fail("该连接的凭据方式不受支持，当前无法测试".to_string());
     }
     let Some(cref) = conn.credential_ref.as_deref() else {
         return fail("连接缺少 API Key，请重新录入".to_string());
@@ -1217,6 +1248,22 @@ mod tests {
     }
 
     const SECRET: &str = "sk-live-0123456789abcdef-SUPERSECRET";
+
+    #[tokio::test]
+    async fn no_auth_connection_requires_no_key_and_survives_save() {
+        let (pool, vault) = setup().await;
+        let summary = list(&pool).await.unwrap().into_iter().find(|p| p.id == "opencode").unwrap();
+        assert_eq!(summary.auth_modes, vec![CredentialKind::None]);
+        assert!(add_connection(&pool, &vault, "opencode", "", SECRET).await.is_err());
+        let created = add_connection(&pool, &vault, "opencode", "", "").await.unwrap();
+        assert_eq!(created.kind, CredentialKind::None);
+        assert_eq!(add_connection(&pool, &vault, "opencode", "", "").await.unwrap().id, created.id);
+        assert!(repo::get_connection(&pool, &created.id).await.unwrap().unwrap().credential_ref.is_none());
+        let detail = get_detail(&pool, "opencode").await.unwrap();
+        assert_eq!(detail.summary.status, ConnectionStatus::Connected);
+        assert_eq!(save_detail(&pool, &vault, detail).await.unwrap().connections[0].kind, CredentialKind::None);
+        assert!(add_connection(&pool, &vault, "opencode-zen", "", "").await.is_err());
+    }
 
     fn conn(id: &str, label: &str) -> Connection {
         Connection {

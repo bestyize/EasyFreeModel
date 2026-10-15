@@ -125,13 +125,12 @@ describe('ProviderModal：OAuth 入口', () => {
   it.each([
     ['cursor', '逆向协议'],
     ['kiro', 'AWS SSO OIDC'],
-  ])('custom 提供商 %s：按钮置灰，原因与接入要求可见', async (id, snippet) => {
+  ])('custom 提供商 %s：隐藏不可用登录入口，保留原因与接入要求', async (id, snippet) => {
     const s = { ...summary, id, name: id, adapterReady: false, status: 'unsupported' as const }
     const w = await open(detail({ ...s, id }), s)
-    expect(btn(w, '登录验证')!.attributes('disabled')).toBeDefined()
+    expect(btn(w, '登录验证')).toBeUndefined()
     expect(w.find('[data-testid="oauth-custom-reason"]').text()).toContain(snippet)
     expect(w.find('[data-testid="oauth-custom-notice"]').text()).toContain('接入需要')
-    await btn(w, '登录验证')!.trigger('click')
     expect(w.find('section[aria-label$="OAuth 授权"]').exists()).toBe(false)
   })
 })

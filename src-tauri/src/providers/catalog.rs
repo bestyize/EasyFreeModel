@@ -103,6 +103,9 @@ impl CatalogEntry {
 
     /// 目录里写作 "apikey" / "oauth"，对外统一为 CredentialKind（"apiKey" / "oauth"）。
     pub fn auth_modes(&self) -> Vec<CredentialKind> {
+        if self.no_auth {
+            return vec![CredentialKind::None];
+        }
         let mut out: Vec<CredentialKind> = Vec::new();
         for m in &self.auth_modes {
             let k = match m.to_ascii_lowercase().as_str() {
@@ -265,6 +268,8 @@ mod tests {
         for id in ["openrouter", "gemini", "nvidia", "claude", "antigravity"] {
             assert!(find(id).is_some(), "{id}");
         }
+        assert_eq!(find("opencode").unwrap().auth_modes(), vec![CredentialKind::None]);
+        assert_eq!(find("opencode-zen").unwrap().auth_modes(), vec![CredentialKind::ApiKey]);
     }
 
     #[test]

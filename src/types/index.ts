@@ -6,7 +6,7 @@
  */
 export type ProviderGroup = 'custom' | 'oauth' | 'free' | 'apikey'
 export type ConnectionStatus = 'connected' | 'disconnected' | 'error' | 'unsupported' | 'checking'
-export type CredentialKind = 'oauth' | 'apiKey'
+export type CredentialKind = 'oauth' | 'apiKey' | 'none'
 export type Protocol = 'openai-chat' | 'openai-responses' | 'anthropic-messages' | 'gemini'
 
 export interface ProviderSummary {
@@ -29,7 +29,7 @@ export interface ProviderSummary {
   /** 目录文字图标（1–3 个字符），缺失为 null（回退到名称首字母） */
   textIcon: string | null
   /** 支持的凭据方式；adapterReady=false 时即使含 apiKey 也不能添加连接 */
-  authModes: ('oauth' | 'apiKey')[]
+  authModes: CredentialKind[]
   /** adapterReady=false 时显示的“待接入”原因；就绪时为 null */
   pendingReason: string | null
 }

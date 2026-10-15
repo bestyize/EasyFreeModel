@@ -51,7 +51,7 @@ function submitKey() {
 const labelEl = ref<HTMLInputElement | null>(null)
 const status = computed(() => connectionStatus(props.connection, props.pending))
 const isOAuth = computed(() => props.connection.kind === 'oauth')
-const kindText = computed(() => (isOAuth.value ? 'OAuth' : 'API Key'))
+const kindText = computed(() => (isOAuth.value ? 'OAuth' : props.connection.kind === 'none' ? '免密钥' : 'API Key'))
 const needsReauth = computed(() => isOAuth.value && props.connection.status === 'needsReauth')
 const canTest = computed(() => !props.readonly && !props.pending && !props.testing)
 
@@ -87,7 +87,7 @@ async function edit() {
       >
         <component :is="expanded ? ChevronDown : ChevronRight" :size="16" />
       </button>
-      <component :is="connection.kind === 'oauth' ? Lock : KeyRound" :size="16" class="kind-ico" aria-hidden="true" />
+      <component :is="connection.kind === 'oauth' ? Lock : connection.kind === 'none' ? Zap : KeyRound" :size="16" class="kind-ico" aria-hidden="true" />
       <span class="label" :title="connection.accountLabel">{{ connection.accountLabel || '（未命名）' }}</span>
       <StatusTag :tone="status.tone">{{ status.text }}</StatusTag>
       <span class="chip">{{ kindText }}</span>

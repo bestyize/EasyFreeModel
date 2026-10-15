@@ -36,7 +36,7 @@ string_enum!(ConnectionStatus {
     Unsupported => "unsupported",
     Checking => "checking",
 });
-string_enum!(CredentialKind { Oauth => "oauth", ApiKey => "apiKey" });
+string_enum!(CredentialKind { Oauth => "oauth", ApiKey => "apiKey", None => "none" });
 string_enum!(Protocol {
     OpenaiChat => "openai-chat",
     OpenaiResponses => "openai-responses",

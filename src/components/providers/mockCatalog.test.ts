@@ -52,6 +52,8 @@ describe('mock 目录与真实资源一致', () => {
     expect(byId['azure'].serviceKinds).toEqual(['llm'])
     expect(byId['openai'].authModes).toEqual(['apiKey'])
     expect(byId['clinepass'].authModes).toEqual(['apiKey', 'oauth'])
+    expect(byId['opencode'].authModes).toEqual(['none'])
+    expect(byId['opencode-zen'].authModes).toEqual(['apiKey'])
     expect(byId['edge-tts'].website).toBeNull()
     for (const p of Object.values(byId)) expect(p.color === null || /^#[0-9A-F]{6}$/.test(p.color), p.id).toBe(true)
   })
@@ -68,6 +70,16 @@ describe('mock 目录与真实资源一致', () => {
 })
 
 describe('mock 命令遵守同样的红线', () => {
+  it('免密钥提供商一键启用，重复操作不建第二个连接，也不接受密钥', async () => {
+    await expect(mock.addConnection({ providerId: 'opencode', accountLabel: '', apiKey: SECRET })).rejects.toThrow('无需 API Key')
+    const input = { providerId: 'opencode', accountLabel: '免密钥连接', apiKey: '' }
+    const conn = await mock.addConnection(input)
+    expect(conn.kind).toBe('none')
+    expect((await mock.addConnection(input)).id).toBe(conn.id)
+    expect((await mock.getProvider('opencode')).connections).toHaveLength(1)
+    expect((await mock.testConnection(conn.id)).error).toContain('无法确认可用')
+    expect((await mock.listProviders()).find((p) => p.id === 'opencode')?.status).toBe('connected')
+  })
   it('addConnection：未就绪的提供商被拒绝并说明原因', async () => {
     await expect(mock.addConnection({ providerId: 'grok-web', accountLabel: 'x', apiKey: SECRET })).rejects.toThrow(
       '网页会话类暂缓',
