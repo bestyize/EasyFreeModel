@@ -2,9 +2,11 @@
 //! （Rust snake_case 参数由 Tauri 自动对应前端 camelCase）。命令内不直接写 SQL。
 
 pub mod api_keys;
+pub mod integrations;
 pub mod media;
 pub mod oauth;
 pub mod providers;
+pub mod proxy;
 pub mod quota;
 pub mod system;
 pub mod usage;

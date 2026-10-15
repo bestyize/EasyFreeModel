@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { PanelLeftClose, PanelLeftOpen, Waypoints } from 'lucide-vue-next'
-import { APP_NAME, APP_VERSION, NAV_ITEMS } from '@/router/nav'
+import { APP_NAME, APP_VERSION, VISIBLE_NAV_ITEMS } from '@/router/nav'
 import { useSystemStore } from '@/stores/system'
 
 defineProps<{ collapsed: boolean }>()
@@ -34,7 +34,7 @@ const fmt = (n: number | null | undefined, suffix = '') => (n == null ? '—' : 
 
     <nav class="nav">
       <RouterLink
-        v-for="item in NAV_ITEMS"
+        v-for="item in VISIBLE_NAV_ITEMS"
         :key="item.path"
         :to="item.path"
         class="nav-item"

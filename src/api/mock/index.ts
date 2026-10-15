@@ -6,6 +6,8 @@ import { usageMock } from './usage'
 import { quotaMock } from './quota'
 import { systemMock } from './system'
 import { mediaMock } from './media'
+import { proxyMock } from './proxy'
+import { integrationsMock } from './integrations'
 
 export const mockApi: Api = {
   ...providersMock,
@@ -15,4 +17,6 @@ export const mockApi: Api = {
   ...quotaMock,
   ...systemMock,
   ...mediaMock,
+  ...proxyMock,
+  ...integrationsMock,
 }

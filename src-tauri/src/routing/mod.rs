@@ -126,6 +126,12 @@ impl Runtime {
         }
     }
 
+    /// 注入代理池：之后所有上游请求按池配置选路（AppState 构造时调用）。
+    pub fn with_proxy_pool(mut self, pool: Arc<crate::proxy::ProxyPool>) -> Self {
+        self.client = self.client.with_pool(pool);
+        self
+    }
+
     /// 注入 OAuth 令牌服务（AppState 构造时调用）。
     pub fn with_oauth(mut self, oauth: Arc<OAuthService>) -> Self {
         self.oauth = Some(oauth);

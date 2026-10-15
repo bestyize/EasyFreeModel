@@ -92,7 +92,7 @@ impl Adapter for GeminiAdapter {
     async fn list_models(&self, http: &UpstreamClient, target: &UpstreamTarget) -> Result<Vec<String>, UpstreamError> {
         let mut headers = super::build_headers(self, target, None, false)?;
         headers.remove(reqwest::header::CONTENT_TYPE);
-        let resp = http.get(self.models_url(target), headers, target.timeout).await?;
+        let resp = http.get(&target.provider_id, self.models_url(target), headers, target.timeout).await?;
         let status = resp.status();
         let body = client::read_body(resp, super::MAX_ERROR_BODY_BYTES * 4, true).await?;
         if !status.is_success() {

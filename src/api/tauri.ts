@@ -61,8 +61,21 @@ export const tauriApi: Api = {
   saveSettings: (settings) => invoke('save_settings', { settings }),
   startGateway: () => invoke('start_gateway'),
   stopGateway: () => invoke('stop_gateway'),
+  listGatewayModels: () => invoke('list_gateway_models'),
 
   listMediaJobs: (kind) => invoke('list_media_jobs', { kind }),
   submitMediaJob: (kind, params) => invoke('submit_media_job', { kind, params }),
   cancelMediaJob: (id) => invoke('cancel_media_job', { id }),
+
+  previewClientImport: (input) => invoke('preview_client_import', { input }),
+  applyClientImport: (input) => invoke('apply_client_import', { input }),
+
+  getProxyPool: () => invoke('get_proxy_pool'),
+  saveProxyPoolConfig: (config) => invoke('save_proxy_pool_config', { config }),
+  saveProxyNode: (input) => invoke('save_proxy_node', { input }),
+  deleteProxyNode: (id) => invoke('delete_proxy_node', { id }),
+  setProxyNodeEnabled: (id, enabled) => invoke('set_proxy_node_enabled', { id, enabled }),
+  moveProxyNode: (id, delta) => invoke('move_proxy_node', { id, delta }),
+  importProxyNodes: (text) => invoke('import_proxy_nodes', { text }),
+  testProxyNodes: (ids) => invoke('test_proxy_nodes', { ids: ids ?? null }),
 }

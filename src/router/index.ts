@@ -3,6 +3,7 @@ import { NAV_ITEMS } from './nav'
 
 const views = {
   'api-keys': () => import('@/views/ApiKeysView.vue'),
+  'api-guide': () => import('@/views/ApiGuideView.vue'),
   providers: () => import('@/views/ProvidersView.vue'),
   usage: () => import('@/views/UsageView.vue'),
   quota: () => import('@/views/QuotaView.vue'),
@@ -11,6 +12,7 @@ const views = {
   tts: () => import('@/views/TtsView.vue'),
   video: () => import('@/views/VideoView.vue'),
   websearch: () => import('@/views/WebSearchView.vue'),
+  'proxy-pool': () => import('@/views/ProxyPoolView.vue'),
   settings: () => import('@/views/SettingsView.vue'),
 } as const
 

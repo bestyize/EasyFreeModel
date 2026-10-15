@@ -13,6 +13,7 @@ use crate::error::AppResult;
 pub mod api_keys;
 pub mod media;
 pub mod providers;
+pub mod proxy;
 pub mod quota;
 pub mod settings;
 pub mod usage;

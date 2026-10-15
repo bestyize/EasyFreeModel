@@ -38,6 +38,11 @@ export const systemMock: SystemApi = {
     }
     return gateway()
   },
+  listGatewayModels: async () => [
+    { id: 'deepseek-chat', providerId: 'deepseek', providerName: 'DeepSeek' },
+    { id: 'openai/gpt-4o-mini', providerId: 'openai', providerName: 'OpenAI' },
+    { id: 'anthropic/claude-sonnet', providerId: 'anthropic', providerName: 'Anthropic' },
+  ],
   stopGateway: async () => {
     running = false
     error = null

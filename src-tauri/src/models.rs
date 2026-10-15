@@ -367,6 +367,15 @@ pub struct QuotaAccount {
 
 // ---- 设置与服务 ----
 
+/// 网关当前对外暴露的一个模型名（接入指南里的模型候选）。
+#[derive(Debug, Clone, PartialEq, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct GatewayModel {
+    pub id: String,
+    pub provider_id: String,
+    pub provider_name: String,
+}
+
 #[derive(Debug, Clone, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct SystemStatus {

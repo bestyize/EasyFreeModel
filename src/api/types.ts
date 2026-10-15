@@ -3,9 +3,13 @@ import type {
   ApiKeyInfo,
   ApiKeySecretResult,
   AppSettings,
+  ClientImportInput,
+  ClientImportOutcome,
+  ClientImportPreview,
   Connection,
   CreateApiKeyInput,
   CreateCustomProviderInput,
+  GatewayModel,
   GatewayStatus,
   MediaJob,
   MediaKind,
@@ -16,6 +20,11 @@ import type {
   OAuthStartResult,
   ProviderDetail,
   ProviderSummary,
+  ProxyImportResult,
+  ProxyNode,
+  ProxyNodeInput,
+  ProxyPoolConfig,
+  ProxyPoolState,
   QuotaAccount,
   SystemStatus,
   TestResult,
@@ -75,12 +84,37 @@ export interface SystemApi {
   saveSettings(settings: AppSettings): Promise<AppSettings>
   startGateway(): Promise<GatewayStatus>
   stopGateway(): Promise<GatewayStatus>
+  /** 网关当前能提供的模型名（启用且适配器就绪），按名称排序 */
+  listGatewayModels(): Promise<GatewayModel[]>
 }
 
 export interface MediaApi {
   listMediaJobs(kind: MediaKind): Promise<MediaJob[]>
   submitMediaJob(kind: MediaKind, params: Record<string, unknown>): Promise<MediaJob>
   cancelMediaJob(id: string): Promise<MediaJob>
+}
+
+/** 一键接入：把网关地址 / 密钥 / 模型写进本机 Codex、Claude Code 的配置文件。先预览，用户确认后再写入。 */
+export interface IntegrationsApi {
+  /** 只读：目标文件、会改哪些字段；无法导入时 error 有值（不会抛错） */
+  previewClientImport(input: ClientImportInput): Promise<ClientImportPreview>
+  /** 写入前自动备份；内容已是最新时 changed=false。失败抛出可读的中文错误 */
+  applyClientImport(input: ClientImportInput): Promise<ClientImportOutcome>
+}
+
+/** 代理池。所有写操作返回最新的完整状态；密码只出不进（hasPassword 布尔值）。 */
+export interface ProxyApi {
+  getProxyPool(): Promise<ProxyPoolState>
+  saveProxyPoolConfig(config: ProxyPoolConfig): Promise<ProxyPoolState>
+  saveProxyNode(input: ProxyNodeInput): Promise<ProxyPoolState>
+  deleteProxyNode(id: string): Promise<ProxyPoolState>
+  setProxyNodeEnabled(id: string, enabled: boolean): Promise<ProxyPoolState>
+  /** delta < 0 上移，> 0 下移一格；故障转移策略按列表顺序选路 */
+  moveProxyNode(id: string, delta: number): Promise<ProxyPoolState>
+  /** 每行一个代理：scheme://user:pass@host:port、host:port、host:port:user:pass */
+  importProxyNodes(text: string): Promise<ProxyImportResult>
+  /** ids 缺省 = 全部节点；返回测速后的全部节点 */
+  testProxyNodes(ids?: string[]): Promise<ProxyNode[]>
 }
 
 /**
@@ -106,4 +140,4 @@ export interface OAuthApi {
   oauthDisconnect(connectionId: string): Promise<void>
 }
 
-export type Api = ProvidersApi & OAuthApi & ApiKeysApi & UsageApi & QuotaApi & SystemApi & MediaApi
+export type Api = ProvidersApi & OAuthApi & ApiKeysApi & UsageApi & QuotaApi & SystemApi & MediaApi & ProxyApi & IntegrationsApi

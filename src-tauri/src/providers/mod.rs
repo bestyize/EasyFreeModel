@@ -606,11 +606,14 @@ pub async fn probe_connection(target: &UpstreamTarget, credential: &str) -> Prob
 
 pub async fn probe_live(target: &UpstreamTarget, credential: &str) -> ProbeOutcome {
 
-    let client = match reqwest::Client::builder()
-        .no_proxy()
-        .timeout(std::time::Duration::from_secs(6))
-        .build()
-    {
+    let builder = match crate::proxy::probe_builder(
+        reqwest::Client::builder().no_proxy().timeout(std::time::Duration::from_secs(6)),
+        &target.provider_id,
+    ) {
+        Ok(b) => b,
+        Err(e) => return ProbeOutcome::Unreachable(e),
+    };
+    let client = match builder.build() {
         Ok(c) => c,
         Err(e) => return ProbeOutcome::Unreachable(format!("构建 HTTP 客户端失败：{e}")),
     };
@@ -1089,11 +1092,13 @@ async fn try_fetch_upstream_models(
         Err(_) => return Ok(Vec::new()),
     };
 
-    let client = reqwest::Client::builder()
-        .no_proxy()
-        .timeout(std::time::Duration::from_secs(8))
-        .build()
-        .map_err(|e| AppError::msg(format!("创建上游客户端失败：{e}")))?;
+    let client = crate::proxy::probe_builder(
+        reqwest::Client::builder().no_proxy().timeout(std::time::Duration::from_secs(8)),
+        &provider.id,
+    )
+    .map_err(AppError::msg)?
+    .build()
+    .map_err(|e| AppError::msg(format!("创建上游客户端失败：{e}")))?;
 
     let (url, auth_style) = match target.adapter {
         Adapter::OpenaiCompatible | Adapter::OpenaiResponses => {

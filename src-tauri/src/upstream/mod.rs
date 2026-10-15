@@ -348,7 +348,7 @@ pub trait Adapter: Send + Sync {
         self.validate_target(target)?;
         let mut headers = build_headers(self, target, None, false)?;
         headers.remove(CONTENT_TYPE);
-        let resp = client.get(self.models_url(target), headers, target.timeout).await?;
+        let resp = client.get(&target.provider_id, self.models_url(target), headers, target.timeout).await?;
         let status = resp.status();
         let body = client::read_body(resp, MAX_ERROR_BODY_BYTES * 4, true).await?;
         if !status.is_success() {
@@ -433,7 +433,7 @@ async fn send<A: Adapter + ?Sized>(
     let url = adapter.request_url(target, &req);
     // 日志里只有主机与路径：查询串（如 `?alt=sse`）与凭据都不记录
     tracing::debug!(provider = %target.provider_id, url = %endpoint::display_url(&url), stream, "upstream request");
-    client.post_json(url, headers, bytes, total, target.timeout).await
+    client.post_json(&target.provider_id, url, headers, bytes, total, target.timeout).await
 }
 
 async fn reply_from(resp: reqwest::Response) -> Result<UpstreamReply, UpstreamError> {

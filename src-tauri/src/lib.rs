@@ -2,11 +2,13 @@ pub mod commands;
 pub mod desktop;
 pub mod error;
 pub mod gateway;
+pub mod integrations;
 pub mod media;
 pub mod models;
 pub mod oauth;
 pub mod protocols;
 pub mod providers;
+pub mod proxy;
 pub mod quota;
 pub mod routing;
 pub mod security;
@@ -68,12 +70,23 @@ pub fn run() {
             commands::system::save_settings,
             commands::system::start_gateway,
             commands::system::stop_gateway,
+            commands::system::list_gateway_models,
             commands::media::list_media_jobs,
             commands::media::submit_media_job,
             commands::media::cancel_media_job,
             commands::media::list_media_providers,
             commands::media::recover_media_jobs,
             commands::media::create_embeddings,
+            commands::integrations::preview_client_import,
+            commands::integrations::apply_client_import,
+            commands::proxy::get_proxy_pool,
+            commands::proxy::save_proxy_pool_config,
+            commands::proxy::save_proxy_node,
+            commands::proxy::delete_proxy_node,
+            commands::proxy::set_proxy_node_enabled,
+            commands::proxy::move_proxy_node,
+            commands::proxy::import_proxy_nodes,
+            commands::proxy::test_proxy_nodes,
         ])
         .run(tauri::generate_context!())
         .expect("error while running Router Desktop");

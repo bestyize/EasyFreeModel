@@ -88,11 +88,8 @@ pub async fn refresh(
         None => repo::list_accounts(pool).await?.into_iter().filter(|a| a.enabled).map(|a| a.connection_id).collect(),
     };
     let checked_at = now_ts();
-    let client = reqwest::Client::builder()
-        .no_proxy()
-        .timeout(std::time::Duration::from_secs(12))
-        .build()
-        .map_err(|e| AppError::msg(format!("构建 HTTP 客户端失败：{e}")))?;
+    // 按提供商选出口：代理池可以只覆盖部分提供商，所以客户端按提供商缓存
+    let mut clients: std::collections::HashMap<String, Result<reqwest::Client, String>> = std::collections::HashMap::new();
 
     for id in targets {
         let conn = match providers_repo::get_connection(pool, &id).await {
@@ -125,6 +122,23 @@ pub async fn refresh(
 
         match cred_res {
             Ok(cred) => {
+                let client = clients
+                    .entry(conn.provider_id.clone())
+                    .or_insert_with(|| {
+                        crate::proxy::probe_builder(
+                            reqwest::Client::builder().no_proxy().timeout(std::time::Duration::from_secs(12)),
+                            &conn.provider_id,
+                        )
+                        .and_then(|b| b.build().map_err(|e| format!("构建 HTTP 客户端失败：{e}")))
+                    })
+                    .clone();
+                let client = match client {
+                    Ok(c) => c,
+                    Err(msg) => {
+                        repo::record_error(pool, &id, &msg, &checked_at).await?;
+                        continue;
+                    }
+                };
                 match fetcher::fetch_quota_from_upstream(&client, &conn.provider_id, &cred, &id, &checked_at).await {
                     Ok(snaps) => {
                         repo::save_snapshots(pool, &id, &snaps).await?;

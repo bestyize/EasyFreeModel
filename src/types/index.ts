@@ -321,6 +321,50 @@ export interface AppSettings {
   redactLogs: boolean
 }
 
+// ---- 一键接入客户端 ----
+export type ImportClient = 'codex' | 'claude'
+
+export interface ClientImportInput {
+  client: ImportClient
+  /** 网关根地址，如 http://127.0.0.1:20128 */
+  origin: string
+  apiKey: string
+  model: string
+}
+
+export interface ImportFieldChange {
+  field: string
+  /** null = 原来没有这个字段（密钥类旧值已被后端打码） */
+  before: string | null
+  /** null = 删除该字段 */
+  after: string | null
+}
+
+export interface ClientImportPreview {
+  client: ImportClient
+  /** 将要写入的配置文件 */
+  path: string
+  exists: boolean
+  /** 配置已经是目标状态，无需写入 */
+  unchanged: boolean
+  changes: ImportFieldChange[]
+  /** 有值表示不能导入（参数无效、现有文件无法解析等） */
+  error: string | null
+}
+
+export interface ClientImportOutcome {
+  path: string
+  backupPath: string | null
+  changed: boolean
+}
+
+/** 网关当前对外提供的模型名（不受密钥白名单限制），用于接入指南的模型候选 */
+export interface GatewayModel {
+  id: string
+  providerId: string
+  providerName: string
+}
+
 // ---- 多模态作业 ----
 export type MediaKind = 'image' | 'asr' | 'tts' | 'video' | 'search'
 export type JobStatus = 'queued' | 'running' | 'succeeded' | 'failed' | 'cancelled'
@@ -336,4 +380,70 @@ export interface MediaJob {
   error: string | null
   createdAt: string
   finishedAt: string | null
+}
+
+// ---- 代理池 ----
+export type ProxyScheme = 'http' | 'https' | 'socks5' | 'socks5h'
+export type ProxyStrategy = 'roundRobin' | 'random' | 'failover' | 'lowestLatency'
+export type ProxyProviderScope = 'all' | 'include' | 'exclude'
+export type ProxyNodeStatus = 'untested' | 'healthy' | 'unhealthy' | 'cooldown'
+
+export interface ProxyPoolConfig {
+  enabled: boolean
+  strategy: ProxyStrategy
+  providerScope: ProxyProviderScope
+  providerIds: string[]
+  /** 连续失败多少次后让节点冷却，1–20 */
+  failureThreshold: number
+  /** 冷却秒数，5–3600 */
+  cooldownSeconds: number
+  /** 单个请求最多换几个不同代理重试，1–5 */
+  maxAttempts: number
+  /** 没有可用节点时是否回退直连；关闭时拒绝出站 */
+  fallbackDirect: boolean
+  testUrl: string
+}
+
+/** 后端返回的节点：不含密码，只有 hasPassword */
+export interface ProxyNode {
+  id: string
+  name: string
+  scheme: ProxyScheme
+  host: string
+  port: number
+  username: string | null
+  hasPassword: boolean
+  enabled: boolean
+  status: ProxyNodeStatus
+  latencyMs: number | null
+  lastCheckedAt: string | null
+  lastError: string | null
+  exitIp: string | null
+  successCount: number
+  failureCount: number
+  cooldownRemainingSeconds: number
+}
+
+export interface ProxyPoolState {
+  config: ProxyPoolConfig
+  nodes: ProxyNode[]
+}
+
+export interface ProxyNodeInput {
+  /** 缺省 = 新增 */
+  id?: string
+  name: string
+  scheme: ProxyScheme
+  host: string
+  port: number
+  username?: string | null
+  /** undefined = 保持原密码；空串 = 清除；其它 = 设置新密码 */
+  password?: string
+  enabled: boolean
+}
+
+export interface ProxyImportResult {
+  added: number
+  /** 只含行号与原因，不回显原文（可能含密码） */
+  skipped: { line: number; reason: string }[]
 }

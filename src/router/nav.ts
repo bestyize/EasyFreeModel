@@ -5,7 +5,9 @@ import {
   Globe,
   Image,
   KeyRound,
+  Link2,
   Mic,
+  Network,
   Settings,
   Video,
   Volume2,
@@ -21,18 +23,24 @@ export interface NavItem {
   label: string
   subtitle: string
   icon: Component
+  /** 暂时从左侧菜单隐藏，路由仍保留 */
+  hidden?: boolean
 }
 
-/** 固定十项一级菜单，顺序与 PRODUCT_DESIGN.md §2 一致。不得新增一级导航。 */
+/** 一级菜单；媒体类入口暂时隐藏，代理池按用户要求置于设置页上方。 */
 export const NAV_ITEMS: NavItem[] = [
   { path: '/api-keys', name: 'api-keys', label: 'API 密钥', subtitle: '管理对外提供的本地访问密钥、权限与有效期', icon: KeyRound },
+  { path: '/api-guide', name: 'api-guide', label: 'API 接入', subtitle: '网关地址、请求示例，以及 Codex / Claude Code / CC Switch 的一键配置', icon: Link2 },
   { path: '/providers', name: 'providers', label: '提供商', subtitle: '管理您的 AI 提供商、账户与模型', icon: Database },
   { path: '/usage', name: 'usage', label: '使用情况', subtitle: '监控您的 API 请求、Token 消耗和调用趋势', icon: ChartColumn },
   { path: '/quota', name: 'quota', label: '配额跟踪', subtitle: '跟踪和管理您的 API 配额限制', icon: ChartPie },
-  { path: '/image', name: 'image', label: '图像生成', subtitle: '文生图与图片编辑，查看任务历史', icon: Image },
-  { path: '/asr', name: 'asr', label: '语音转文字', subtitle: '上传或录制音频并转写为文本', icon: Mic },
-  { path: '/tts', name: 'tts', label: '文字转语音', subtitle: '合成语音、试听并导出音频', icon: Volume2 },
-  { path: '/video', name: 'video', label: '视频生成', subtitle: '创建并查看长耗时视频生成任务', icon: Video },
-  { path: '/websearch', name: 'websearch', label: 'WebSearch', subtitle: '联网搜索供应商接入与结果测试', icon: Globe },
+  { path: '/image', name: 'image', label: '图像生成', subtitle: '文生图与图片编辑，查看任务历史', icon: Image, hidden: true },
+  { path: '/asr', name: 'asr', label: '语音转文字', subtitle: '上传或录制音频并转写为文本', icon: Mic, hidden: true },
+  { path: '/tts', name: 'tts', label: '文字转语音', subtitle: '合成语音、试听并导出音频', icon: Volume2, hidden: true },
+  { path: '/video', name: 'video', label: '视频生成', subtitle: '创建并查看长耗时视频生成任务', icon: Video, hidden: true },
+  { path: '/websearch', name: 'websearch', label: 'WebSearch', subtitle: '联网搜索供应商接入与结果测试', icon: Globe, hidden: true },
+  { path: '/proxy-pool', name: 'proxy-pool', label: '代理池', subtitle: '管理出站代理节点与轮换策略', icon: Network },
   { path: '/settings', name: 'settings', label: '设置页', subtitle: '本地代理、网络、安全、更新与数据备份', icon: Settings },
 ]
+
+export const VISIBLE_NAV_ITEMS: NavItem[] = NAV_ITEMS.filter((item) => !item.hidden)

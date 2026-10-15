@@ -5,7 +5,8 @@ use tauri::State;
 
 use crate::error::{AppError, AppResult};
 use crate::gateway::GatewayStatus;
-use crate::models::{AppSettings, SystemStatus};
+use crate::gateway::VerifiedKey;
+use crate::models::{AppSettings, GatewayModel, SystemStatus};
 use crate::state::AppState;
 use crate::store::settings as settings_repo;
 use crate::usage;
@@ -90,6 +91,28 @@ pub async fn save_settings(state: State<'_, AppState>, settings: AppSettings) ->
     Ok(s)
 }
 
+/// 网关当前能对外提供的模型名（启用且适配器就绪），不受任何密钥的模型白名单限制；
+/// 仅用于接入指南里给出模型候选，真正的访问控制仍由每个密钥的 `allowed_models` 决定。
+pub async fn list_gateway_models_inner(state: &AppState) -> AppResult<Vec<GatewayModel>> {
+    let Some(rt) = state.gateway.runtime() else {
+        return Ok(Vec::new());
+    };
+    let unrestricted = VerifiedKey { id: String::new(), allowed_protocols: Vec::new(), allowed_models: Vec::new(), rpm_limit: None, tpm_limit: None };
+    let mut models: Vec<GatewayModel> = rt
+        .list_public_models(&unrestricted)
+        .await?
+        .into_iter()
+        .map(|m| GatewayModel { id: m.id, provider_id: m.provider_id, provider_name: m.provider_name })
+        .collect();
+    models.sort_by(|a, b| a.id.cmp(&b.id));
+    Ok(models)
+}
+
+#[tauri::command]
+pub async fn list_gateway_models(state: State<'_, AppState>) -> AppResult<Vec<GatewayModel>> {
+    list_gateway_models_inner(&state).await
+}
+
 #[tauri::command]
 pub async fn start_gateway(state: State<'_, AppState>) -> AppResult<GatewayStatus> {
     start_gateway_inner(&state).await
@@ -135,6 +158,40 @@ mod tests {
 
         let err = start_gateway_inner(&state).await.unwrap_err().to_string();
         assert!(err.contains("已被占用") && err.contains(&port.to_string()), "{err}");
+    }
+
+    #[tokio::test]
+    async fn gateway_models_list_only_enabled_ready_models() {
+        let state = AppState::new(store::open_memory().await.unwrap(), Arc::new(MemoryVault::default()));
+        for (id, enabled) in [("ready", 1), ("off", 0)] {
+            sqlx::query(
+                "INSERT INTO providers (id, kind, display_name, grp, adapter, adapter_ready, protocols_json, enabled, sort_order, \
+                    round_robin, max_concurrency, max_retries, created_at, updated_at, base_url) \
+                 VALUES (?1, 'custom', ?2, 'custom', 'openai-compatible', 1, '[]', ?3, 0, 0, 4, 2, 't', 't', 'https://api.example.com/v1')",
+            )
+            .bind(id)
+            .bind(format!("Provider {id}"))
+            .bind(enabled)
+            .execute(&state.db)
+            .await
+            .unwrap();
+            for alias in ["zeta", "alpha"] {
+                sqlx::query(
+                    "INSERT INTO models (id, provider_id, upstream_model_id, public_alias, enabled, position) VALUES (?1, ?2, ?3, ?4, 1, 0)",
+                )
+                .bind(format!("{id}/{alias}"))
+                .bind(id)
+                .bind(alias)
+                .bind(format!("{id}-{alias}"))
+                .execute(&state.db)
+                .await
+                .unwrap();
+            }
+        }
+        let models = list_gateway_models_inner(&state).await.unwrap();
+        let ids: Vec<&str> = models.iter().map(|m| m.id.as_str()).collect();
+        assert_eq!(ids, ["ready-alpha", "ready-zeta"], "停用的提供商不出现，结果按名称排序");
+        assert!(models.iter().all(|m| m.provider_id == "ready" && m.provider_name == "Provider ready"));
     }
 
     #[tokio::test]

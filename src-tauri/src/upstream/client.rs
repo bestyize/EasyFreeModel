@@ -5,6 +5,7 @@
 //! - 不禁用 TLS 证书校验，不跟随重定向（避免把自定义密钥头带到其它主机）。
 //! - 错误只暴露分类，不携带 URL / 请求头 / 正文。
 
+use std::sync::Arc;
 use std::time::Duration;
 
 use bytes::{Bytes, BytesMut};
@@ -13,6 +14,7 @@ use reqwest::header::{HeaderMap, HeaderValue, USER_AGENT};
 use url::Url;
 
 use super::UpstreamError;
+use crate::proxy::{ProxyPool, Route};
 
 pub const USER_AGENT_PREFIX: &str = "RouterDesktop";
 
@@ -36,6 +38,8 @@ impl Default for ClientOptions {
 #[derive(Clone)]
 pub struct UpstreamClient {
     http: reqwest::Client,
+    /// 代理池：未注入时一律直连（系统 / 环境变量代理仍按 reqwest 默认行为生效）。
+    pool: Option<Arc<ProxyPool>>,
 }
 
 impl std::fmt::Debug for UpstreamClient {
@@ -74,11 +78,61 @@ impl UpstreamClient {
             b = b.no_proxy();
         }
         let http = b.build().map_err(|_| UpstreamError::Config("failed to build the HTTP client".into()))?;
-        Ok(Self { http })
+        Ok(Self { http, pool: None })
+    }
+
+    /// 接入代理池：之后的出站请求按池配置选路。
+    pub fn with_pool(mut self, pool: Arc<ProxyPool>) -> Self {
+        self.pool = Some(pool);
+        self
+    }
+
+    /// 按代理池给出的尝试顺序发送。代理连不上（`is_connect`）才换下一个节点并记失败；
+    /// 其它错误（上游超时、响应错误）与代理无关，原样返回。
+    async fn send_routed<F, Fut>(&self, provider_id: &str, mut attempt: F) -> Result<reqwest::Response, UpstreamError>
+    where
+        F: FnMut(reqwest::Client) -> Fut,
+        Fut: std::future::Future<Output = Result<reqwest::Response, SendFailure>>,
+    {
+        let routes = match &self.pool {
+            Some(pool) => pool.plan(provider_id),
+            None => vec![Route::Direct],
+        };
+        if routes.is_empty() {
+            tracing::warn!(provider = %provider_id, "代理池已开启但没有可用节点，已阻止直连");
+            return Err(UpstreamError::Connect);
+        }
+        let mut last = UpstreamError::Connect;
+        for route in routes {
+            let (client, node) = match route {
+                Route::Direct => (self.http.clone(), None),
+                Route::Proxy { node_id, client } => (client, Some(node_id)),
+            };
+            match attempt(client).await {
+                Ok(resp) => {
+                    if let (Some(pool), Some(id)) = (&self.pool, &node) {
+                        pool.report_success(id);
+                    }
+                    return Ok(resp);
+                }
+                Err(SendFailure { error, connect_failed }) => {
+                    if let (Some(pool), Some(id)) = (&self.pool, &node) {
+                        if connect_failed {
+                            pool.report_failure(id, "无法连接到代理，或代理拒绝了连接");
+                            last = error;
+                            continue;
+                        }
+                    }
+                    return Err(error);
+                }
+            }
+        }
+        Err(last)
     }
 
     pub(crate) async fn post_json(
         &self,
+        provider_id: &str,
         url: Url,
         mut headers: HeaderMap,
         body: Bytes,
@@ -86,20 +140,47 @@ impl UpstreamClient {
         header_timeout: Duration,
     ) -> Result<reqwest::Response, UpstreamError> {
         headers.insert(USER_AGENT, HeaderValue::from_str(&user_agent()).expect("static user agent"));
-        let mut rb = self.http.post(url).headers(headers).body(body);
-        if let Some(t) = total_timeout {
-            rb = rb.timeout(t);
-        }
-        match tokio::time::timeout(header_timeout, rb.send()).await {
-            Ok(Ok(resp)) => Ok(resp),
-            Ok(Err(e)) => Err(classify_error(&e)),
-            Err(_) => Err(UpstreamError::Timeout),
-        }
+        self.send_routed(provider_id, |http| {
+            let mut rb = http.post(url.clone()).headers(headers.clone()).body(body.clone());
+            if let Some(t) = total_timeout {
+                rb = rb.timeout(t);
+            }
+            async move {
+                match tokio::time::timeout(header_timeout, rb.send()).await {
+                    Ok(Ok(resp)) => Ok(resp),
+                    Ok(Err(e)) => Err(SendFailure::from(e)),
+                    Err(_) => Err(SendFailure { error: UpstreamError::Timeout, connect_failed: false }),
+                }
+            }
+        })
+        .await
     }
 
-    pub(crate) async fn get(&self, url: Url, mut headers: HeaderMap, timeout: Duration) -> Result<reqwest::Response, UpstreamError> {
+    pub(crate) async fn get(
+        &self,
+        provider_id: &str,
+        url: Url,
+        mut headers: HeaderMap,
+        timeout: Duration,
+    ) -> Result<reqwest::Response, UpstreamError> {
         headers.insert(USER_AGENT, HeaderValue::from_str(&user_agent()).expect("static user agent"));
-        self.http.get(url).headers(headers).timeout(timeout).send().await.map_err(|e| classify_error(&e))
+        self.send_routed(provider_id, |http| {
+            let rb = http.get(url.clone()).headers(headers.clone()).timeout(timeout);
+            async move { rb.send().await.map_err(SendFailure::from) }
+        })
+        .await
+    }
+}
+
+/// 一次发送失败：`connect_failed` 为真表示请求尚未送达（连不上代理 / 隧道失败），可安全换节点重试。
+pub(crate) struct SendFailure {
+    error: UpstreamError,
+    connect_failed: bool,
+}
+
+impl From<reqwest::Error> for SendFailure {
+    fn from(e: reqwest::Error) -> Self {
+        Self { connect_failed: e.is_connect(), error: classify_error(&e) }
     }
 }
 

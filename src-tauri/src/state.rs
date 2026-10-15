@@ -9,6 +9,7 @@ use crate::error::{AppError, AppResult};
 use crate::gateway::{GatewayManager, KeyVerifier};
 use crate::oauth::{ClientCredentialAdmin, OAuthHub, OAuthService};
 use crate::providers::catalog;
+use crate::proxy::ProxyPool;
 use crate::routing::Runtime;
 use crate::security::{CredentialVault, DbKeyVerifier, LocalVault, VaultClientCredentials, VaultTokenStore};
 use crate::store;
@@ -25,6 +26,8 @@ pub struct AppState {
     pub oauth: Arc<OAuthService>,
     /// OAuth 授权的应用层：授权会话、连接创建 / 重新授权 / 断开、客户端凭据（命令层入口）。
     pub oauth_hub: Arc<OAuthHub>,
+    /// 出站代理池：转发管线与提供商探测据此选路。
+    pub proxy_pool: Arc<ProxyPool>,
 }
 
 impl AppState {
@@ -48,16 +51,17 @@ impl AppState {
         oauth: Arc<OAuthService>,
         clients: Arc<dyn ClientCredentialAdmin>,
     ) -> Self {
+        let proxy_pool = Arc::new(ProxyPool::new(db.clone(), vault.clone()));
         // 运行时在网关启动时读取；运行中的网关需重启才会使用新构造的运行时
         let gateway = match Runtime::new(db.clone(), vault.clone()) {
-            Ok(runtime) => GatewayManager::with_runtime(Arc::new(runtime.with_oauth(oauth.clone()))),
+            Ok(runtime) => GatewayManager::with_runtime(Arc::new(runtime.with_oauth(oauth.clone()).with_proxy_pool(proxy_pool.clone()))),
             Err(e) => {
                 tracing::error!("上游转发运行时初始化失败，聊天端点将返回 501：{e}");
                 GatewayManager::new()
             }
         };
         let oauth_hub = Arc::new(OAuthHub::new(oauth.clone(), clients, db.clone()));
-        Self { db, gateway, vault, oauth, oauth_hub }
+        Self { db, gateway, vault, oauth, oauth_hub, proxy_pool }
     }
 
     /// 打开数据库（含迁移）、写入提供商目录、接上本地凭据库（对齐 9Router，秒级静默读取）。
@@ -65,7 +69,10 @@ impl AppState {
         let db = store::open(&data_dir.join(DB_FILE)).await?;
         catalog::seed(&db).await?;
         let vault = Arc::new(LocalVault::new(data_dir.join("vault.json")));
-        Self::try_new(db, vault)
+        let state = Self::try_new(db, vault)?;
+        state.proxy_pool.reload().await?;
+        crate::proxy::install_global(state.proxy_pool.clone());
+        Ok(state)
     }
 
     /// 网关用来校验 Bearer 密钥的校验器。
