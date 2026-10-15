@@ -9,8 +9,8 @@ use toml_edit::{value, DocumentMut, Item, Table, Value};
 
 use super::{mask, FieldChange, Params, Plan};
 
-pub const PROVIDER_ID: &str = "router";
-const PROVIDER_NAME: &str = "Router Desktop";
+pub const PROVIDER_ID: &str = "freeapibox";
+const PROVIDER_NAME: &str = "FreeApiBox";
 
 fn parse_error(text: &str, e: &toml_edit::TomlError) -> String {
     // 只报行号和语法原因：完整错误会带上出错的那一行原文，可能含密钥
@@ -61,7 +61,7 @@ pub(crate) fn plan(existing: Option<&str>, p: &Params) -> Result<Plan, String> {
         .entry(PROVIDER_ID)
         .or_insert(Item::Table(Table::new()))
         .as_table_mut()
-        .ok_or("现有 config.toml 里的 model_providers.router 不是普通表，无法自动合并。")?;
+        .ok_or("现有 config.toml 里的 model_providers.freeapibox 不是普通表，无法自动合并。")?;
 
     let base_url = format!("{}/v1", p.origin);
     let fields: [(&str, &str, bool); 4] = [
