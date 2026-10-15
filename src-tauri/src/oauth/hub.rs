@@ -180,6 +180,8 @@ struct Session {
     provider_id: String,
     target: Target,
     state: State,
+    /// 本次授权专属的回调地址与 state；仅用于校验手动粘贴的回调 URL。
+    callback: Option<(String, String)>,
     /// 框架流程的取消句柄；流程启动完成前为 None。
     cancel: Option<CancelHandle>,
     task: Option<JoinHandle<()>>,
@@ -584,6 +586,7 @@ impl OAuthHub {
                         provider_id: provider_id.to_owned(),
                         target: target.clone(),
                         state: State::Pending,
+                        callback: None,
                         cancel: None,
                         task: None,
                         finished_at: None,
@@ -650,6 +653,15 @@ impl OAuthHub {
                 return Err(e.into());
             }
         };
+        let callback = if result.flow == FlowKind::AuthorizationCode {
+            result.authorize_url.as_deref().and_then(|raw| {
+                let url = reqwest::Url::parse(raw).ok()?;
+                let params: HashMap<_, _> = url.query_pairs().into_owned().collect();
+                Some((params.get("redirect_uri")?.clone(), params.get("state")?.clone()))
+            })
+        } else {
+            None
+        };
 
         // 后台任务：等待授权结果；硬性超时兜底。
         let lifetime = (expires_at - Utc::now()).to_std().unwrap_or_default() + inner.limits.grace;
@@ -670,6 +682,7 @@ impl OAuthHub {
             match sessions.get_mut(&session_id) {
                 Some(s) if s.is_pending() && !inner.closed.load(Ordering::SeqCst) => {
                     s.cancel = Some(cancel);
+                    s.callback = callback;
                     s.task = Some(task);
                     None
                 }
@@ -693,6 +706,40 @@ impl OAuthHub {
                 State::Done(r) => r.clone(),
             },
         }
+    }
+
+    /// 浏览器未能访问本机监听端口时，接收用户粘贴的完整回调 URL。
+    /// 只向当前会话预先绑定的回环地址发送请求，仍由同一个监听器校验 state 并兑换令牌。
+    pub async fn submit_callback(&self, session_id: &str, callback_url: &str) -> Result<(), HubError> {
+        self.inner.gc();
+        let (expected, state) = {
+            let sessions = self.inner.lock();
+            let session = sessions.get(session_id).ok_or(HubError::new("expired"))?;
+            if !session.is_pending() { return Err(HubError::new("expired")); }
+            session.callback.clone().ok_or(HubError::new("unsupported_flow"))?
+        };
+        if callback_url.len() > 8192 {
+            return Err(HubError::new("invalid_callback"));
+        }
+        let url = reqwest::Url::parse(callback_url.trim()).map_err(|_| HubError::new("invalid_callback"))?;
+        let target = reqwest::Url::parse(&expected).map_err(|_| HubError::new("internal"))?;
+        if url.scheme() != "http" || url.host_str() != target.host_str() || url.port() != target.port()
+            || url.path() != target.path() || url.username() != "" || url.password().is_some() || url.fragment().is_some()
+            || url.query_pairs().filter(|(k, _)| k == "state").count() != 1
+            || url.query_pairs().find(|(k, _)| k == "state").is_none_or(|(_, v)| v.as_ref() != state.as_str())
+            || url.query_pairs().filter(|(k, _)| k == "code").count() != 1
+            || url.query_pairs().find(|(k, _)| k == "code").is_none_or(|(_, v)| v.is_empty())
+        {
+            return Err(HubError::new("invalid_callback"));
+        }
+        // 重组目标地址，避免请求任意地址；不记录 URL 或响应内容（包含授权码）。
+        let mut local = target;
+        local.set_query(url.query());
+        let client = reqwest::Client::builder().no_proxy().redirect(reqwest::redirect::Policy::none())
+            .timeout(Duration::from_secs(3)).build().map_err(|_| HubError::new("internal"))?;
+        let response = client.get(local).send().await.map_err(|_| HubError::new("listen_failed"))?;
+        if response.status().is_success() || response.status() == reqwest::StatusCode::CONFLICT { Ok(()) }
+        else { Err(HubError::new("invalid_callback")) }
     }
 
     /// 取消会话：状态立即变为 `cancelled`，返回时回调监听已关闭、端口已释放。

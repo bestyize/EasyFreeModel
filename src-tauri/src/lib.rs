@@ -52,6 +52,7 @@ pub fn run() {
             commands::oauth::oauth_clear_client_credentials,
             commands::oauth::oauth_start,
             commands::oauth::oauth_poll,
+            commands::oauth::oauth_submit_callback,
             commands::oauth::oauth_cancel,
             commands::oauth::oauth_reauthorize,
             commands::oauth::oauth_disconnect,

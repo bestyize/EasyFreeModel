@@ -284,6 +284,10 @@ export const oauthMock: OAuthApi = {
     return { status: 'pending' }
   },
 
+  oauthSubmitCallback: async () => {
+    throw new OAuthApiError('unsupported_flow')
+  },
+
   oauthCancel: async (sessionId) => {
     await delay()
     const s = sessions.get(sessionId)

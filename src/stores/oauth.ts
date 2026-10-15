@@ -69,6 +69,10 @@ export const useOAuthStore = defineStore('oauth', () => {
     return api.oauthPoll(sessionId)
   }
 
+  function submitCallback(sessionId: string, callbackUrl: string): Promise<void> {
+    return api.oauthSubmitCallback(sessionId, callbackUrl)
+  }
+
   function cancel(sessionId: string): Promise<void> {
     return api.oauthCancel(sessionId)
   }
@@ -89,6 +93,7 @@ export const useOAuthStore = defineStore('oauth', () => {
     start,
     reauthorize,
     poll,
+    submitCallback,
     cancel,
     disconnect,
   }

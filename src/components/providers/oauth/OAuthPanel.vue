@@ -47,6 +47,9 @@ const expiresAtMs = ref(0)
 const now = ref(Date.now())
 const errorText = ref<string | null>(null)
 const openError = ref<string | null>(null)
+const callbackInput = ref('')
+const callbackError = ref<string | null>(null)
+const callbackBusy = ref(false)
 const resultConnectionId = ref<string | null>(null)
 
 let pollTimer: ReturnType<typeof setTimeout> | undefined
@@ -213,11 +216,29 @@ async function open(url: string) {
   }
 }
 
+async function submitCallback() {
+  const s = session.value
+  if (!s || s.flow !== 'authorization-code' || callbackBusy.value) return
+  const url = callbackInput.value.trim()
+  callbackInput.value = ''
+  callbackError.value = null
+  callbackBusy.value = true
+  try {
+    await store.submitCallback(s.sessionId, url)
+  } catch (e) {
+    callbackError.value = oauthErrorText(toOAuthApiError(e).code)
+  } finally {
+    callbackBusy.value = false
+  }
+}
+
 async function begin() {
   if (stage.value === 'starting' || stage.value === 'running') return
   stopTimers()
   errorText.value = null
   openError.value = null
+  callbackInput.value = ''
+  callbackError.value = null
   stage.value = 'starting'
   try {
     const res = props.reauthConnection
@@ -393,6 +414,13 @@ onBeforeUnmount(() => {
           </button>
         </p>
       </template>
+      <div v-if="session.flow === 'authorization-code'" class="manual-callback">
+        <label class="field" for="oauth-callback-url">浏览器授权后没有自动完成？复制地址栏中的完整回调链接粘贴到这里。</label>
+        <input id="oauth-callback-url" v-model="callbackInput" class="input" type="text" autocomplete="off" spellcheck="false"
+          placeholder="http://127.0.0.1:端口/oauth2callback?state=…&code=…" data-testid="oauth-callback-url" />
+        <button type="button" class="btn" :disabled="!callbackInput.trim() || callbackBusy" @click="submitCallback">{{ callbackBusy ? '提交中…' : '提交回调链接' }}</button>
+        <p v-if="callbackError" class="err" role="alert">{{ callbackError }}</p>
+      </div>
       <p v-if="openError" class="err" role="alert">{{ openError }}</p>
       <p class="muted" data-testid="oauth-countdown">剩余时间 <span class="mono">{{ countdownText }}</span></p>
       <div class="actions">
@@ -444,6 +472,8 @@ onBeforeUnmount(() => {
 .err { margin: 0; font-size: 13px; color: var(--c-danger); }
 .mono { font-family: var(--font-mono); }
 .field { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--c-text-2); }
+.manual-callback { display: flex; flex-direction: column; align-items: flex-start; gap: 7px; }
+.manual-callback .input { width: 100%; box-sizing: border-box; }
 .notice { display: flex; align-items: flex-start; gap: 8px; padding: 10px 14px; border-radius: var(--radius); font-size: 13px; }
 .notice p { margin: 0 0 4px; }
 .notice ul { margin: 0; padding-left: 18px; }

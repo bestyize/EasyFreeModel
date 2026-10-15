@@ -46,6 +46,12 @@ pub async fn oauth_poll(state: State<'_, AppState>, session_id: String) -> Resul
     Ok(state.oauth_hub.poll(&session_id))
 }
 
+/// 手动回调备用入口：仅接受当前会话对应的本机回调 URL；不在错误或日志中回显授权码。
+#[tauri::command]
+pub async fn oauth_submit_callback(state: State<'_, AppState>, session_id: String, callback_url: String) -> Result<(), HubError> {
+    state.oauth_hub.submit_callback(&session_id, &callback_url).await
+}
+
 /// 取消授权；返回时回调监听已关闭。
 #[tauri::command]
 pub async fn oauth_cancel(state: State<'_, AppState>, session_id: String) -> Result<(), HubError> {

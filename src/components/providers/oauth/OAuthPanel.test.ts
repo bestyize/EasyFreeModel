@@ -10,6 +10,7 @@ const h = vi.hoisted(() => ({
     oauthClearClientCredentials: vi.fn(),
     oauthStart: vi.fn(),
     oauthPoll: vi.fn(),
+    oauthSubmitCallback: vi.fn(),
     oauthCancel: vi.fn(),
     oauthReauthorize: vi.fn(),
     oauthDisconnect: vi.fn(),
@@ -252,6 +253,23 @@ describe('OAuthPanel：开始授权', () => {
     expect(h.api.oauthPoll).not.toHaveBeenCalled()
     await btn(w, '重新开始').trigger('click')
     expect(btn(w, '开始授权')).toBeTruthy()
+  })
+
+  it('授权码流程可粘贴回调链接，提交后清除输入', async () => {
+    h.api.oauthStart.mockResolvedValue(codeStart())
+    h.api.oauthPoll.mockResolvedValue({ status: 'pending' })
+    h.api.oauthSubmitCallback.mockResolvedValue(undefined)
+    const w = mountPanel('antigravity')
+    await flushPromises()
+    await btn(w, '开始授权').trigger('click')
+    await flushPromises()
+    const input = w.find('[data-testid="oauth-callback-url"]')
+    const callback = 'http://127.0.0.1:51265/oauth2callback?state=abc&code=123'
+    await input.setValue(callback)
+    await btn(w, '提交回调链接').trigger('click')
+    await flushPromises()
+    expect(h.api.oauthSubmitCallback).toHaveBeenCalledWith('s-code', callback)
+    expect((input.element as HTMLInputElement).value).toBe('')
   })
 
   it('自动打开浏览器失败时给出提示，但流程继续', async () => {

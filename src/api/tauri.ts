@@ -38,6 +38,7 @@ export const tauriApi: Api = {
   oauthClearClientCredentials: (providerId) => oauth('oauth_clear_client_credentials', { providerId }),
   oauthStart: (providerId, accountLabel) => oauth('oauth_start', { providerId, accountLabel }),
   oauthPoll: (sessionId) => oauth('oauth_poll', { sessionId }),
+  oauthSubmitCallback: (sessionId, callbackUrl) => oauth('oauth_submit_callback', { sessionId, callbackUrl }),
   oauthCancel: (sessionId) => oauth('oauth_cancel', { sessionId }),
   oauthReauthorize: (connectionId) => oauth('oauth_reauthorize', { connectionId }),
   oauthDisconnect: (connectionId) => oauth('oauth_disconnect', { connectionId }),

@@ -85,6 +85,24 @@ fn prepare_intl(obj: &mut serde_json::Map<String, Value>) {
     }
 }
 
+/// Some clients replay a streamed assistant turn as many adjacent text parts.
+/// CodeBuddy treats each part as a separate paragraph, so rebuild the original
+/// text before sending the conversation history. Newlines already present in
+/// a part remain intact; no separator is invented between stream fragments.
+fn coalesce_assistant_text(obj: &mut serde_json::Map<String, Value>) {
+    let Some(messages) = obj.get_mut("messages").and_then(Value::as_array_mut) else { return };
+    for message in messages {
+        if message.get("role").and_then(Value::as_str) != Some("assistant") { continue }
+        let Some(parts) = message.get("content").and_then(Value::as_array) else { continue };
+        if parts.is_empty() || !parts.iter().all(|part| {
+            part.get("type").and_then(Value::as_str) == Some("text")
+                && part.get("text").and_then(Value::as_str).is_some()
+        }) { continue }
+        let text: String = parts.iter().filter_map(|part| part.get("text").and_then(Value::as_str)).collect();
+        message["content"] = Value::String(text);
+    }
+}
+
 pub(crate) fn prepare_body(body: &mut Value, provider: &str) {
     if !is_codebuddy(provider) {
         return;
@@ -112,6 +130,7 @@ pub(crate) fn prepare_body(body: &mut Value, provider: &str) {
         "codebuddy-intl" => prepare_intl(obj),
         _ => {}
     }
+    coalesce_assistant_text(obj);
 }
 
 #[cfg(test)]
@@ -169,5 +188,26 @@ mod tests {
         let mut cn = json!({"messages":[{"role":"system","content":"x".repeat(2001)}]});
         prepare_body(&mut cn, "codebuddy-cn");
         assert_eq!(cn["messages"][0]["content"], NEUTRAL_AGENT_PROMPT);
+    }
+
+    #[test]
+    fn replayed_assistant_tokens_do_not_become_paragraphs() {
+        for provider in ["codebuddy-cn", "codebuddy-intl"] {
+            let mut body = json!({"messages": [
+                {"role": "user", "content": "read this"},
+                {"role": "assistant", "content": [
+                    {"type": "text", "text": "Hi"},
+                    {"type": "text", "text": "way"},
+                    {"type": "text", "text": "/aggreg"},
+                    {"type": "text", "text": "ate.rs\nnext line"}
+                ]},
+                {"role": "assistant", "content": [{"type": "text", "text": "look"}, {"type": "image_url", "image_url": {"url": "data:image/png;base64,AA=="}}]}
+            ]});
+            prepare_body(&mut body, provider);
+            let assistant = body["messages"].as_array().unwrap().iter()
+                .filter(|message| message["role"] == "assistant").collect::<Vec<_>>();
+            assert_eq!(assistant[0]["content"], "Hiway/aggregate.rs\nnext line");
+            assert!(assistant[1]["content"].is_array(), "mixed image content must be preserved");
+        }
     }
 }

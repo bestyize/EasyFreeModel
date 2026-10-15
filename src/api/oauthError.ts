@@ -48,6 +48,7 @@ const TEXT: Record<string, string> = {
   too_many_sessions: '进行中的授权过多，请先完成或取消其中一些',
   label_invalid: '账户标识需为 1–128 个字符，且不含控制字符',
   invalid_input: '输入无效，请检查后重试',
+  invalid_callback: '回调地址与本次授权不匹配，请复制浏览器地址栏中的完整地址',
   not_found: '找不到对应的连接',
   not_oauth: '该连接不是 OAuth 连接',
   internal: '内部错误，请重试',

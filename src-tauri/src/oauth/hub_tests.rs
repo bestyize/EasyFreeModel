@@ -79,6 +79,24 @@ async fn code_flow_start_then_poll_creates_an_oauth_connection() {
 }
 
 #[tokio::test]
+async fn pasted_callback_uses_the_same_session_and_rejects_other_addresses() {
+    let env = env().await;
+    let started = env.hub.start("t-code", "manual").await.unwrap();
+    let authorize = started.authorize_url.as_deref().unwrap();
+    let client = reqwest::Client::builder().redirect(reqwest::redirect::Policy::none()).build().unwrap();
+    let response = client.get(authorize).send().await.unwrap();
+    let callback = response.headers().get(reqwest::header::LOCATION).unwrap().to_str().unwrap().to_owned();
+    let wrong = callback.replace("127.0.0.1", "example.com");
+    assert_eq!(env.hub.submit_callback(&started.session_id, &wrong).await.unwrap_err().code(), "invalid_callback");
+    assert_eq!(env.hub.poll(&started.session_id), PollResult::Pending);
+    let wrong_state = callback.replace("state=", "state=wrong");
+    assert_eq!(env.hub.submit_callback(&started.session_id, &wrong_state).await.unwrap_err().code(), "invalid_callback");
+    assert_eq!(env.hub.poll(&started.session_id), PollResult::Pending);
+    env.hub.submit_callback(&started.session_id, &callback).await.unwrap();
+    assert!(matches!(wait_done(&env.hub, &started.session_id).await, PollResult::Succeeded { .. }));
+}
+
+#[tokio::test]
 async fn state_poll_flow_opens_a_url_and_succeeds_after_login() {
     use std::sync::atomic::Ordering;
     let env = env().await;

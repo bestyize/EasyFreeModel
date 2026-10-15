@@ -132,6 +132,8 @@ export interface OAuthApi {
   oauthStart(providerId: string, accountLabel: string): Promise<OAuthStartResult>
   /** 轮询授权结果（建议每 1–2 秒一次）。未知/已清理的会话返回 expired */
   oauthPoll(sessionId: string): Promise<OAuthPollResult>
+  /** 粘贴当前授权会话的完整本机回调 URL，作为自动回调失败时的备用入口 */
+  oauthSubmitCallback(sessionId: string, callbackUrl: string): Promise<void>
   /** 取消授权并立即释放本地回调端口 */
   oauthCancel(sessionId: string): Promise<void>
   /** 对已有连接重新授权（成功后连接恢复为 active，凭据原位更新） */
