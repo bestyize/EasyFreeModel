@@ -27,9 +27,9 @@ pub(crate) fn plan(existing: Option<&str>, p: &Params) -> Result<Plan, String> {
         ("ANTHROPIC_BASE_URL", p.origin.as_str(), false),
         ("ANTHROPIC_AUTH_TOKEN", p.key.as_str(), true),
         ("ANTHROPIC_MODEL", p.model.as_str(), false),
-        ("ANTHROPIC_DEFAULT_HAIKU_MODEL", p.model.as_str(), false),
-        ("ANTHROPIC_DEFAULT_SONNET_MODEL", p.model.as_str(), false),
-        ("ANTHROPIC_DEFAULT_OPUS_MODEL", p.model.as_str(), false),
+        ("ANTHROPIC_DEFAULT_HAIKU_MODEL", p.haiku_model.as_str(), false),
+        ("ANTHROPIC_DEFAULT_SONNET_MODEL", p.sonnet_model.as_str(), false),
+        ("ANTHROPIC_DEFAULT_OPUS_MODEL", p.opus_model.as_str(), false),
     ];
     let mut changes = Vec::new();
     for (key, new, secret) in fields {
