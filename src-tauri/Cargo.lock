@@ -3502,7 +3502,7 @@ dependencies = [
 
 [[package]]
 name = "router-desktop"
-version = "0.5.99"
+version = "0.8.0"
 dependencies = [
  "async-trait",
  "axum",

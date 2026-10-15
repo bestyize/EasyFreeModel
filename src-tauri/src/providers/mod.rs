@@ -777,7 +777,7 @@ pub async fn probe_live(target: &UpstreamTarget, credential: &str) -> ProbeOutco
     } else {
         client.get(&url)
     };
-    req = req.header("User-Agent", "RouterDesktop/0.5.99");
+    req = req.header("User-Agent", crate::upstream::client::user_agent());
     for (k, v) in extra_headers {
         req = req.header(k, v);
     }
@@ -1129,7 +1129,7 @@ async fn try_fetch_upstream_models(
         }
     };
 
-    let mut rb = client.get(&url).header("User-Agent", "RouterDesktop/0.5.99");
+    let mut rb = client.get(&url).header("User-Agent", crate::upstream::client::user_agent());
     if let Some(key) = &api_key {
         match auth_style {
             "bearer" => {

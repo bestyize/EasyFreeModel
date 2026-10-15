@@ -74,6 +74,7 @@ jobs:
           test "$(find release-assets -maxdepth 1 -name '*.dmg' -type f | wc -l)" -eq 1
           version=$(python3 -c 'import json; print(json.load(open("src-tauri/tauri.conf.json"))["version"])')
           test "$version" = "$(python3 -c 'import json; print(json.load(open("package.json"))["version"])')"
+          test "$version" = "$(python3 -c 'import tomllib; print(tomllib.load(open("src-tauri/Cargo.toml", "rb"))["package"]["version"])')"
           echo "tag=v$version" >> "$GITHUB_OUTPUT"
           (cd release-assets && sha256sum -- * > SHA256SUMS.txt)
       - name: Create draft Release with installers

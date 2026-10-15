@@ -112,7 +112,7 @@ async fn fetch_deepseek(
     let resp = client
         .get("https://api.deepseek.com/user/balance")
         .bearer_auth(key)
-        .header("User-Agent", "RouterDesktop/0.5.99")
+        .header("User-Agent", crate::upstream::client::user_agent())
         .send()
         .await
         .map_err(|e| AppError::msg(format!("DeepSeek 网络请求失败：{e}")))?;
@@ -218,7 +218,7 @@ async fn fetch_codex(
     let resp = client
         .get("https://chatgpt.com/backend-api/wham/usage")
         .bearer_auth(token)
-        .header("User-Agent", "RouterDesktop/0.5.99")
+        .header("User-Agent", crate::upstream::client::user_agent())
         .send()
         .await
         .map_err(|e| AppError::msg(format!("Codex 网络请求失败：{e}")))?;

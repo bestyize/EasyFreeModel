@@ -100,6 +100,10 @@ describe('ProviderModal：OAuth 入口', () => {
     expect(btn(w, '添加连接')).toBeUndefined()
     expect(btn(w, '登录验证')!.attributes('disabled')).toBeUndefined()
     expect(w.text()).not.toContain('授权流程待接入')
+    expect(w.find('section[aria-label="上游地址"]').exists()).toBe(false)
+    const sections = w.findAll('section[aria-label]').map((s) => s.attributes('aria-label'))
+    expect(sections.indexOf('可用模型')).toBeLessThan(sections.indexOf('分发策略'))
+    expect(sections.indexOf('分发策略')).toBeLessThan(sections.indexOf('Custom Headers'))
   })
 
   it('只支持 API Key 的提供商不拉取 OAuth 信息、没有 OAuth 按钮', async () => {

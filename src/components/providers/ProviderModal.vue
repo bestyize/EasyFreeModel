@@ -672,7 +672,7 @@ function cancel() {
             :disabled="oauthButtonDisabled"
             @click="openOAuth()"
           >
-            <Lock :size="14" /> {{ draft.group === 'oauth' ? '登录验证' : '添加 OAuth 连接' }}
+            <Lock :size="14" /> 登录验证
           </button>
         </div>
         <div v-if="supportsOAuth && oauthIsCustom && oauthInfo" class="oauth-custom" role="note" data-testid="oauth-custom-notice">
