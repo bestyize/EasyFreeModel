@@ -60,6 +60,12 @@ pub struct ImportInput {
     pub origin: String,
     pub api_key: String,
     pub model: String,
+    #[serde(default)]
+    pub haiku_model: Option<String>,
+    #[serde(default)]
+    pub sonnet_model: Option<String>,
+    #[serde(default)]
+    pub opus_model: Option<String>,
 }
 
 /// 校验并规整后的参数。
@@ -68,6 +74,9 @@ pub(crate) struct Params {
     pub origin: String,
     pub key: String,
     pub model: String,
+    pub haiku_model: String,
+    pub sonnet_model: String,
+    pub opus_model: String,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
@@ -139,7 +148,21 @@ fn validate(input: &ImportInput) -> Result<Params, String> {
     if model.is_empty() || model.chars().count() > 200 || !no_control(model) {
         return Err("模型名为空或包含无效字符".into());
     }
-    Ok(Params { origin: url.origin().ascii_serialization(), key: key.to_string(), model: model.to_string() })
+    let slot = |raw: Option<&String>| -> Result<String, String> {
+        let name = raw.map(String::as_str).unwrap_or(model).trim();
+        if name.is_empty() || name.chars().count() > 200 || !no_control(name) {
+            return Err("模型名为空或包含无效字符".into());
+        }
+        Ok(name.to_string())
+    };
+    Ok(Params {
+        origin: url.origin().ascii_serialization(),
+        key: key.to_string(),
+        model: model.to_string(),
+        haiku_model: slot(input.haiku_model.as_ref())?,
+        sonnet_model: slot(input.sonnet_model.as_ref())?,
+        opus_model: slot(input.opus_model.as_ref())?,
+    })
 }
 
 /// 配置文件路径：环境变量指定的绝对目录优先，否则 `<home>/.codex` / `<home>/.claude`。
