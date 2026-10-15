@@ -27,7 +27,7 @@ impl Drop for Tmp {
 }
 
 fn input(client: ClientKind) -> ImportInput {
-    ImportInput { client, origin: ORIGIN.into(), api_key: KEY.into(), model: "openai/gpt-4o-mini".into() }
+    ImportInput { client, origin: ORIGIN.into(), api_key: KEY.into(), model: "openai/gpt-4o-mini".into(), haiku_model: None, sonnet_model: None, opus_model: None }
 }
 
 fn params() -> Params {
@@ -72,13 +72,13 @@ trust_level = "trusted"
 fn codex_merge_keeps_everything_else() {
     let plan = codex::plan(Some(CODEX_SAMPLE), &params()).unwrap();
     let doc = toml(&plan.content);
-    assert_eq!(doc["model_provider"].as_str(), Some("router"));
+    assert_eq!(doc["model_provider"].as_str(), Some("freeapibox"));
     assert_eq!(doc["model"].as_str(), Some("openai/gpt-4o-mini"));
-    let r = &doc["model_providers"]["router"];
+    let r = &doc["model_providers"]["freeapibox"];
     assert_eq!(r["base_url"].as_str(), Some("http://127.0.0.1:20128/v1"));
     assert_eq!(r["wire_api"].as_str(), Some("responses"));
     assert_eq!(r["experimental_bearer_token"].as_str(), Some(KEY));
-    assert_eq!(r["name"].as_str(), Some("Router Desktop"));
+    assert_eq!(r["name"].as_str(), Some("FreeApiBox"));
 
     // 原有内容原样保留
     assert!(plan.content.contains("# 我的 Codex 配置"));
@@ -87,7 +87,7 @@ fn codex_merge_keeps_everything_else() {
     assert_eq!(doc["model_providers"]["custom"]["experimental_bearer_token"].as_str(), Some("sk-old-secret-token-ABCD"));
     assert_eq!(doc["profiles"]["m21"]["model"].as_str(), Some("codex-MiniMax-M2.5"));
     assert_eq!(doc["projects"]["/Users/x/proj"]["trust_level"].as_str(), Some("trusted"));
-    assert!(plan.content.find("[model_providers.custom]").unwrap() < plan.content.find("[model_providers.router]").unwrap());
+    assert!(plan.content.find("[model_providers.custom]").unwrap() < plan.content.find("[model_providers.freeapibox]").unwrap());
 
     let model = plan.changes.iter().find(|c| c.field == "model").unwrap();
     assert_eq!((model.before.as_deref(), model.after.as_deref()), (Some("old-model"), Some("openai/gpt-4o-mini")));
@@ -100,9 +100,9 @@ fn codex_merge_keeps_everything_else() {
 fn codex_fresh_file_has_only_what_we_need() {
     let plan = codex::plan(None, &params()).unwrap();
     let doc = toml(&plan.content);
-    assert_eq!(doc["model_provider"].as_str(), Some("router"));
-    assert_eq!(doc["model_providers"]["router"]["experimental_bearer_token"].as_str(), Some(KEY));
-    assert!(plan.content.contains("[model_providers.router]"));
+    assert_eq!(doc["model_provider"].as_str(), Some("freeapibox"));
+    assert_eq!(doc["model_providers"]["freeapibox"]["experimental_bearer_token"].as_str(), Some(KEY));
+    assert!(plan.content.contains("[model_providers.freeapibox]"));
     assert!(!plan.content.contains("[model_providers]\n"), "不应输出空的 [model_providers] 表头:\n{}", plan.content);
     assert!(plan.changes.iter().all(|c| c.before.is_none()));
 }
@@ -120,7 +120,7 @@ fn codex_updates_existing_router_masks_old_token_and_drops_env_key() {
     let existing = r#"model_provider = "router"
 model = "m"
 
-[model_providers.router]
+[model_providers.freeapibox]
 name = "x"
 base_url = "http://old:1/v1"
 wire_api = "responses"
@@ -129,7 +129,7 @@ experimental_bearer_token = "sk-previous-token-WXYZ"
 "#;
     let plan = codex::plan(Some(existing), &params()).unwrap();
     let doc = toml(&plan.content);
-    let r = &doc["model_providers"]["router"];
+    let r = &doc["model_providers"]["freeapibox"];
     assert_eq!(r["base_url"].as_str(), Some("http://127.0.0.1:20128/v1"));
     assert_eq!(r["experimental_bearer_token"].as_str(), Some(KEY));
     assert!(r.get("env_key").is_none());
@@ -255,7 +255,7 @@ fn input_validation_and_origin_normalisation() {
     let mut i = input(ClientKind::Codex);
     i.api_key = "k\"ey\\x".into();
     let plan = codex::plan(None, &validate(&i).unwrap()).unwrap();
-    assert_eq!(toml(&plan.content)["model_providers"]["router"]["experimental_bearer_token"].as_str(), Some("k\"ey\\x"));
+    assert_eq!(toml(&plan.content)["model_providers"]["freeapibox"]["experimental_bearer_token"].as_str(), Some("k\"ey\\x"));
 }
 
 #[test]
@@ -299,7 +299,7 @@ fn apply_creates_missing_dirs_and_file_with_private_mode() {
     let path = t.path("nested/.codex/config.toml");
     let out = apply(&path, &input(ClientKind::Codex)).unwrap();
     assert!(out.changed && out.backup_path.is_none());
-    assert_eq!(toml(&fs::read_to_string(&path).unwrap())["model_provider"].as_str(), Some("router"));
+    assert_eq!(toml(&fs::read_to_string(&path).unwrap())["model_provider"].as_str(), Some("freeapibox"));
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
@@ -323,7 +323,7 @@ fn apply_backs_up_original_then_is_a_noop_the_second_time() {
     assert!(out.changed);
     let bak = out.backup_path.expect("改动已有文件必须备份");
     assert_eq!(fs::read_to_string(&bak).unwrap(), CODEX_SAMPLE, "备份必须是原文件的逐字节副本");
-    assert_eq!(toml(&fs::read_to_string(&path).unwrap())["model_providers"]["router"]["base_url"].as_str(), Some("http://127.0.0.1:20128/v1"));
+    assert_eq!(toml(&fs::read_to_string(&path).unwrap())["model_providers"]["freeapibox"]["base_url"].as_str(), Some("http://127.0.0.1:20128/v1"));
     #[cfg(unix)]
     {
         use std::os::unix::fs::PermissionsExt;
