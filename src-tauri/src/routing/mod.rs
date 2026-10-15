@@ -10,6 +10,7 @@
 pub mod dispatch;
 pub mod endpoint;
 pub mod health;
+pub mod probe;
 pub mod repo;
 pub mod resolve;
 pub mod scheduler;

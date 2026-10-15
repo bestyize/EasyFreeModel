@@ -53,6 +53,11 @@ const pendingDelete = ref<Connection | null>(null)
 const confirmDeleteOpen = ref(false)
 let loadToken = 0
 
+// 模型级探测的就地提示（结果表本身在 store 里，key = modelId）。
+// 必须在下面的 watch(immediate) 之前声明：它会立刻调用 load()。
+const modelTestNote = ref<string | null>(null)
+const modelTestOk = ref(false)
+
 // 添加 API Key 连接的内嵌表单。apiKey 只存在于这个输入框的本地 ref：
 // 提交的瞬间就清空，不进入 store、不写本地存储、不打日志；关闭弹窗/卸载时同样清空。
 const addOpen = ref(false)
@@ -97,6 +102,10 @@ async function load() {
   oauthNotice.value = null
   oauthError.value = null
   credMsg.value = {}
+  // 换提供商时丢弃上一个提供商的模型探测结论
+  store.clearModelTestResults()
+  modelTestNote.value = null
+  modelTestOk.value = false
   if (!props.provider) return
   loading.value = true
   original.value = null
@@ -117,10 +126,11 @@ async function load() {
 }
 
 watch(
-  () => props.modelValue,
-  (open) => {
+  // 打开时加载；与已打开期间被换成另一个提供商时也要重新加载（否则会展示上一个提供商的草稿）
+  [() => props.modelValue, () => props.provider?.id],
+  ([open], prev) => {
     if (open) load()
-    else {
+    else if (prev?.[0]) {
       loadToken++
       resetAddForm()
       closeOAuth() // 卸载面板会同时取消进行中的授权会话
@@ -288,11 +298,28 @@ function errText(e: unknown): string {
 /** 拉取模型：把后端合并后的最新列表并入草稿，保留用户已改的别名与启用状态 */
 const modelsBusy = ref(false)
 const modelsError = ref<string | null>(null)
+/** 模型级探测：复用 store 的结果表（key = modelId），并给出就地提示 */
+async function testModel(modelId: string) {
+  const d = draft.value
+  if (!d) return
+  modelTestNote.value = null
+  const model = d.models.find((m) => m.id === modelId)
+  const r = await store.testModel(d.id, modelId)
+  const label = model?.publicAlias || model?.upstreamModelId || modelId
+  modelTestOk.value = r.ok
+  modelTestNote.value = r.ok
+    ? `「${label}」可用${r.latencyMs != null ? `（${r.latencyMs}ms）` : ''}`
+    : `「${label}」探测失败：${r.error ?? '未知错误'}`
+}
 async function onFetchModels() {
   const d = draft.value
   if (!d || modelsBusy.value) return
   modelsError.value = null
   modelsBusy.value = true
+  // 模型列表变化后旧的探测结论不再适用
+  store.clearModelTestResults()
+  modelTestNote.value = null
+  modelTestOk.value = false
   try {
     const fresh = await store.fetchModels(d.id)
     const byId = new Map(d.models.map((m) => [m.id, m]))
@@ -708,9 +735,21 @@ function cancel() {
         :conflict-ids="conflictIds"
         :readonly="readonly"
         :fetching="modelsBusy"
+        :test-results="store.modelTestResults"
+        :testing-ids="store.testingModelIds"
         @fetch="onFetchModels"
+        @test="testModel"
       />
       <p v-if="modelsError" class="issues" role="alert" data-testid="models-error">{{ modelsError }}</p>
+      <p
+        v-if="modelTestNote"
+        class="model-test-note"
+        :class="{ bad: !modelTestOk }"
+        role="status"
+        data-testid="model-test-note"
+      >
+        {{ modelTestNote }}
+      </p>
     </div>
 
     <template #footer>
@@ -825,5 +864,7 @@ function cancel() {
 .foot-msg { flex: 1; min-width: 0; }
 .issues { margin: 0; font-size: 12px; color: var(--c-danger); }
 .issues p { margin: 0; }
+.model-test-note { margin: 0; padding: 8px 12px; border-radius: 8px; background: var(--c-surface-2); font-size: var(--fs-small); color: var(--c-text); }
+.model-test-note.bad { background: #fdecec; color: var(--c-danger); }
 .dirty-tip { font-size: 12px; color: var(--c-brand); }
 </style>

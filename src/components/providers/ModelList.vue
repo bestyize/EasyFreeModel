@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Ban, Bot, Check, Copy, Power, RefreshCw, Search } from 'lucide-vue-next'
-import type { ModelEntry, ProviderDetail } from '@/types'
+import { Ban, Bot, Check, Copy, Power, RefreshCw, Search, Zap } from 'lucide-vue-next'
+import type { ModelEntry, ProviderDetail, TestResult } from '@/types'
 
 const props = defineProps<{
   models: ModelEntry[]
@@ -11,12 +11,18 @@ const props = defineProps<{
   readonly?: boolean
   /** 正在拉取模型（顶部按钮显示加载态） */
   fetching?: boolean
+  /** 模型级探测结果，key = modelId */
+  testResults?: Record<string, TestResult>
+  /** 正在探测的模型 ID */
+  testingIds?: Set<string>
 }>()
 const emit = defineEmits<{
   'update:models': [value: ModelEntry[]]
   'update:thinkingLevel': [value: ProviderDetail['thinkingLevel']]
   /** 请求从上游/内置模型库拉取模型 */
   fetch: []
+  /** 请求探测单个模型的可用性 */
+  test: [modelId: string]
 }>()
 
 const query = ref('')
@@ -34,6 +40,20 @@ const visible = computed(() => {
   )
 })
 const enabledCount = computed(() => props.models.filter((m) => m.enabled).length)
+
+/** 模型级探测：正在探测 / 通过 / 失败原因 */
+const testingModel = (id: string) => props.testingIds?.has(id) ?? false
+const testOk = (id: string) => props.testResults?.[id]?.ok === true
+const testError = (id: string) => props.testResults?.[id]?.error ?? null
+const latencyOf = (id: string) => props.testResults?.[id]?.latencyMs ?? null
+/** 按钮的悬停说明：给出当前状态与（失败时的）完整原因 */
+function testTitle(id: string): string {
+  if (testingModel(id)) return '正在探测…'
+  const err = testError(id)
+  if (err) return `探测失败：${err}`
+  if (testOk(id)) return `探测通过（${latencyOf(id)}ms）`
+  return '对该模型发起一次最小真实请求'
+}
 
 function patch(id: string, p: Partial<ModelEntry>) {
   emit('update:models', props.models.map((m) => (m.id === id ? { ...m, ...p } : m)))
@@ -132,7 +152,23 @@ async function copy(m: ModelEntry) {
             <span v-else class="tag nothink" title="该模型不支持思考档位">不支持思考</span>
           </div>
           <p v-if="conflictIds.has(m.id)" class="err" role="alert">别名与其它已启用模型冲突，请修改</p>
+          <p v-if="testError(m.id)" class="err" role="alert" data-test="model-test-error">
+            探测失败：{{ testError(m.id) }}
+          </p>
         </div>
+        <button
+          type="button"
+          class="act"
+          :class="{ ok: testOk(m.id), bad: !!testError(m.id) }"
+          :disabled="readonly || testingModel(m.id)"
+          :aria-label="`测试模型可用性 ${m.publicAlias || m.upstreamModelId}`"
+          :title="testTitle(m.id)"
+          data-test="model-test"
+          @click="emit('test', m.id)"
+        >
+          <Zap :size="14" />
+          {{ testingModel(m.id) ? '测试中' : testOk(m.id) ? `可用 ${latencyOf(m.id)}ms` : '测试' }}
+        </button>
         <button type="button" class="copy" :aria-label="`复制模型 ID ${m.publicAlias}`" @click="copy(m)">
           <component :is="copiedId === m.id ? Check : Copy" :size="16" />
         </button>
@@ -170,6 +206,11 @@ h3 small { margin-left: 6px; font-size: 12px; font-weight: 400; color: var(--c-t
 .err { margin: 2px 6px 0; font-size: 12px; color: var(--c-danger); }
 .copy { display: grid; place-items: center; width: 32px; height: 32px; flex: none; border: 0; border-radius: 8px; background: transparent; color: var(--c-text-2); }
 .copy:hover { background: var(--c-surface-2); }
+.act { display: inline-flex; align-items: center; gap: 4px; flex: none; padding: 0 8px; height: 32px; border: 1px solid var(--c-border); border-radius: 8px; background: var(--c-canvas); color: var(--c-text-2); font-size: var(--fs-caption); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.act:hover:not(:disabled) { border-color: var(--c-brand); color: var(--c-brand); }
+.act:disabled { cursor: progress; opacity: 0.6; }
+.act.ok { border-color: #bfe6d5; background: #e8f6f0; color: var(--c-success); }
+.act.bad { border-color: #f6c9c9; background: #fdecec; color: var(--c-danger); }
 .spin { animation: spin 1s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 </style>

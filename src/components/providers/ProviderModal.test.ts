@@ -13,6 +13,8 @@ const apiMock = vi.hoisted(() => ({
   deleteCustomProvider: vi.fn(),
   addConnection: vi.fn(),
   updateConnectionCredential: vi.fn(),
+  fetchProviderModels: vi.fn(),
+  testProviderModel: vi.fn(),
 }))
 vi.mock('@/api', () => ({ api: apiMock }))
 
@@ -199,5 +201,95 @@ describe('ProviderModal', () => {
     const toggle = w.findAll('button').find((b) => b.text().includes('Custom Headers'))!
     await toggle.trigger('click')
     expect(w.find('input[aria-label="Header 值 1"]').attributes('type')).toBe('password')
+  })
+
+  // ---- 模型级可用性探测 ----
+
+  const modelTestBtn = (w: ReturnType<typeof mount>, alias: string) =>
+    w.findAll('button').find((b) => b.attributes('aria-label') === `测试模型可用性 ${alias}`)
+
+  it('每个模型行都有“测试”按钮，点击后调用后端并把成功结果显示出来', async () => {
+    apiMock.testProviderModel.mockResolvedValue({
+      connectionId: '',
+      providerId: 'ag',
+      ok: true,
+      latencyMs: 42,
+      error: null,
+    })
+    const w = await open()
+
+    const btn = modelTestBtn(w, 'ag/model-a')
+    expect(btn).toBeTruthy()
+    await btn!.trigger('click')
+    await flushPromises()
+
+    expect(apiMock.testProviderModel).toHaveBeenCalledWith('ag', 'ag/c1/a')
+    const note = w.find('[data-testid="model-test-note"]')
+    expect(note.exists()).toBe(true)
+    expect(note.text()).toContain('ag/model-a')
+    expect(note.text()).toContain('可用')
+    expect(note.text()).toContain('42ms')
+    // 行内按钮本身也变成可用状态（含延迟）
+    const row = modelTestBtn(w, 'ag/model-a')!
+    expect(row.classes()).toContain('ok')
+    expect(row.text()).toContain('42ms')
+  })
+
+  it('探测失败时就地显示原因，且不把它当成成功', async () => {
+    apiMock.testProviderModel.mockResolvedValue({
+      connectionId: '',
+      providerId: 'ag',
+      ok: false,
+      latencyMs: null,
+      error: '上游找不到该模型（HTTP 404）：model not found',
+    })
+    const w = await open()
+
+    await modelTestBtn(w, 'ag/model-b')!.trigger('click')
+    await flushPromises()
+
+    const note = w.find('[data-testid="model-test-note"]')
+    expect(note.text()).toContain('探测失败')
+    expect(note.text()).toContain('找不到该模型')
+    // 失败的模型行内显示原因，且按钮标记为失败而不是可用
+    expect(w.find('[data-test="model-test-error"]').text()).toContain('找不到该模型')
+    expect(modelTestBtn(w, 'ag/model-b')!.classes()).toContain('bad')
+  })
+
+  it('API 抛错时也如实报告失败，不会静默', async () => {
+    apiMock.testProviderModel.mockRejectedValue(new Error('网络中断'))
+    const w = await open()
+
+    await modelTestBtn(w, 'ag/model-a')!.trigger('click')
+    await flushPromises()
+
+    expect(w.find('[data-testid="model-test-note"]').text()).toContain('网络中断')
+  })
+
+  it('适配器未接入（只读）时“测试”按钮禁用', async () => {
+    const w = await open(detail({ adapterReady: false, pendingReason: '适配器尚未接入' }))
+    const btn = modelTestBtn(w, 'ag/model-a')
+    expect(btn!.attributes('disabled')).toBeDefined()
+  })
+
+  it('换提供商时清掉上一轮的探测结论，避免展示过期结果', async () => {
+    apiMock.testProviderModel.mockResolvedValue({
+      connectionId: '',
+      providerId: 'ag',
+      ok: true,
+      latencyMs: 12,
+      error: null,
+    })
+    const w = await open()
+    await modelTestBtn(w, 'ag/model-a')!.trigger('click')
+    await flushPromises()
+    expect(w.find('[data-testid="model-test-note"]').exists()).toBe(true)
+
+    // 切换到另一个提供商（id 变化会触发重新 load）后旧的探测结论应被清除
+    const other = detail({ id: 'other', name: 'Other' })
+    apiMock.getProvider.mockResolvedValue(other)
+    await w.setProps({ provider: { ...summary, id: 'other', name: 'Other' } })
+    await flushPromises()
+    expect(w.find('[data-testid="model-test-note"]').exists()).toBe(false)
   })
 })

@@ -284,6 +284,24 @@ export const providersMock: ProvidersApi = {
     }
     return { connectionId, providerId: null, ok: false, latencyMs: null, error: '连接不存在或尚未保存' }
   },
+  testProviderModel: async (providerId, modelId): Promise<TestResult> => {
+    await delay(300)
+    const fail = (error: string): TestResult => ({
+      connectionId: '',
+      providerId,
+      ok: false,
+      latencyMs: null,
+      error,
+    })
+    const d = store.get(providerId)
+    if (!d) return fail('提供商不存在，请刷新后重试')
+    if (!d.adapterReady) return fail(`该提供商的适配器尚未接入：${pendingText(d)}`)
+    const m = d.models.find((x) => x.id === modelId)
+    if (!m) return fail('模型不存在，可能已被删除，请刷新后重试')
+    if (!d.connections.some((c) => c.enabled)) return fail('该提供商还没有可用的连接')
+    // 浏览器预览没有真实上游：如实说明无法确认，绝不伪造成成功。
+    return fail('浏览器预览模式无法访问真实上游，请在桌面应用中测试')
+  },
 
   createCustomProvider: async (input) => {
     await delay()

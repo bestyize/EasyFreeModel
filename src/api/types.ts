@@ -46,6 +46,8 @@ export interface ProvidersApi {
   testProviders(ids: string[]): Promise<TestResult[]>
   /** 从上游（或内置模型库）拉取模型列表并同步更新到数据库 */
   fetchProviderModels(providerId: string): Promise<ModelEntry[]>
+  /** 模型级可用性探测：对单个已保存模型发起一次最小真实上游请求 */
+  testProviderModel(providerId: string, modelId: string): Promise<TestResult>
 }
 
 export interface ApiKeysApi {

@@ -17,7 +17,7 @@
 //! - `stream`：首帧探测与拉取式（带背压）的流式转发。
 
 mod auth;
-mod convert;
+pub(crate) mod convert;
 mod forward;
 mod rate_limit;
 mod response;
@@ -155,6 +155,11 @@ impl GatewayManager {
 
     fn current_runtime(&self) -> Option<Arc<Runtime>> {
         self.runtime.lock().unwrap_or_else(|e| e.into_inner()).clone()
+    }
+
+    /// 转发运行时（供模型级探测这类只读命令复用真实适配器与凭据路径）。未挂接时为 None。
+    pub fn runtime(&self) -> Option<Arc<Runtime>> {
+        self.current_runtime()
     }
 
     /// 启动网关。端口被占用等绑定失败返回带端口号的 `AppError`（不 panic），并记入 `status().error`。

@@ -44,6 +44,7 @@ pub fn run() {
             commands::providers::add_connection,
             commands::providers::update_connection_credential,
             commands::providers::fetch_provider_models,
+            commands::providers::test_provider_model,
             commands::oauth::oauth_list_providers,
             commands::oauth::oauth_set_client_credentials,
             commands::oauth::oauth_clear_client_credentials,

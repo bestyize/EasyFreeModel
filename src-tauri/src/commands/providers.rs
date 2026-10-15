@@ -78,3 +78,22 @@ pub async fn fetch_provider_models(
 ) -> AppResult<Vec<crate::models::ModelEntry>> {
     providers::fetch_models(&state.db, &state.vault, &provider_id).await
 }
+
+/// 模型级可用性探测：对单个已保存模型发起一次最小真实上游请求，如实报告结果。
+#[tauri::command]
+pub async fn test_provider_model(
+    state: State<'_, AppState>,
+    provider_id: String,
+    model_id: String,
+) -> AppResult<TestResult> {
+    match state.gateway.runtime() {
+        Some(rt) => rt.probe_model(&provider_id, &model_id).await,
+        None => Ok(TestResult {
+            connection_id: String::new(),
+            provider_id: Some(provider_id),
+            ok: false,
+            latency_ms: None,
+            error: Some("转发运行时尚未就绪，无法探测".to_string()),
+        }),
+    }
+}

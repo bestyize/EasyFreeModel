@@ -75,6 +75,10 @@ impl Reply {
     fn json_with(status: u16, body: Value, headers: Vec<(&'static str, String)>) -> Reply {
         Reply::Json { status, body, headers, delay_ms: 0 }
     }
+    /// 非 JSON 的原始响应体（用于验证“200 但内容不合法”这类情形）。
+    fn raw(status: u16, body: &str) -> Reply {
+        Reply::Raw { status, body: body.to_string() }
+    }
     fn sse(chunks: Vec<String>) -> Reply {
         Reply::Sse { chunks: chunks.into_iter().map(|c| (c, 0)).collect(), end: End::Finish }
     }

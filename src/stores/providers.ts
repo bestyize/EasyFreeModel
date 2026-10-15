@@ -111,6 +111,36 @@ export const useProvidersStore = defineStore('providers', () => {
 
   const fetchingModels = ref<Set<string>>(new Set())
 
+  /** 模型级探测结果，key = modelId */
+  const modelTestResults = ref<Record<string, TestResult>>({})
+  const testingModelIds = ref<Set<string>>(new Set())
+
+  /**
+   * 探测单个模型：对已保存的模型发起一次最小真实上游请求，返回结果。
+   * 结果按 modelId 记在 `modelTestResults`，供模型列表就地展示。
+   */
+  async function testModel(providerId: string, modelId: string): Promise<TestResult> {
+    testingModelIds.value = new Set(testingModelIds.value).add(modelId)
+    let result: TestResult
+    try {
+      result = await api.testProviderModel(providerId, modelId)
+    } catch (e) {
+      result = { connectionId: '', providerId, ok: false, latencyMs: null, error: errMsg(e) }
+    } finally {
+      const next = new Set(testingModelIds.value)
+      next.delete(modelId)
+      testingModelIds.value = next
+    }
+    modelTestResults.value = { ...modelTestResults.value, [modelId]: result }
+    return result
+  }
+
+  /** 切换提供商或刷新模型列表后清掉旧的探测结果，避免展示过期结论 */
+  function clearModelTestResults() {
+    modelTestResults.value = {}
+    testingModelIds.value = new Set()
+  }
+
   /**
    * 拉取某提供商的可用模型（优先上游 /models，失败回退内置预设模型库）并合并入库。
    * 返回最新模型列表，交给弹窗草稿直接替换。
@@ -204,5 +234,9 @@ export const useProvidersStore = defineStore('providers', () => {
     testGroup,
     fetchModels,
     fetchingModels,
+    modelTestResults,
+    testingModelIds,
+    testModel,
+    clearModelTestResults,
   }
 })

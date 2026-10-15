@@ -76,6 +76,17 @@ pub async fn list_enabled_models(pool: &SqlitePool) -> AppResult<Vec<ModelCfg>> 
     .await?)
 }
 
+/// 单个模型（用于模型级探测）；不存在返回 None。
+pub async fn get_model(pool: &SqlitePool, provider_id: &str, id: &str) -> AppResult<Option<ModelCfg>> {
+    Ok(sqlx::query_as::<_, ModelCfg>(
+        "SELECT id, provider_id, upstream_model_id, public_alias FROM models WHERE id = ?1 AND provider_id = ?2",
+    )
+    .bind(id)
+    .bind(provider_id)
+    .fetch_optional(pool)
+    .await?)
+}
+
 /// 连接按 priority、创建时间排序；是否可用由调度器判断。
 pub async fn list_connections(pool: &SqlitePool, provider_id: &str) -> AppResult<Vec<ConnCfg>> {
     Ok(sqlx::query_as::<_, ConnCfg>(
