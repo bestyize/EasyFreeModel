@@ -129,6 +129,11 @@ pub(crate) fn minimax_quota_refusal(provider: &str, reply: &UpstreamReply) -> bo
 
 fn classify_rejection(provider: &str, reply: &UpstreamReply) -> Class {
     if minimax_quota_refusal(provider, reply) { return Class::RateLimited; }
+    // OpenCode Free's 403 FreeTierError is a channel restriction, not an
+    // invalid local account. Do not disable a public/free connection.
+    if provider == "opencode" && reply.status == 403
+        && String::from_utf8_lossy(&reply.body).to_ascii_lowercase().contains("freetier")
+    { return Class::Fatal; }
     if matches!(provider, "codebuddy-cn" | "codebuddy-intl") {
         if let Ok(body) = serde_json::from_slice::<serde_json::Value>(&reply.body) {
             let code = body.get("code").and_then(serde_json::Value::as_i64);
@@ -140,6 +145,22 @@ fn classify_rejection(provider: &str, reply: &UpstreamReply) -> Class {
         }
     }
     classify(reply.status)
+}
+
+#[cfg(test)]
+mod opencode_rejection_tests {
+    use super::*;
+    use bytes::Bytes;
+
+    #[test]
+    fn free_tier_restriction_does_not_disable_provider_account() {
+        let denied = UpstreamReply {
+            status: 403, retry_after: None, content_type: Some("application/json".into()),
+            body: Bytes::from_static(br#"{"error":{"type":"FreeTierError","message":"OpenCode's free tier can only be used from within OpenCode."}}"#),
+        };
+        assert!(matches!(classify_rejection("opencode", &denied), Class::Fatal));
+        assert!(matches!(classify_rejection("opencode-zen", &denied), Class::Auth));
+    }
 }
 
 const RECYCLE_BACKOFF: Duration = Duration::from_millis(150);
