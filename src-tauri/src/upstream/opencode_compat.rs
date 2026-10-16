@@ -245,9 +245,6 @@ pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
             }
             obj.remove("max_tokens");
             obj.remove("max_completion_tokens");
-            // The public pool cannot replay reasoning from another account.
-            // Normalize function calls and outputs to the Responses wire contract.
-            normalize_responses_input(body);
             if let Some(effort) = obj.remove("reasoning_effort").and_then(|v| v.as_str().map(str::to_owned)) {
                 if !obj.get("reasoning").is_some_and(Value::is_object) { obj.insert("reasoning".into(), json!({})); }
                 obj["reasoning"]["effort"] = json!(effort);
@@ -256,6 +253,9 @@ pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
                 reasoning.entry("summary").or_insert_with(|| json!("auto"));
             }
             obj.entry("tool_choice").or_insert_with(|| json!("auto"));
+            // Strip encrypted reasoning items from prior pooled-account turns
+            // and normalize the Responses function-call wire shape.
+            normalize_responses_input(body);
             normalize_responses_tools(body);
             inject_fingerprint_tools(body, true);
         }
