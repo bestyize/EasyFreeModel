@@ -88,6 +88,28 @@ pub fn endpoint_for(p: &ProviderCfg) -> Result<ResolvedEndpoint, NotReady> {
 }
 
 /// A built-in provider may expose a native endpoint for a particular client protocol.
+/// OpenCode Free (not OpenCode Zen) publishes different native transports per model.
+/// Keep the routing decision here, before request conversion, so each client
+/// protocol is translated to the correct upstream wire format.
+pub fn apply_opencode_model_endpoint(p: &ProviderCfg, model: &str, endpoint: &mut ResolvedEndpoint) {
+    if p.kind != "builtin" || p.id != "opencode" { return; }
+    let base_model = model.split_once('(').map_or(model, |(base, _)| base).trim();
+    let (kind, path) = match base_model {
+        "muse-spark-1.2-contributor-free" | "muse-spark-1.3-contributor-free" =>
+            (AdapterKind::OpenAiResponses, "responses"),
+        "union-alpha" => (AdapterKind::AnthropicCompatible, "messages"),
+        _ => (AdapterKind::OpenAiCompatible, "chat/completions"),
+    };
+    endpoint.kind = kind;
+    endpoint.base_url = url::Url::parse(&format!("https://opencode.ai/inference/v1/{path}"))
+        .expect("static OpenCode endpoint must parse");
+    // Free is a public upstream; its dedicated adapter sets the public token.
+    endpoint.auth = AuthStyle::None;
+    endpoint.force_stream = true;
+    endpoint.stream_usage = false;
+    endpoint.path = None;
+}
+
 pub fn endpoint_for_client(p: &ProviderCfg, client: ProtocolKind) -> Result<Option<ResolvedEndpoint>, NotReady> {
     if p.kind != "builtin" {
         return Ok(None);
@@ -214,6 +236,31 @@ mod tests {
         assert!(p.0.contains("网页会话类暂缓"), "{p}");
         // 未知适配器 id
         assert!(endpoint_for(&row("c", "custom", "bogus", true, Some("https://x.example"))).is_err());
+    }
+
+    #[test]
+    fn opencode_free_routes_per_model_and_zen_is_unchanged() {
+        let free = row("opencode", "builtin", "none", true, None);
+        let paid = row("opencode-zen", "builtin", "none", true, None);
+        for (model, kind, path) in [
+            ("muse-spark-1.2-contributor-free", AdapterKind::OpenAiResponses, "responses"),
+            ("muse-spark-1.3-contributor-free", AdapterKind::OpenAiResponses, "responses"),
+            ("union-alpha", AdapterKind::AnthropicCompatible, "messages"),
+            ("deepseek-v4.1-flash-free", AdapterKind::OpenAiCompatible, "chat/completions"),
+            ("mimo-v2.6-flash-free", AdapterKind::OpenAiCompatible, "chat/completions"),
+        ] {
+            let mut endpoint = endpoint_for(&free).unwrap();
+            apply_opencode_model_endpoint(&free, model, &mut endpoint);
+            assert_eq!(endpoint.kind, kind, "{model}");
+            assert_eq!(endpoint.base_url.as_str(), format!("https://opencode.ai/inference/v1/{path}"));
+            assert!(endpoint.force_stream);
+            assert!(!endpoint.stream_usage);
+            assert_eq!(endpoint.auth, AuthStyle::None);
+        }
+        let mut zen_endpoint = endpoint_for(&paid).unwrap();
+        let original = zen_endpoint.base_url.clone();
+        apply_opencode_model_endpoint(&paid, "union-alpha", &mut zen_endpoint);
+        assert_eq!(zen_endpoint.base_url, original, "paid Zen must not be redirected to Free");
     }
 
     #[test]
