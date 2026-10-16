@@ -182,6 +182,54 @@ fn normalize_responses_tools(body: &mut Value) {
     });
 }
 
+fn normalize_responses_input(body: &mut Value) {
+    let Some(input) = body.get_mut("input") else { return };
+    if let Some(text) = input.as_str() {
+        let text = if text.trim().is_empty() { "..." } else { text };
+        *input = json!([{"type":"message", "role":"user", "content":[{"type":"input_text","text":text}]}]);
+    }
+    let Some(items) = input.as_array_mut() else { return };
+    if items.is_empty() {
+        items.push(json!({"type":"message", "role":"user", "content":[{"type":"input_text","text":"..."}]}));
+    }
+    items.retain(|item| item.get("type").and_then(Value::as_str) != Some("reasoning"));
+    for item in items {
+        match item.get("type").and_then(Value::as_str) {
+            Some("function_call") => {
+                let valid = item.get("name").and_then(Value::as_str)
+                    .is_some_and(|name| !name.trim().is_empty());
+                if !valid { continue; }
+                if let Some(id) = item.get("call_id").and_then(Value::as_str).map(str::to_owned) {
+                    if id.len() > 64 { item["call_id"] = json!(&id[..64]); }
+                }
+                let args = item.get("arguments").cloned().unwrap_or(Value::Null);
+                let arguments = match args {
+                    Value::String(ref raw) if serde_json::from_str::<Value>(raw).is_ok() => raw.clone(),
+                    Value::String(_) | Value::Null => "{}".to_string(),
+                    other => other.to_string(),
+                };
+                item["arguments"] = json!(arguments);
+            }
+            Some("function_call_output") => {
+                if let Some(id) = item.get("call_id").and_then(Value::as_str).map(str::to_owned) {
+                    if id.len() > 64 { item["call_id"] = json!(&id[..64]); }
+                }
+                let output = item.get("output").cloned().unwrap_or(Value::Null);
+                let text = match output {
+                    Value::String(s) => s,
+                    Value::Null => String::new(),
+                    Value::Array(parts) => parts.iter().map(|part| part.get("text")
+                        .and_then(Value::as_str).map(str::to_owned).unwrap_or_else(|| part.to_string()))
+                        .collect::<Vec<_>>().join(""),
+                    other => other.to_string(),
+                };
+                item["output"] = json!(text);
+            }
+            _ => {}
+        }
+    }
+}
+
 pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
     if !is_free(target) { return; }
     let Some(obj) = body.as_object_mut() else { return };
@@ -197,11 +245,9 @@ pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
             }
             obj.remove("max_tokens");
             obj.remove("max_completion_tokens");
-            if let Some(items) = obj.get_mut("input").and_then(Value::as_array_mut) {
-                // Pooled free accounts cannot decrypt encrypted reasoning from
-                // other sessions. Never replay stale reasoning item references.
-                items.retain(|item| item.get("type").and_then(Value::as_str) != Some("reasoning"));
-            }
+            // The public pool cannot replay reasoning from another account.
+            // Normalize function calls and outputs to the Responses wire contract.
+            normalize_responses_input(body);
             if let Some(effort) = obj.remove("reasoning_effort").and_then(|v| v.as_str().map(str::to_owned)) {
                 if !obj.get("reasoning").is_some_and(Value::is_object) { obj.insert("reasoning".into(), json!({})); }
                 obj["reasoning"]["effort"] = json!(effort);
@@ -271,6 +317,25 @@ mod tests {
         assert_eq!(body["tools"][1]["function"]["name"], "read");
         assert_eq!(body["tools"][2]["function"]["name"], "shell");
         assert!(body["messages"][0]["content"].as_str().unwrap().contains("placeholders"));
+    }
+
+    #[test]
+    fn responses_normalizes_text_input_and_function_history() {
+        let mut t = target("opencode");
+        t.endpoint.kind = AdapterKind::OpenAiResponses;
+        let mut body = json!({"input":[
+            {"type":"function_call","name":"lookup","call_id":"abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZlong",
+             "arguments":{"q":"hi"}},
+            {"type":"function_call_output","call_id":"abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZlong",
+             "output":[{"text":"ok"}]}]});
+        prepare_body(&mut body, &t);
+        assert_eq!(body["input"][0]["arguments"], "{\\"q\\":\\"hi\\"}");
+        assert_eq!(body["input"][0]["call_id"], body["input"][1]["call_id"]);
+        assert_eq!(body["input"][0]["call_id"].as_str().unwrap().len(), 64);
+        assert_eq!(body["input"][1]["output"], "ok");
+        let mut text = json!({"input":"hello"});
+        prepare_body(&mut text, &t);
+        assert_eq!(text["input"][0]["content"][0]["text"], "hello");
     }
 
     #[test]
