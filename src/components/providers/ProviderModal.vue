@@ -306,6 +306,11 @@ async function testModel(modelId: string) {
   if (!d) return
   modelTestNote.value = null
   const model = d.models.find((m) => m.id === modelId)
+  if (!original.value?.models.some((m) => m.id === modelId)) {
+    modelTestOk.value = false
+    modelTestNote.value = '请先保存修改，再测试新添加的模型'
+    return
+  }
   const r = await store.testModel(d.id, modelId)
   const label = model?.publicAlias || model?.upstreamModelId || modelId
   modelTestOk.value = r.ok
@@ -325,14 +330,15 @@ async function onFetchModels() {
   try {
     const fresh = await store.fetchModels(d.id)
     const byId = new Map(d.models.map((m) => [m.id, m]))
+    const byUpstream = new Map(d.models.map((m) => [m.upstreamModelId, m]))
     d.models = fresh
       .map((m) => {
-        const prev = byId.get(m.id)
-        return prev ? { ...m, publicAlias: prev.publicAlias, enabled: prev.enabled } : m
+        const prev = byId.get(m.id) ?? byUpstream.get(m.upstreamModelId)
+        return prev ?? m
       })
       .concat(
         // 保留用户手动添加、但上游本次未返回的模型（例如自定义别名）
-        d.models.filter((m) => !fresh.some((f) => f.id === m.id)),
+        d.models.filter((m) => !fresh.some((f) => f.id === m.id || f.upstreamModelId === m.upstreamModelId)),
       )
     if (!fresh.length) modelsError.value = '上游与内置模型库都没有返回模型'
   } catch (e) {
@@ -720,6 +726,8 @@ function cancel() {
       </section>
 
       <ModelList
+        :key="draft.id"
+        :provider-id="draft.id"
         v-model:models="draft.models"
         v-model:thinking-level="draft.thinkingLevel"
         :conflict-ids="conflictIds"

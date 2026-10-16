@@ -77,6 +77,60 @@ beforeEach(() => {
 })
 
 describe('ProviderModal', () => {
+  it('添加自定义模型进入草稿，保存后提交完整模型配置；可删除并保存', async () => {
+    const w = await open()
+    await w.get('[data-testid="add-model"]').trigger('click')
+    await w.get('input[aria-label="上游模型 ID"]').setValue(' my-model ')
+    await w.get('input[aria-label="自定义模型公开别名"]').setValue(' ag/my-model ')
+    await w.get('input[aria-label="自定义模型描述"]').setValue('My model')
+    await w.get('.thinking-option input').setValue(true)
+    await w.get('[data-testid="confirm-add-model"]').trigger('click')
+    expect(w.get('input[aria-label="启用模型 ag/my-model"]').element).toHaveProperty('checked', true)
+    expect(apiMock.saveProvider).not.toHaveBeenCalled()
+    const added = { id: expect.stringMatching(/^ag\/custom\//), upstreamModelId: 'my-model', publicAlias: 'ag/my-model', description: 'My model', enabled: true, supportsThinking: true }
+    apiMock.saveProvider.mockImplementation(async (d) => d)
+    await saveBtn(w).trigger('click')
+    await flushPromises()
+    expect(apiMock.saveProvider.mock.calls[0][0].models).toEqual([...detail().models, added])
+    await w.get('button[aria-label="删除模型 ag/my-model"]').trigger('click')
+    await saveBtn(w).trigger('click')
+    await flushPromises()
+    expect(apiMock.saveProvider.mock.calls[1][0].models).toEqual(detail().models)
+  })
+
+  it('自定义模型校验空 ID、重复上游和别名；别名可留空', async () => {
+    const w = await open()
+    await w.get('[data-testid="add-model"]').trigger('click')
+    await w.get('[data-testid="confirm-add-model"]').trigger('click')
+    expect(w.text()).toContain('请填写有效的上游模型 ID')
+    await w.get('input[aria-label="上游模型 ID"]').setValue('a')
+    await w.get('[data-testid="confirm-add-model"]').trigger('click')
+    expect(w.text()).toContain('该上游模型已在列表中')
+    await w.get('input[aria-label="上游模型 ID"]').setValue('new-model')
+    await w.get('input[aria-label="自定义模型公开别名"]').setValue('AG/MODEL-A')
+    await w.get('[data-testid="confirm-add-model"]').trigger('click')
+    expect(w.text()).toContain('公开别名与已启用模型冲突')
+    await w.get('input[aria-label="自定义模型公开别名"]').setValue('')
+    await w.get('[data-testid="confirm-add-model"]').trigger('click')
+    expect(w.find('input[aria-label="启用模型 new-model"]').exists()).toBe(true)
+    await w.get('button[aria-label="测试模型可用性 new-model"]').trigger('click')
+    expect(w.text()).toContain('请先保存修改，再测试新添加的模型')
+    expect(apiMock.testProviderModel).not.toHaveBeenCalled()
+  })
+
+  it('拉取模型保留未保存的自定义模型，不重复添加同一上游', async () => {
+    const w = await open()
+    await w.get('[data-testid="add-model"]').trigger('click')
+    await w.get('input[aria-label="上游模型 ID"]').setValue('new-model')
+    await w.get('input[aria-label="自定义模型公开别名"]').setValue('my-alias')
+    await w.get('[data-testid="confirm-add-model"]').trigger('click')
+    apiMock.fetchProviderModels.mockResolvedValue([...detail().models, { id: 'ag/new-model', upstreamModelId: 'new-model', publicAlias: 'ag/new-model', description: '', enabled: true, supportsThinking: false }])
+    await w.get('[data-testid="fetch-models"]').trigger('click')
+    await flushPromises()
+    expect(w.findAll('input[aria-label="公开别名 new-model"]')).toHaveLength(1)
+    expect(w.get('input[aria-label="公开别名 new-model"]').element).toHaveProperty('value', 'my-alias')
+  })
+
   it('免密钥提供商一键启用，无 API Key 输入框，连接显示免密钥', async () => {
     const free = { ...summary, id: 'opencode', name: 'OpenCode Free', group: 'free' as const, status: 'disconnected' as const,
       connectionCount: 0, authModes: ['none' as const], protocols: ['openai-chat' as const] }

@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { Ban, Bot, Check, Copy, Power, RefreshCw, Search, Zap } from 'lucide-vue-next'
+import { Ban, Bot, Check, Copy, Plus, Power, RefreshCw, Search, Trash2, Zap } from 'lucide-vue-next'
 import type { ModelEntry, ProviderDetail, TestResult } from '@/types'
 
 const props = defineProps<{
+  providerId: string
   models: ModelEntry[]
   thinkingLevel: ProviderDetail['thinkingLevel']
   /** 处于别名冲突中的模型 ID */
@@ -26,6 +27,58 @@ const emit = defineEmits<{
 }>()
 
 const query = ref('')
+const addOpen = ref(false)
+const upstreamId = ref('')
+const publicAlias = ref('')
+const description = ref('')
+const supportsThinking = ref(false)
+const addError = ref<string | null>(null)
+
+function resetAdd() {
+  addOpen.value = false
+  upstreamId.value = ''
+  publicAlias.value = ''
+  description.value = ''
+  supportsThinking.value = false
+  addError.value = null
+}
+
+function addModel() {
+  if (props.readonly || props.fetching) return
+  const upstream = upstreamId.value.trim()
+  const alias = publicAlias.value.trim() || upstream
+  if (!upstream || new TextEncoder().encode(upstream).length > 256 || /\s|\p{Cc}/u.test(upstream)) {
+    addError.value = '请填写有效的上游模型 ID（不含空白，最多 256 字节）'
+    return
+  }
+  if ([...alias].length > 128 || /\p{Cc}/u.test(alias)) {
+    addError.value = '公开别名不能超过 128 个字符或包含控制字符'
+    return
+  }
+  if (props.models.some((m) => m.upstreamModelId === upstream)) {
+    addError.value = '该上游模型已在列表中'
+    return
+  }
+  if (props.models.some((m) => m.enabled && m.publicAlias.trim().toLowerCase() === alias.toLowerCase())) {
+    addError.value = '公开别名与已启用模型冲突，请修改'
+    return
+  }
+  emit('update:models', [...props.models, {
+    id: `${props.providerId}/custom/${crypto.randomUUID()}`,
+    upstreamModelId: upstream,
+    publicAlias: alias,
+    description: description.value.trim(),
+    supportsThinking: supportsThinking.value,
+    enabled: true,
+  }])
+  query.value = ''
+  resetAdd()
+}
+
+function removeModel(id: string) {
+  if (props.readonly || props.fetching) return
+  emit('update:models', props.models.filter((m) => m.id !== id))
+}
 const copiedId = ref<string | null>(null)
 let copiedTimer: ReturnType<typeof setTimeout> | undefined
 
@@ -114,6 +167,16 @@ async function copy(m: ModelEntry) {
         type="button"
         class="btn"
         :disabled="readonly || fetching"
+        data-testid="add-model"
+        :aria-expanded="addOpen"
+        @click="addOpen ? resetAdd() : (addOpen = true)"
+      >
+        <Plus :size="14" /> 自定义模型
+      </button>
+      <button
+        type="button"
+        class="btn"
+        :disabled="readonly || fetching"
         data-testid="fetch-models"
         :aria-label="fetching ? '正在拉取模型' : '从上游拉取模型列表'"
         :title="'向上游 /models 拉取；失败时回退到内置预设模型库'"
@@ -123,7 +186,20 @@ async function copy(m: ModelEntry) {
       </button>
     </div>
 
-    <p v-if="!models.length" class="empty">该提供商暂无可用模型。点击「拉取模型」从上游或内置模型库获取。</p>
+    <div v-if="addOpen" class="add-model" role="group" aria-label="添加自定义模型">
+      <label>上游模型 ID <input v-model="upstreamId" class="input" :disabled="readonly || fetching" aria-label="上游模型 ID" placeholder="填写供应商实际使用的模型 ID" spellcheck="false" @keydown.enter.prevent="addModel" /></label>
+      <label>公开别名 <input v-model="publicAlias" class="input" :disabled="readonly || fetching" aria-label="自定义模型公开别名" placeholder="留空时使用上游模型 ID" maxlength="128" spellcheck="false" @keydown.enter.prevent="addModel" /></label>
+      <label>描述（可选） <input v-model="description" class="input" :disabled="readonly || fetching" aria-label="自定义模型描述" /></label>
+      <label class="thinking-option"><input v-model="supportsThinking" type="checkbox" :disabled="readonly || fetching" /> 支持思考档位</label>
+      <p v-if="addError" class="err" role="alert">{{ addError }}</p>
+      <div class="add-actions">
+        <span class="empty">添加或删除后，点击「保存修改」生效。</span>
+        <button type="button" class="btn" @click="resetAdd">取消</button>
+        <button type="button" class="btn btn-primary" :disabled="readonly || fetching" data-testid="confirm-add-model" @click="addModel">添加模型</button>
+      </div>
+    </div>
+
+    <p v-if="!models.length" class="empty">该提供商暂无可用模型。可添加自定义模型，或点击「拉取模型」获取。</p>
     <p v-else-if="!visible.length" class="empty">没有匹配“{{ query }}”的模型。</p>
     <ul v-else class="grid">
       <li v-for="m in visible" :key="m.id" class="model" :class="{ conflict: conflictIds.has(m.id), off: !m.enabled }">
@@ -172,6 +248,9 @@ async function copy(m: ModelEntry) {
         <button type="button" class="copy" :aria-label="`复制模型 ID ${m.publicAlias}`" @click="copy(m)">
           <component :is="copiedId === m.id ? Check : Copy" :size="16" />
         </button>
+        <button type="button" class="copy remove" :disabled="readonly || fetching" :aria-label="`删除模型 ${m.publicAlias || m.upstreamModelId}`" @click="removeModel(m.id)">
+          <Trash2 :size="14" />
+        </button>
       </li>
     </ul>
   </section>
@@ -187,6 +266,13 @@ h3 small { margin-left: 6px; font-size: 12px; font-weight: 400; color: var(--c-t
 .search input { flex: 1; min-width: 0; border: 0; outline: 0; background: transparent; color: var(--c-text); }
 .search:focus-within { border-color: var(--c-brand); }
 .empty { margin: 8px 0 0; font-size: 13px; color: var(--c-text-2); }
+.add-model { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 12px; margin-bottom: 12px; border: 1px solid var(--c-border); border-radius: 8px; }
+.add-model label { display: flex; flex-direction: column; gap: 6px; min-width: 0; font-size: 12px; color: var(--c-text-2); }
+.add-model .thinking-option { flex-direction: row; align-items: center; }
+.add-model .err, .add-actions { grid-column: 1 / -1; }
+.add-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+.add-actions .empty { flex: 1; margin: 0; }
+.remove:hover:not(:disabled) { color: var(--c-danger); }
 .grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0; padding: 0; list-style: none; }
 .model { display: flex; align-items: flex-start; gap: 8px; padding: 8px 10px; border: 1px solid var(--c-border); border-radius: 8px; min-width: 0; }
 .model.off { background: var(--c-sidebar); }

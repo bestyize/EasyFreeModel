@@ -4001,6 +4001,33 @@
       "supportsThinking": false,
       "enabled": true,
       "position": 3
+    },
+    {
+      "id": "opencode/deepseek-v4.1-flash-free",
+      "upstreamModelId": "deepseek-v4.1-flash-free",
+      "publicAlias": "oc/deepseek-v4.1-flash-free",
+      "description": "DeepSeek V4.1 Flash Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "opencode/mimo-v2.6-flash-free",
+      "upstreamModelId": "mimo-v2.6-flash-free",
+      "publicAlias": "oc/mimo-v2.6-flash-free",
+      "description": "MiMo V2.6 Flash Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "opencode/nemotron-3.5-super-vl-free",
+      "upstreamModelId": "nemotron-3.5-super-vl-free",
+      "publicAlias": "oc/nemotron-3.5-super-vl-free",
+      "description": "Nemotron 3.5 Super VL Free",
+      "supportsThinking": false,
+      "enabled": true,
+      "position": 6
     }
   ],
   "openrouter": [

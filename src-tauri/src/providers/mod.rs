@@ -1077,11 +1077,16 @@ pub async fn fetch_models(
 
     let mut tx = pool.begin().await?;
     for (pos, m) in fetched.iter().enumerate() {
+        // A manually added model can have a different internal ID. Keep its alias and settings.
+        if existing.iter().any(|prev| prev.id.starts_with(&format!("{provider_id}/custom/"))
+            && prev.upstream_model_id == m.upstream_model_id) {
+            continue;
+        }
         let enabled = existing_enabled.get(&m.id).copied().unwrap_or(m.enabled);
         sqlx::query(
             "INSERT INTO models (id, provider_id, upstream_model_id, public_alias, description, supports_thinking, enabled, position) \
              VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8) \
-             ON CONFLICT(id) DO UPDATE SET public_alias = excluded.public_alias, description = excluded.description, \
+             ON CONFLICT(id) DO UPDATE SET description = excluded.description, \
                 supports_thinking = excluded.supports_thinking, position = excluded.position",
         )
         .bind(&m.id)
