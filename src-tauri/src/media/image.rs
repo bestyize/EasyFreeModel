@@ -114,7 +114,7 @@ impl MediaAdapter for OpenAiImages {
             if let Some((_, _, s)) = &size {
                 form = form.text("size", s.clone());
             }
-            cx.http.send_json(cx.post(url)?.multipart(form)).await?
+            cx.http.send_json(cx.provider_id, cx.post(url)?.multipart(form)).await?
         } else {
             let mut body = Map::new();
             body.insert("model".into(), json!(model));
@@ -125,7 +125,7 @@ impl MediaAdapter for OpenAiImages {
             if let Some((_, _, s)) = &size {
                 body.insert("size".into(), json!(s));
             }
-            cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&Value::Object(body))).await?
+            cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&Value::Object(body))).await?
         };
 
         let data = v.get("data").and_then(Value::as_array).ok_or_else(|| MediaError::BadResponse("缺少 data 数组".into()))?;
@@ -190,7 +190,7 @@ impl MediaAdapter for StabilityV2 {
         }
         let url = format!("{}/{segment}", cx.cfg.base_url.trim_end_matches('/'));
         let rb = cx.post(&url)?.header(reqwest::header::ACCEPT, "application/json").multipart(form);
-        let v = cx.http.send_json(rb).await?;
+        let v = cx.http.send_json(cx.provider_id, rb).await?;
         if let Some(reason) = str_at(&v, &["finish_reason"]) {
             if reason != "SUCCESS" {
                 return Err(MediaError::Failed(format!("Stability 未成功生成图片（{reason}），可能被内容审核拦截")));
@@ -233,7 +233,7 @@ impl MediaAdapter for BflFlux {
             body["seed"] = json!(seed);
         }
         let url = format!("{}/{model}", cx.cfg.base_url.trim_end_matches('/'));
-        let v = cx.http.send_json(cx.post(&url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&url)?.json(&body)).await?;
         let id = str_at(&v, &["id"]).unwrap_or("").to_string();
         let poll = str_at(&v, &["polling_url"]).ok_or_else(|| MediaError::BadResponse("缺少 polling_url".into()))?;
         let mut task = RemoteTask::new("bfl-flux", id);
@@ -243,7 +243,7 @@ impl MediaAdapter for BflFlux {
 
     async fn poll(&self, cx: &AdapterCtx<'_>, task: &RemoteTask) -> Result<PollState, MediaError> {
         let url = cx.trusted_url(task.poll_url.as_deref().ok_or_else(|| MediaError::BadResponse("缺少轮询地址".into()))?)?;
-        let v = cx.http.send_json(cx.get(&url)?).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.get(&url)?).await?;
         match str_at(&v, &["status"]).unwrap_or("") {
             "Ready" => {
                 let sample = str_at(&v, &["result", "sample"]).ok_or_else(|| MediaError::BadResponse("任务完成但缺少 result.sample".into()))?;
@@ -311,7 +311,7 @@ impl MediaAdapter for FalQueue {
             body["seed"] = json!(seed);
         }
         let url = format!("{}/{model}", cx.cfg.base_url.trim_end_matches('/'));
-        let v = cx.http.send_json(cx.post(&url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&url)?.json(&body)).await?;
         let direct = fal_images(&v);
         if !direct.is_empty() {
             return Ok(Submission::Done(Outcome::files(direct)));
@@ -328,7 +328,7 @@ impl MediaAdapter for FalQueue {
 
     async fn poll(&self, cx: &AdapterCtx<'_>, task: &RemoteTask) -> Result<PollState, MediaError> {
         let status_url = cx.trusted_url(task.poll_url.as_deref().ok_or_else(|| MediaError::BadResponse("缺少轮询地址".into()))?)?;
-        let s = cx.http.send_json(cx.get(&status_url)?).await?;
+        let s = cx.http.send_json(cx.provider_id, cx.get(&status_url)?).await?;
         match str_at(&s, &["status"]).unwrap_or("") {
             "COMPLETED" => {
                 if let Some(err) = str_at(&s, &["error"]).filter(|e| !e.is_empty()) {
@@ -336,7 +336,7 @@ impl MediaAdapter for FalQueue {
                 }
                 let response_url =
                     task.data.get("responseUrl").and_then(Value::as_str).ok_or_else(|| MediaError::BadResponse("缺少 response_url".into()))?;
-                let result = cx.http.send_json(cx.get(&cx.trusted_url(response_url)?)?).await?;
+                let result = cx.http.send_json(cx.provider_id, cx.get(&cx.trusted_url(response_url)?)?).await?;
                 let items = fal_images(&result);
                 if items.is_empty() {
                     Err(MediaError::BadResponse("fal 任务完成但没有返回图片".into()))
@@ -352,7 +352,7 @@ impl MediaAdapter for FalQueue {
     async fn cancel(&self, cx: &AdapterCtx<'_>, task: &RemoteTask) -> Result<(), MediaError> {
         let Some(url) = task.cancel_url.as_deref() else { return Ok(()) };
         let rb = cx.request(Method::PUT, &cx.trusted_url(url)?)?;
-        cx.http.send(rb).await.map(|_| ())
+        cx.http.send(cx.provider_id, rb).await.map(|_| ())
     }
 }
 

@@ -53,7 +53,7 @@ pub async fn github_copilot_token(
         ("Authorization".into(), format!("token {account_token}")),
         ("X-GitHub-Api-Version".into(), "2022-11-28".into()),
     ]);
-    let reply = http::get_with(client, &url, &headers).await?;
+    let reply = http::get_with(client, &cfg.id, &url, &headers).await?;
     if !(200..300).contains(&reply.status) {
         return Err(exchange_error(&cfg.id, &reply, account_token));
     }
@@ -82,11 +82,11 @@ pub async fn muse_model_key(
         ("Authorization".into(), format!("Bearer {account_token}")),
         ("x-api-version".into(), "1.0.0".into()),
     ]);
-    let mut reply = http::post_json_with(client, &url, &json!({"onboard": true}), &headers).await?;
+    let mut reply = http::post_json_with(client, &cfg.id, &url, &json!({"onboard": true}), &headers).await?;
     for attempt in 0..2 {
         if !matches!(reply.status, 429 | 500..=599) { break; }
         tokio::time::sleep(std::time::Duration::from_secs(5 * (attempt + 1))).await;
-        reply = http::post_json_with(client, &url, &json!({"onboard": true}), &headers).await?;
+        reply = http::post_json_with(client, &cfg.id, &url, &json!({"onboard": true}), &headers).await?;
     }
     if !(200..300).contains(&reply.status) {
         return Err(exchange_error(&cfg.id, &reply, &account_token));

@@ -56,6 +56,7 @@ pub enum Encoding {
 pub fn build_client(timeout: Duration) -> Result<Client, OAuthError> {
     Client::builder()
         .user_agent(user_agent())
+        .no_proxy()
         .timeout(timeout)
         .connect_timeout(Duration::from_secs(10))
         // 令牌端点不应重定向；跟随重定向可能把凭据带到意外的主机。
@@ -108,16 +109,18 @@ pub fn form_encode(fields: &[(String, String)]) -> String {
 
 pub async fn post(
     client: &Client,
+    provider_id: &str,
     url: &str,
     encoding: Encoding,
     fields: &[(String, String)],
 ) -> Result<Reply, OAuthError> {
-    post_with(client, url, encoding, fields, &ExtraHeaders::default()).await
+    post_with(client, provider_id, url, encoding, fields, &ExtraHeaders::default()).await
 }
 
 /// 同 [`post`]，但附带额外请求头（个别供应商的私有协议需要）。
 pub async fn post_with(
     client: &Client,
+    provider_id: &str,
     url: &str,
     encoding: Encoding,
     fields: &[(String, String)],
@@ -137,29 +140,31 @@ pub async fn post_with(
             request.json(&map)
         }
     };
-    finish(request).await
+    finish(provider_id, request).await
 }
 
 /// JSON POST with typed values, for provider-specific token exchange endpoints.
 pub async fn post_json_with(
     client: &Client,
+    provider_id: &str,
     url: &str,
     body: &Value,
     headers: &ExtraHeaders,
 ) -> Result<Reply, OAuthError> {
     let url = ensure_secure_endpoint(url)?;
     let request = headers.apply(client.post(url).header(ACCEPT, "application/json")).json(body);
-    finish(request).await
+    finish(provider_id, request).await
 }
 
 /// GET 请求（CodeBuddy 的令牌轮询以 GET + 查询串进行）。
-pub async fn get_with(client: &Client, url: &str, headers: &ExtraHeaders) -> Result<Reply, OAuthError> {
+pub async fn get_with(client: &Client, provider_id: &str, url: &str, headers: &ExtraHeaders) -> Result<Reply, OAuthError> {
     let url = ensure_secure_endpoint(url)?;
-    finish(headers.apply(client.get(url).header(ACCEPT, "application/json"))).await
+    finish(provider_id, headers.apply(client.get(url).header(ACCEPT, "application/json"))).await
 }
 
-async fn finish(request: reqwest::RequestBuilder) -> Result<Reply, OAuthError> {
-    let response = request.send().await.map_err(map_reqwest)?;
+async fn finish(provider_id: &str, request: reqwest::RequestBuilder) -> Result<Reply, OAuthError> {
+    let response = crate::proxy::http::send(provider_id, request, Duration::from_secs(30)).await
+        .map_err(|e| OAuthError::Transient(e.to_string()))?;
     let status = response.status().as_u16();
     if response.content_length().is_some_and(|n| n as usize > MAX_BODY_BYTES) {
         return Err(OAuthError::InvalidResponse("response too large".into()));

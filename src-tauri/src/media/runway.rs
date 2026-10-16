@@ -18,14 +18,14 @@ fn task_url(cx: &AdapterCtx<'_>, id: &str) -> Result<String, MediaError> {
 /// `POST {base}/{path}` 创建任务，返回待轮询的句柄。
 pub(super) async fn create_task(cx: &AdapterCtx<'_>, format: &str, path: &str, body: &Value) -> Result<Submission, MediaError> {
     let rb = cx.post(&format!("{}/{path}", base(cx)))?.json(body);
-    let v = cx.http.send_json(rb).await?;
+    let v = cx.http.send_json(cx.provider_id, rb).await?;
     let id = v.get("id").and_then(Value::as_str).ok_or_else(|| MediaError::BadResponse("Runway 未返回任务 id".into()))?;
     safe_path_segment(id, "任务 ID").map_err(|_| MediaError::BadResponse("Runway 返回的任务 id 不合法".into()))?;
     Ok(Submission::Pending(RemoteTask::new(format, id)))
 }
 
 pub(super) async fn poll_task(cx: &AdapterCtx<'_>, task: &RemoteTask, ext: &str) -> Result<PollState, MediaError> {
-    let v = cx.http.send_json(cx.get(&task_url(cx, &task.id)?)?).await?;
+    let v = cx.http.send_json(cx.provider_id, cx.get(&task_url(cx, &task.id)?)?).await?;
     match str_at(&v, &["status"]).unwrap_or("") {
         "SUCCEEDED" => {
             let outputs: Vec<OutputItem> = v
@@ -54,7 +54,7 @@ pub(super) async fn poll_task(cx: &AdapterCtx<'_>, task: &RemoteTask, ext: &str)
 
 pub(super) async fn cancel_task(cx: &AdapterCtx<'_>, task: &RemoteTask) -> Result<(), MediaError> {
     let rb = cx.request(Method::DELETE, &task_url(cx, &task.id)?)?;
-    cx.http.send(rb).await.map(|_| ())
+    cx.http.send(cx.provider_id, rb).await.map(|_| ())
 }
 
 pub(super) fn ratio_body(model: &str, prompt: Option<&str>, ratio: &str) -> Value {

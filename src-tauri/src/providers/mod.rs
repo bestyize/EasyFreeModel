@@ -618,16 +618,11 @@ pub async fn probe_connection(target: &UpstreamTarget, credential: &str) -> Prob
 
 pub async fn probe_live(target: &UpstreamTarget, credential: &str) -> ProbeOutcome {
 
-    let builder = match crate::proxy::probe_builder(
-        reqwest::Client::builder().no_proxy().timeout(std::time::Duration::from_secs(6)),
-        &target.provider_id,
-    ) {
-        Ok(b) => b,
-        Err(e) => return ProbeOutcome::Unreachable(e),
-    };
-    let client = match builder.build() {
+    let client = match reqwest::Client::builder().no_proxy()
+        .redirect(reqwest::redirect::Policy::none())
+        .timeout(std::time::Duration::from_secs(6)).build() {
         Ok(c) => c,
-        Err(e) => return ProbeOutcome::Unreachable(format!("构建 HTTP 客户端失败：{e}")),
+        Err(_) => return ProbeOutcome::Unreachable("构建 HTTP 客户端失败".into()),
     };
 
     let start = std::time::Instant::now();
@@ -804,7 +799,7 @@ pub async fn probe_live(target: &UpstreamTarget, credential: &str) -> ProbeOutco
         req = req.header(auth_header, auth_val);
     }
 
-    match req.send().await {
+    match crate::proxy::http::send(&target.provider_id, req, std::time::Duration::from_secs(6)).await {
         Ok(resp) => {
             let latency_ms = start.elapsed().as_millis() as u64;
             let status = resp.status();
@@ -1142,13 +1137,10 @@ async fn try_fetch_upstream_models(
         Err(_) => return Ok(Vec::new()),
     };
 
-    let client = crate::proxy::probe_builder(
-        reqwest::Client::builder().no_proxy().timeout(std::time::Duration::from_secs(8)),
-        &provider.id,
-    )
-    .map_err(AppError::msg)?
-    .build()
-    .map_err(|e| AppError::msg(format!("创建上游客户端失败：{e}")))?;
+    let client = reqwest::Client::builder().no_proxy()
+        .redirect(reqwest::redirect::Policy::none())
+        .timeout(std::time::Duration::from_secs(8)).build()
+        .map_err(|_| AppError::msg("创建上游客户端失败"))?;
 
     let (url, auth_style) = match target.adapter {
         Adapter::OpenaiCompatible | Adapter::OpenaiResponses => {
@@ -1207,7 +1199,7 @@ async fn try_fetch_upstream_models(
         }
     }
 
-    let resp = match rb.send().await {
+    let resp = match crate::proxy::http::send(&provider.id, rb, std::time::Duration::from_secs(8)).await {
         Ok(r) => r,
         Err(_) => return Ok(Vec::new()),
     };

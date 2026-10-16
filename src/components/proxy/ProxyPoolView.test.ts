@@ -60,6 +60,22 @@ describe('ProxyPoolView', () => {
     expect(q('[data-testid="test-all"]')!.hasAttribute('disabled')).toBe(true)
   })
 
+  it('代理生效范围支持仅提供媒体能力的供应商', async () => {
+    h.api.listProviders.mockResolvedValue([
+      { id: 'image-only', name: 'Image Provider', serviceKinds: ['image'] },
+      { id: 'voice-only', name: 'Voice Provider', serviceKinds: ['tts'] },
+    ])
+    await mountView(state({ providerScope: 'include' }))
+    expect(q('[data-testid="pick-image-only"]')).not.toBeNull()
+    expect(q('[data-testid="pick-voice-only"]')).not.toBeNull()
+    q('[data-testid="pick-image-only"]')!.click()
+    await flushPromises()
+    h.api.saveProxyPoolConfig.mockResolvedValue(state({ providerScope: 'include', providerIds: ['image-only'] }))
+    q('[data-testid="save-config"]')!.click()
+    await flushPromises()
+    expect(h.api.saveProxyPoolConfig).toHaveBeenCalledWith({ ...config, providerScope: 'include', providerIds: ['image-only'] })
+  })
+
   it('开启但无可用节点：按是否回退直连显示不同提示', async () => {
     await mountView(state({ enabled: true }, [node({ enabled: false })]))
     expect(q('[data-testid="no-usable-banner"]')!.textContent).toContain('会被拒绝')

@@ -767,7 +767,7 @@ async fn save_outcome(ctx: &MediaContext, kind: MediaKind, cand: &Candidate, sec
                 let path = ctx.dirs.new_output_path(kind, &ext).await?;
                 running.lock().created.push(path.clone());
                 let creds = authed.then_some((&cand.cfg, secret));
-                ctx.http.download_to_file(&url, creds, limit, &path).await?;
+                ctx.http.download_to_file(&cand.provider_id, &url, creds, limit, &path).await?;
                 path
             }
         };
