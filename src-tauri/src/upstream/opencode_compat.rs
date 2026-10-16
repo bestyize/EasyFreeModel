@@ -41,8 +41,12 @@ fn session_for(connection_id: &str) -> String {
     let ms = SystemTime::now().duration_since(UNIX_EPOCH).unwrap_or_default().as_millis() as u64;
     // OpenCode v2 session ids are 12 descending-time hex digits and 14 base62 digits.
     let prefix = (!(ms.wrapping_mul(4096).wrapping_add(1))) & 0xffff_ffff_ffff;
-    let random = uuid::Uuid::new_v4().simple().to_string();
-    let session = format!("ses_{prefix:012x}{}", &random[..14]);
+    const BASE62: &[u8] = b"0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+    let entropy = uuid::Uuid::new_v4();
+    let random: String = entropy.as_bytes()[..14].iter()
+        .map(|byte| BASE62[*byte as usize % BASE62.len()] as char)
+        .collect();
+    let session = format!("ses_{prefix:012x}{random}");
     entries.insert(connection_id.to_owned(), (session.clone(), now));
     session
 }
