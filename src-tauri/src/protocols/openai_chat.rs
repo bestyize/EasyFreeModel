@@ -569,7 +569,7 @@ pub fn encode_response(resp: &CanonicalResponse) -> Value {
 }
 
 pub fn decode_finish_reason(v: Option<&Value>) -> StopReason {
-    match v.and_then(Value::as_str) {
+    match v.and_then(Value::as_str).map(str::trim).filter(|s| !s.is_empty()) {
         None | Some("stop") => StopReason::EndTurn,
         Some("length") => StopReason::MaxTokens,
         Some("tool_calls") | Some("function_call") => StopReason::ToolUse,

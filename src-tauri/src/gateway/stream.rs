@@ -308,10 +308,16 @@ fn normalize_openai_passthrough(frame: &RawFrame) -> Option<Bytes> {
     let choices = data.get_mut("choices")?.as_array_mut()?;
     let mut changed = false;
     for choice in choices {
-        let Some(delta) = choice.get_mut("delta").and_then(Value::as_object_mut) else { continue };
-        if matches!(delta.get("tool_calls"), Some(Value::Array(calls)) if calls.is_empty()) {
-            delta.remove("tool_calls");
+        let Some(c) = choice.as_object_mut() else { continue };
+        if matches!(c.get("finish_reason"), Some(Value::String(s)) if s.trim().is_empty()) {
+            c.insert("finish_reason".into(), Value::Null);
             changed = true;
+        }
+        if let Some(delta) = c.get_mut("delta").and_then(Value::as_object_mut) {
+            if matches!(delta.get("tool_calls"), Some(Value::Array(calls)) if calls.is_empty()) {
+                delta.remove("tool_calls");
+                changed = true;
+            }
         }
     }
     if !changed { return None; }

@@ -409,7 +409,11 @@ impl StreamDecoder for OpenAiStreamDecoder {
             if let Some(delta) = choice.get("delta") {
                 self.handle_delta(delta, &mut out);
             }
-            if let Some(fr) = choice.get("finish_reason").filter(|f| !f.is_null()) {
+            let finish_reason = choice
+                .get("finish_reason")
+                .filter(|f| !f.is_null())
+                .filter(|f| !matches!(f, Value::String(s) if s.trim().is_empty()));
+            if let Some(fr) = finish_reason {
                 self.close_all(&mut out);
                 self.finish = Some(openai_chat::decode_finish_reason(Some(fr)));
             }
@@ -835,16 +839,16 @@ mod tests {
         use crate::protocols::openai_responses::ResponsesStreamEncoder;
         use crate::protocols::StreamEncoder;
 
-        // The provider sends each word separately, plus empty tool_calls and
-        // intermittent reasoning. Only the model's genuine "\n" survives.
+        // The provider sends each word separately, plus empty tool_calls, empty
+        // finish_reason string, and intermittent reasoning. Only the model's genuine "\n" survives.
         let chunks = [
-            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"reasoning_content":"思考"}}]}),
-            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"这","tool_calls":[]}}]}),
-            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"是","tool_calls":[],"reasoning_content":"late"}}]}),
-            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"reasoning_content":"ignored"}}]}),
-            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"正常","tool_calls":[]}}]}),
-            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"文本。\n第二段","tool_calls":[]}}]}),
-            json!({"id":"cb","model":"cb-model","choices":[{"delta":{},"finish_reason":"stop"}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"role":"assistant","content":"","reasoning_content":"思考","tool_calls":[]},"finish_reason":""}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"这","tool_calls":[]},"finish_reason":""}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"是","tool_calls":[],"reasoning_content":"late"},"finish_reason":""}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"reasoning_content":"ignored"},"finish_reason":""}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"正常","tool_calls":[]},"finish_reason":""}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"content":"文本。\n第二段","tool_calls":[]},"finish_reason":""}]}),
+            json!({"id":"cb","model":"cb-model","choices":[{"delta":{"role":"assistant","content":""},"finish_reason":"stop"}]}),
         ];
         let mut decoder = OpenAiStreamDecoder::new();
         let events = run(&mut decoder, &oa(&chunks, true)).unwrap();
