@@ -9,4 +9,5 @@ pub mod providers;
 pub mod proxy;
 pub mod quota;
 pub mod system;
+pub mod update;
 pub mod usage;

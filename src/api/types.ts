@@ -79,6 +79,8 @@ export interface QuotaApi {
 }
 
 export interface SystemApi {
+  /** Only a newer published version; network/parse failures return null silently. */
+  checkForUpdate(): Promise<string | null>
   systemStatus(): Promise<SystemStatus>
   getSettings(): Promise<AppSettings>
   saveSettings(settings: AppSettings): Promise<AppSettings>

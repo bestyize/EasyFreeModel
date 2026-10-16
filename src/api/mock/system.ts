@@ -22,6 +22,7 @@ function gateway(): GatewayStatus {
 }
 
 export const systemMock: SystemApi = {
+  checkForUpdate: async () => null,
   systemStatus: async () => ({ gateway: gateway(), apiRequests: 0, successRate: null, avgLatencyMs: null }),
   getSettings: async () => ({ ...settings }),
   saveSettings: async (s) => {

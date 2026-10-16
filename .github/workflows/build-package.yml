@@ -97,7 +97,7 @@ jobs:
             --draft
           gh release edit "$RELEASE_TAG" --draft=false
 
-      - name: Prepare next version after successful release
+      - name: Publish update version and prepare next version after successful release
         env:
           RELEASED_VERSION: ${{ steps.version.outputs.version }}
         shell: bash
@@ -111,13 +111,18 @@ jobs:
             git fetch --no-tags origin main
             git checkout -B release-version-bump origin/main
             current_version=$(python3 .github/scripts/release_version.py verify)
-            if [[ "$current_version" != "$RELEASED_VERSION" ]]; then
+            python3 .github/scripts/release_version.py publish-update "$RELEASED_VERSION"
+            if [[ "$current_version" == "$RELEASED_VERSION" ]]; then
+              next_version=$(python3 .github/scripts/release_version.py bump "$RELEASED_VERSION")
+            else
               echo "::notice::main is already at v${current_version}; skipping bump for released v${RELEASED_VERSION}."
+              next_version="$current_version"
+            fi
+            git add update.txt package.json package-lock.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock
+            if git diff --cached --quiet; then
               exit 0
             fi
-            next_version=$(python3 .github/scripts/release_version.py bump "$RELEASED_VERSION")
-            git add package.json package-lock.json src-tauri/tauri.conf.json src-tauri/Cargo.toml src-tauri/Cargo.lock
-            git commit -m "chore(release): prepare v${next_version} [skip ci]"
+            git commit -m "chore(release): publish update v${RELEASED_VERSION} and prepare v${next_version} [skip ci]"
             if git push origin HEAD:refs/heads/main; then
               echo "Prepared v${next_version} on main."
               exit 0

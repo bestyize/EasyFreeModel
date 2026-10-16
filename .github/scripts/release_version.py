@@ -4,6 +4,7 @@
 Usage:
   python3 .github/scripts/release_version.py verify
   python3 .github/scripts/release_version.py bump 0.8.4
+  python3 .github/scripts/release_version.py publish-update 0.8.4
 
 The bump command changes the five manifests/lockfiles in one working tree.
 Committing and pushing happens only after a successful GitHub Release.
@@ -20,6 +21,7 @@ PACKAGE_LOCK = ROOT / "package-lock.json"
 TAURI = ROOT / "src-tauri" / "tauri.conf.json"
 CARGO = ROOT / "src-tauri" / "Cargo.toml"
 CARGO_LOCK = ROOT / "src-tauri" / "Cargo.lock"
+UPDATE_FILE = ROOT / "update.txt"
 CARGO_PACKAGE = "router-desktop"
 VERSION_RE = re.compile(r"^\d+\.\d+\.\d+$")
 
@@ -66,6 +68,17 @@ def write_json(path: Path, data: dict) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
+def publish_update(version: str) -> str:
+    """Record a successfully published version, never the next development version."""
+    if not VERSION_RE.fullmatch(version):
+        raise ValueError(f"Unsupported release version: {version!r}")
+    previous = UPDATE_FILE.read_text(encoding="utf-8").strip() if UPDATE_FILE.exists() else ""
+    if VERSION_RE.fullmatch(previous) and tuple(map(int, previous.split("."))) > tuple(map(int, version.split("."))):
+        return previous
+    UPDATE_FILE.write_text(version + "\n", encoding="utf-8")
+    return version
+
+
 def bump(expected: str) -> str:
     current = verified_version()
     if expected != current:
@@ -107,8 +120,10 @@ def main() -> int:
             print(verified_version())
         elif len(sys.argv) == 3 and sys.argv[1] == "bump":
             print(bump(sys.argv[2]))
+        elif len(sys.argv) == 3 and sys.argv[1] == "publish-update":
+            print(publish_update(sys.argv[2]))
         else:
-            print("Usage: release_version.py verify | bump <released-version>", file=sys.stderr)
+            print("Usage: release_version.py verify | bump <released-version> | publish-update <released-version>", file=sys.stderr)
             return 2
     except (ValueError, KeyError, OSError, tomllib.TOMLDecodeError) as exc:
         print(f"::error::{exc}", file=sys.stderr)
