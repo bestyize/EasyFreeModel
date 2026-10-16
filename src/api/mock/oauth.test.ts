@@ -26,10 +26,10 @@ beforeEach(() => {
 afterEach(() => vi.useRealTimers())
 
 describe('oauth mock：能力信息取自 oauth_providers.json', () => {
-  it('25 家，12 家 custom、2 家 state-poll，ids / flow 与 JSON 一致', async () => {
+  it('26 家，12 家 custom、2 家 state-poll，ids / flow 与 JSON 一致', async () => {
     const list = await mock.oauthListProviders()
     expect(list.map((i) => i.providerId)).toEqual(entries.map((e) => e.id))
-    expect(list).toHaveLength(25)
+    expect(list).toHaveLength(26)
     expect(list.filter((i) => i.status === 'custom')).toHaveLength(12)
     expect(list.filter((i) => i.flow === 'state-poll').map((i) => i.providerId)).toEqual(['codebuddy-cn', 'codebuddy-intl'])
     for (const i of list) expect(i.flow, i.providerId).toBe(entries.find((e) => e.id === i.providerId)!.flow)

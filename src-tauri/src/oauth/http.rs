@@ -140,6 +140,18 @@ pub async fn post_with(
     finish(request).await
 }
 
+/// JSON POST with typed values, for provider-specific token exchange endpoints.
+pub async fn post_json_with(
+    client: &Client,
+    url: &str,
+    body: &Value,
+    headers: &ExtraHeaders,
+) -> Result<Reply, OAuthError> {
+    let url = ensure_secure_endpoint(url)?;
+    let request = headers.apply(client.post(url).header(ACCEPT, "application/json")).json(body);
+    finish(request).await
+}
+
 /// GET 请求（CodeBuddy 的令牌轮询以 GET + 查询串进行）。
 pub async fn get_with(client: &Client, url: &str, headers: &ExtraHeaders) -> Result<Reply, OAuthError> {
     let url = ensure_secure_endpoint(url)?;

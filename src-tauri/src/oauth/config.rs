@@ -94,6 +94,9 @@ pub struct OAuthProviderConfig {
     pub token_url: Option<String>,
     #[serde(default)]
     pub refresh_url: Option<String>,
+    /// Optional provider-specific endpoint used after OAuth to mint an inference credential.
+    #[serde(default)]
+    pub agent_key_url: Option<String>,
     /// 设备码响应没有给出 verification_uri 时使用的回退地址。
     #[serde(default)]
     pub verification_uri: Option<String>,
@@ -158,6 +161,9 @@ pub struct OAuthProviderConfig {
     /// （CodeBuddy 用 `X-Refresh-Token`）。
     #[serde(default)]
     pub refresh_token_header: Option<String>,
+    /// Some providers require the refresh token in both the header and form body.
+    #[serde(default)]
+    pub refresh_token_in_body_with_header: bool,
     /// 刷新请求体编码（默认跟 `refreshEncoding`）。
     #[serde(default)]
     pub refresh_request_encoding: Option<Encoding>,
@@ -350,6 +356,10 @@ impl OAuthProviderConfig {
         }
     }
 
+    pub fn agent_key_endpoint(&self, creds: &ClientCredentials) -> Result<String, OAuthError> {
+        self.required(&self.agent_key_url, "agentKeyUrl", creds)
+    }
+
     pub fn scope_string(&self) -> String {
         self.scopes.join(" ")
     }
@@ -365,6 +375,7 @@ impl OAuthProviderConfig {
             ("stateUrl", &self.state_url),
             ("tokenUrl", &self.token_url),
             ("refreshUrl", &self.refresh_url),
+            ("agentKeyUrl", &self.agent_key_url),
             ("verificationUri", &self.verification_uri),
         ];
         for (name, value) in url_fields {
@@ -491,9 +502,9 @@ mod tests {
     }
 
     #[test]
-    fn covers_exactly_the_25_oauth_providers_of_the_catalog() {
+    fn covers_exactly_the_26_oauth_providers_of_the_catalog() {
         let expected = oauth_ids_in_catalog();
-        assert_eq!(expected.len(), 25, "catalog is expected to flag 25 OAuth providers");
+        assert_eq!(expected.len(), 26, "catalog is expected to flag 26 OAuth providers");
         let catalog = OAuthCatalog::builtin().unwrap();
         let mut have: Vec<&str> = catalog.all().iter().map(|p| p.id.as_str()).collect();
         let mut want: Vec<&str> = expected.iter().map(|(id, _, _)| id.as_str()).collect();

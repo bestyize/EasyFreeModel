@@ -1,6 +1,6 @@
 //! 提供商目录与详情的业务逻辑（命令层只调用这里）。
 //!
-//! 133 家内置提供商的 `adapter_ready` 由 `resources/provider_status.json`（见 `status.rs`）决定，
+//! 134 家内置提供商的 `adapter_ready` 由 `resources/provider_status.json`（见 `status.rs`）决定，
 //! 未就绪的状态恒为 `unsupported` 并带 `pending_reason`；连接测试在上游探测接入前如实返回 ok=false。
 //! API Key 只写入系统凭据库（`CredentialVault`），数据库只存 credential_ref，任何返回值都不含明文。
 
@@ -189,7 +189,7 @@ pub async fn save_detail(
             return Err(invalid("自定义提供商必须且只能选择一种协议"));
         };
         let adapter = status::adapter_for_custom_protocol(*protocol)
-            .ok_or_else(|| invalid("自定义提供商仅支持 OpenAI Chat / Anthropic Messages / Gemini 协议"))?;
+            .ok_or_else(|| invalid("自定义提供商协议没有可用适配器"))?;
         (Some(name), Some(serde_json::to_string(&[protocol.as_str()])?), Some(adapter.as_str()))
     } else {
         (None, None, None)
@@ -438,14 +438,8 @@ pub async fn create_custom_provider(
     if name.is_empty() || name.chars().count() > 64 || name.chars().any(|c| c.is_control()) {
         return Err(invalid("提供商名称需为 1–64 个字符"));
     }
-    let adapter = match protocol {
-        Protocol::OpenaiChat | Protocol::AnthropicMessages | Protocol::Gemini => {
-            status::adapter_for_custom_protocol(protocol).expect("三种受支持协议都有适配器")
-        }
-        Protocol::OpenaiResponses => {
-            return Err(invalid("协议仅支持 openai-chat / anthropic-messages / gemini"));
-        }
-    };
+    let adapter = status::adapter_for_custom_protocol(protocol)
+        .ok_or_else(|| invalid("自定义提供商协议没有可用适配器"))?;
     let base_url = status::validate_base_url(base_url)?;
     let id = format!("custom-{}", new_id());
     repo::insert_custom_provider(
@@ -1315,13 +1309,13 @@ mod tests {
     // ---- 种子与目录 ----
 
     #[tokio::test]
-    async fn seed_inserts_all_133_and_group_counts_match() {
+    async fn seed_inserts_all_134_and_group_counts_match() {
         let (pool, _) = setup().await;
         let list = list(&pool).await.unwrap();
-        assert_eq!(list.len(), 133);
+        assert_eq!(list.len(), 134);
         let count = |g: ProviderGroup| list.iter().filter(|p| p.group == g).count();
         assert_eq!(count(ProviderGroup::Oauth), 23);
-        assert_eq!(count(ProviderGroup::Free), 23);
+        assert_eq!(count(ProviderGroup::Free), 24);
         assert_eq!(count(ProviderGroup::Apikey), 87);
         assert_eq!(count(ProviderGroup::Custom), 0);
         // 展示顺序：自定义 → OAuth → 免费 → API Key
@@ -1362,7 +1356,7 @@ mod tests {
         catalog::seed(&pool).await.unwrap();
 
         let n: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM providers").fetch_one(&pool).await.unwrap();
-        assert_eq!(n, 133, "连续 seed 不重复");
+        assert_eq!(n, 134, "连续 seed 不重复");
         let after = get_detail(&pool, "openrouter").await.unwrap();
         assert_eq!(after.connections.len(), 1);
         assert_eq!(after.connections[0].id, "c-keep");
@@ -1520,10 +1514,10 @@ mod tests {
         let u: String = sqlx::query_scalar("SELECT provider_id FROM usage_requests").fetch_one(&pool).await.unwrap();
         assert_eq!(u, "nvidia");
 
-        // 升级后 seed：133 家齐全，连接仍在，ON DELETE CASCADE 仍然生效
+        // 升级后 seed：134 家齐全，连接仍在，ON DELETE CASCADE 仍然生效
         catalog::seed(&pool).await.unwrap();
         let n: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM providers").fetch_one(&pool).await.unwrap();
-        assert_eq!(n, 134, "133 家目录 + 1 家自定义");
+        assert_eq!(n, 135, "134 家目录 + 1 家自定义");
         assert_eq!(get_detail(&pool, "nvidia").await.unwrap().connections.len(), 1);
         assert_eq!(get_detail(&pool, "claude").await.unwrap().summary.group, ProviderGroup::Oauth);
         // 旧 id 不再残留
@@ -1664,12 +1658,20 @@ mod tests {
             .unwrap();
         assert_eq!(a, "anthropic-compatible");
 
-        // 协议非法（空 / 多个 / Responses）一律拒绝
-        for protocols in [vec![], vec![Protocol::OpenaiChat, Protocol::Gemini], vec![Protocol::OpenaiResponses]] {
+        // 协议非法（空 / 多个）一律拒绝
+        for protocols in [vec![], vec![Protocol::OpenaiChat, Protocol::Gemini]] {
             let mut bad = saved.clone();
             bad.summary.protocols = protocols;
             assert!(save_detail(&pool, &vault, bad).await.is_err());
         }
+
+        let mut responses = saved.clone();
+        responses.summary.protocols = vec![Protocol::OpenaiResponses];
+        let updated = save_detail(&pool, &vault, responses).await.unwrap();
+        assert_eq!(updated.summary.protocols, vec![Protocol::OpenaiResponses]);
+        let adapter: String = sqlx::query_scalar("SELECT adapter FROM providers WHERE id = ?1")
+            .bind(&created.summary.id).fetch_one(&pool).await.unwrap();
+        assert_eq!(adapter, "openai-responses");
 
         // 通过 save_provider 新建自定义提供商不再允许（缺 Base URL）
         let mut fresh = saved.clone();
@@ -1709,12 +1711,16 @@ mod tests {
         // 回环地址允许 http
         create_custom_provider(&pool, "Local", Protocol::OpenaiChat, "http://127.0.0.1:11434/v1").await.unwrap();
         create_custom_provider(&pool, "Local2", Protocol::AnthropicMessages, "http://localhost:8080").await.unwrap();
+        let responses = create_custom_provider(&pool, "Responses", Protocol::OpenaiResponses, "https://gw.example.com/v1").await.unwrap();
+        assert_eq!(responses.summary.protocols, vec![Protocol::OpenaiResponses]);
+        let adapter: String = sqlx::query_scalar("SELECT adapter FROM providers WHERE id = ?1")
+            .bind(&responses.summary.id).fetch_one(&pool).await.unwrap();
+        assert_eq!(adapter, "openai-responses");
 
         for (name, proto, url) in [
             ("", Protocol::OpenaiChat, "https://a.example.com"),
             ("   ", Protocol::OpenaiChat, "https://a.example.com"),
             (&"x".repeat(65)[..], Protocol::OpenaiChat, "https://a.example.com"),
-            ("ok", Protocol::OpenaiResponses, "https://a.example.com"),
             ("ok", Protocol::OpenaiChat, "http://a.example.com"),
             ("ok", Protocol::OpenaiChat, "a.example.com"),
             ("ok", Protocol::OpenaiChat, ""),
@@ -1724,7 +1730,7 @@ mod tests {
             assert!(create_custom_provider(&pool, name, proto, url).await.is_err(), "应拒绝 {name:?} {url:?}");
         }
         let n: i64 = sqlx::query_scalar("SELECT COUNT(*) FROM providers WHERE kind = 'custom'").fetch_one(&pool).await.unwrap();
-        assert_eq!(n, 3, "被拒绝的请求不得落库");
+        assert_eq!(n, 4, "被拒绝的请求不得落库");
     }
 
     #[tokio::test]

@@ -19,3 +19,4 @@ src-tauri/gen/
 .env.*
 *.pem
 *.key
+.tmp/

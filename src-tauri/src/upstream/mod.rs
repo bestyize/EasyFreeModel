@@ -491,11 +491,11 @@ async fn send<A: Adapter + ?Sized>(
 ) -> Result<reqwest::Response, UpstreamError> {
     adapter.validate_target(target)?;
     let headers = build_headers(adapter, target, Some(&req), stream)?;
+    let url = adapter.request_url(target, &req);
     let mut body = std::mem::take(&mut req.body);
     adapter.prepare_body(&mut body, &req, target);
     let bytes = Bytes::from(serde_json::to_vec(&body).map_err(|_| UpstreamError::Config("request body could not be serialised".into()))?);
     let total = if stream { None } else { Some(target.timeout) };
-    let url = adapter.request_url(target, &req);
     // 日志里只有主机与路径：查询串（如 `?alt=sse`）与凭据都不记录
     tracing::debug!(provider = %target.provider_id, url = %endpoint::display_url(&url), stream, "upstream request");
     client.post_json(&target.provider_id, url, headers, bytes, total, target.timeout).await

@@ -391,6 +391,12 @@
     "auth": "bearer",
     "reason": null
   },
+  "nous": {
+    "adapter": "openai-compatible",
+    "baseUrl": "https://inference-api.nousresearch.com/v1/chat/completions",
+    "auth": "bearer",
+    "reason": null
+  },
   "ollama-local": {
     "adapter": "ollama",
     "baseUrl": "http://localhost:11434/api/chat",

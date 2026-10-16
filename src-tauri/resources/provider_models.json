@@ -3541,6 +3541,80 @@
       "position": 8
     }
   ],
+  "nous": [
+    {
+      "id": "nous/meituan/longcat-2.0:free",
+      "upstreamModelId": "meituan/longcat-2.0:free",
+      "publicAlias": "nous/meituan/longcat-2.0:free",
+      "description": "Meituan: LongCat 2.0",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 0
+    },
+    {
+      "id": "nous/meituan/longcat-2.5-preview:free",
+      "upstreamModelId": "meituan/longcat-2.5-preview:free",
+      "publicAlias": "nous/meituan/longcat-2.5-preview:free",
+      "description": "Meituan: LongCat 2.5 Preview",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 1
+    },
+    {
+      "id": "nous/stepfun/step-5-preview:free",
+      "upstreamModelId": "stepfun/step-5-preview:free",
+      "publicAlias": "nous/stepfun/step-5-preview:free",
+      "description": "StepFun: Step 5 Preview",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 2
+    },
+    {
+      "id": "nous/upstage/solar-mini4:free",
+      "upstreamModelId": "upstage/solar-mini4:free",
+      "publicAlias": "nous/upstage/solar-mini4:free",
+      "description": "Upstage: Solar Mini 4",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 3
+    },
+    {
+      "id": "nous/stepfun/step-3.7-flash:free",
+      "upstreamModelId": "stepfun/step-3.7-flash:free",
+      "publicAlias": "nous/stepfun/step-3.7-flash:free",
+      "description": "StepFun: Step 3.7 Flash",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 4
+    },
+    {
+      "id": "nous/poolside/laguna-s-2.1:free",
+      "upstreamModelId": "poolside/laguna-s-2.1:free",
+      "publicAlias": "nous/poolside/laguna-s-2.1:free",
+      "description": "Poolside: Laguna S 2.1",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 5
+    },
+    {
+      "id": "nous/poolside/laguna-xs-2.1:free",
+      "upstreamModelId": "poolside/laguna-xs-2.1:free",
+      "publicAlias": "nous/poolside/laguna-xs-2.1:free",
+      "description": "Poolside: Laguna XS 2.1",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 6
+    },
+    {
+      "id": "nous/stealth/missingno",
+      "upstreamModelId": "stealth/missingno",
+      "publicAlias": "nous/stealth/missingno",
+      "description": "MissingNo",
+      "supportsThinking": true,
+      "enabled": true,
+      "position": 7
+    }
+  ],
   "ollama": [
     {
       "id": "ollama/gpt-oss:120b",

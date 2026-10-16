@@ -80,7 +80,9 @@ pub(crate) fn build_router_with(state: AppState, extra: Router<AppState>) -> Rou
         .route("/v1/models", get(list_models))
         .route("/v1/chat/completions", post(chat_completions))
         .route("/v1/messages", post(anthropic_messages))
+        .route("/v1/messages/count_tokens", post(anthropic_count_tokens))
         .route("/v1/responses", post(responses))
+        .route("/v1/responses/compact", post(responses_compact))
         // Gemini：模型名与方法在同一个路径段里（`gemini-2.5-flash:generateContent`），且别名可含 `/`，
         // 因此用通配符整体捕获，再按「最后一个冒号」手工拆分（见 `response::split_gemini_target`）。
         .route("/v1beta/models", get(gemini_list_models))
@@ -155,6 +157,29 @@ async fn responses(
     proxy(state, key, ProtocolKind::OpenAiResponses, headers, body).await
 }
 
+async fn responses_compact(
+    State(state): State<AppState>,
+    Extension(key): Extension<AuthenticatedKey>,
+    headers: HeaderMap,
+    body: Result<Bytes, BytesRejection>,
+) -> Response {
+    let bytes = match body {
+        Ok(bytes) => bytes,
+        Err(rejection) => return proxy(state, key, ProtocolKind::OpenAiResponses, headers, Err(rejection)).await,
+    };
+    let Ok(mut value) = serde_json::from_slice::<Value>(&bytes) else {
+        return error_response(ProtocolKind::OpenAiResponses,
+            &ApiError::new(ApiErrorKind::InvalidRequest, "Invalid JSON body"));
+    };
+    let Some(obj) = value.as_object_mut() else {
+        return error_response(ProtocolKind::OpenAiResponses,
+            &ApiError::new(ApiErrorKind::InvalidRequest, "Request body must be a JSON object"));
+    };
+    obj.insert("_compact".into(), Value::Bool(true));
+    let body = Bytes::from(serde_json::to_vec(&value).expect("parsed JSON can be serialized"));
+    proxy(state, key, ProtocolKind::OpenAiResponses, headers, Ok(body)).await
+}
+
 async fn ollama_chat(
     State(state): State<AppState>,
     Extension(key): Extension<AuthenticatedKey>,
@@ -220,6 +245,25 @@ async fn anthropic_messages(
     body: Result<Bytes, BytesRejection>,
 ) -> Response {
     proxy(state, key, ProtocolKind::AnthropicMessages, headers, body).await
+}
+
+async fn anthropic_count_tokens(body: Result<Bytes, BytesRejection>) -> Response {
+    let body = match body {
+        Ok(bytes) => bytes,
+        Err(rejection) => {
+            let kind = if rejection.status() == StatusCode::PAYLOAD_TOO_LARGE {
+                ApiErrorKind::PayloadTooLarge
+            } else {
+                ApiErrorKind::InvalidRequest
+            };
+            return error_response(ProtocolKind::AnthropicMessages, &ApiError::new(kind, "Invalid JSON body"));
+        }
+    };
+    let Ok(value) = serde_json::from_slice::<Value>(&body) else {
+        return error_response(ProtocolKind::AnthropicMessages,
+            &ApiError::new(ApiErrorKind::InvalidRequest, "Invalid JSON body"));
+    };
+    Json(json!({"input_tokens": super::count_tokens::estimate(&value)})).into_response()
 }
 
 async fn proxy(

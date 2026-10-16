@@ -53,7 +53,9 @@ pub(crate) fn classify(path: &str) -> RouteClass {
     match path {
         "/v1/chat/completions" => RouteClass::Protocol(ProtocolKind::OpenAiChat),
         "/v1/responses" => RouteClass::Protocol(ProtocolKind::OpenAiResponses),
+        "/v1/responses/compact" => RouteClass::Protocol(ProtocolKind::OpenAiResponses),
         "/v1/messages" => RouteClass::Protocol(ProtocolKind::AnthropicMessages),
+        "/v1/messages/count_tokens" => RouteClass::Protocol(ProtocolKind::AnthropicMessages),
         "/api/chat" => RouteClass::Protocol(ProtocolKind::Ollama),
         "/v1/models" | "/v1beta/models" | "/api/tags" => RouteClass::Models,
         p if gemini_inference_path(p) => RouteClass::Protocol(ProtocolKind::Gemini),
@@ -193,6 +195,8 @@ mod tests {
         assert_eq!(classify("/v1beta/models/gemini-2.5-flash:countTokens"), RouteClass::Models, "unsupported methods carry no protocol");
         assert_eq!(classify("/api/chat"), RouteClass::Protocol(ProtocolKind::Ollama));
         assert_eq!(classify("/api/tags"), RouteClass::Models);
+        assert_eq!(classify("/v1/messages/count_tokens"), RouteClass::Protocol(ProtocolKind::AnthropicMessages));
+        assert_eq!(classify("/v1/responses/compact"), RouteClass::Protocol(ProtocolKind::OpenAiResponses));
         assert_eq!(classify("/v1/models/gpt-4o"), RouteClass::Other);
     }
 

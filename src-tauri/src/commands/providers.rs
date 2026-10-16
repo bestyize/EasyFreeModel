@@ -31,7 +31,7 @@ pub async fn test_providers(state: State<'_, AppState>, ids: Vec<String>) -> App
     providers::test_providers(&state.db, &state.vault, &ids).await
 }
 
-/// 创建自定义提供商。`protocol`：openai-chat | anthropic-messages | gemini；
+/// 创建自定义提供商。`protocol`：openai-chat | openai-responses | anthropic-messages | gemini；
 /// `base_url` 必须是 https，或回环地址（localhost / 127.0.0.1 / ::1）上的 http。
 #[tauri::command]
 pub async fn create_custom_provider(

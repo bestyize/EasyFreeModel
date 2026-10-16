@@ -1,4 +1,4 @@
-//! 内置提供商目录（PRODUCT_DESIGN.md §4.2）：133 家，对齐 9Router。
+//! 内置提供商目录：134 家，对齐 9Router v0.5.104 启用的注册表。
 //!
 //! 数据来源是内嵌的两份 JSON：
 //! - `resources/provider_catalog.json`：名称 / 分类 / 颜色 / 官网 / 服务类型 / 认证方式（只读，不含任何凭据）；
@@ -259,11 +259,11 @@ mod tests {
     use std::collections::{HashMap, HashSet};
 
     #[test]
-    fn catalog_parses_and_has_133_unique_ids() {
+    fn catalog_parses_and_has_134_unique_ids() {
         let list = entries();
-        assert_eq!(list.len(), 133);
+        assert_eq!(list.len(), 134);
         let ids: HashSet<_> = list.iter().map(|c| c.id.as_str()).collect();
-        assert_eq!(ids.len(), 133);
+        assert_eq!(ids.len(), 134);
         // 旧版 33 家依赖的几个 id 仍在
         for id in ["openrouter", "gemini", "nvidia", "claude", "antigravity"] {
             assert!(find(id).is_some(), "{id}");
@@ -292,7 +292,7 @@ mod tests {
             }
         }
         assert_eq!(counts[&ProviderGroup::Oauth], 23);
-        assert_eq!(counts[&ProviderGroup::Free], 23);
+        assert_eq!(counts[&ProviderGroup::Free], 24);
         assert_eq!(counts[&ProviderGroup::Apikey], 87);
     }
 
@@ -340,7 +340,7 @@ mod tests {
     #[test]
     fn has_oauth_flag_is_read_from_the_catalog() {
         let n = entries().iter().filter(|e| e.has_oauth).count();
-        assert_eq!(n, 25, "目录中 hasOAuth=true 的条目数");
+        assert_eq!(n, 26, "目录中 hasOAuth=true 的条目数");
         assert!(find("gemini-cli").unwrap().has_oauth);
         assert!(!find("openai").unwrap().has_oauth);
     }

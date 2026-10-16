@@ -16,15 +16,15 @@ beforeEach(() => {
 })
 
 describe('mock 目录与真实资源一致', () => {
-  it('133 家，分组 23 / 23 / 87，顺序自定义 → OAuth → 免费 → API Key', async () => {
+  it('134 家，分组 23 / 24 / 87，顺序自定义 → OAuth → 免费 → API Key', async () => {
     const list = await mock.listProviders()
-    expect(list).toHaveLength(133)
+    expect(list).toHaveLength(134)
     expect(list.filter((p) => p.group === 'oauth')).toHaveLength(23)
-    expect(list.filter((p) => p.group === 'free')).toHaveLength(23)
+    expect(list.filter((p) => p.group === 'free')).toHaveLength(24)
     expect(list.filter((p) => p.group === 'apikey')).toHaveLength(87)
     const rank = { custom: 0, oauth: 1, free: 2, apikey: 3 } as const
     expect(list.every((p, i) => i === 0 || rank[list[i - 1].group] <= rank[p.group])).toBe(true)
-    expect(new Set(list.map((p) => p.id)).size).toBe(133)
+    expect(new Set(list.map((p) => p.id)).size).toBe(134)
     expect(catalog.map((c) => c.id).sort()).toEqual(list.map((p) => p.id).sort())
   })
 
@@ -119,7 +119,7 @@ describe('mock 命令遵守同样的红线', () => {
     await expect(mock.createCustomProvider({ name: '', protocol: 'openai-chat', baseUrl: 'https://a.example.com' })).rejects.toThrow('名称')
     await expect(mock.createCustomProvider({ name: 'X', protocol: 'openai-chat', baseUrl: 'http://a.example.com' })).rejects.toThrow('https')
     await expect(
-      mock.createCustomProvider({ name: 'X', protocol: 'openai-responses' as never, baseUrl: 'https://a.example.com' }),
+      mock.createCustomProvider({ name: 'X', protocol: 'unsupported' as never, baseUrl: 'https://a.example.com' }),
     ).rejects.toThrow('协议')
 
     const d = await mock.createCustomProvider({ name: ' Mine ', protocol: 'anthropic-messages', baseUrl: 'https://a.example.com/v1/' })
@@ -128,6 +128,9 @@ describe('mock 命令遵守同样的红线', () => {
     expect(d.adapterReady).toBe(true)
     expect(d.baseUrl).toBe('https://a.example.com/v1')
     expect((await mock.listProviders())[0].id).toBe(d.id)
+
+    const responses = await mock.createCustomProvider({ name: 'Responses', protocol: 'openai-responses', baseUrl: 'https://a.example.com/v1' })
+    expect(responses.protocols).toEqual(['openai-responses'])
 
     await expect(mock.deleteCustomProvider('openrouter')).rejects.toThrow('自定义')
     await mock.deleteCustomProvider(d.id)

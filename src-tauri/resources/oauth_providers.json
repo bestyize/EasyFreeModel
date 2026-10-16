@@ -439,6 +439,21 @@
       }
     },
     {
+      "id": "nous",
+      "flow": "device",
+      "deviceCodeUrl": "https://portal.nousresearch.com/api/oauth/device/code",
+      "tokenUrl": "https://portal.nousresearch.com/api/oauth/token",
+      "refreshUrl": "https://portal.nousresearch.com/api/oauth/token",
+      "clientId": "hermes-cli",
+      "scopes": ["inference:invoke", "inference:mint_agent_key"],
+      "pkce": false,
+      "refreshLeadSeconds": 300,
+      "refreshTokenHeader": "x-nous-refresh-token",
+      "refreshTokenInBodyWithHeader": true,
+      "agentKeyUrl": "https://portal.nousresearch.com/api/oauth/agent-key",
+      "riskNotice": "该接入方式使用 Nous Portal 的设备码授权；请确认账户及上游条款允许通过本工具调用推理接口。"
+    },
+    {
       "id": "zed",
       "flow": "custom",
       "clientId": null,

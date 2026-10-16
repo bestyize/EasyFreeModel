@@ -144,6 +144,16 @@ impl OAuthService {
         &self.store
     }
 
+    /// Exchange a Portal login token for the credential accepted by its inference API.
+    pub async fn prepare_inference_tokens(&self, provider_id: &str, tokens: TokenSet) -> Result<TokenSet, OAuthError> {
+        if provider_id != "nous" {
+            return Ok(tokens);
+        }
+        let cfg = self.catalog.get(provider_id).ok_or_else(|| OAuthError::UnknownProvider(provider_id.into()))?;
+        let creds = self.credentials.credentials_for(provider_id).await?;
+        super::nous::mint_agent_key(&self.http, cfg, &creds, tokens).await
+    }
+
     fn provider(&self, provider_id: &str, expected: FlowKind) -> Result<&OAuthProviderConfig, OAuthError> {
         let cfg = self
             .catalog
@@ -216,7 +226,8 @@ impl OAuthService {
                     .load(key)
                     .await?
                     .ok_or_else(|| OAuthError::NoTokens(provider_id.to_owned()))?;
-                if !tokens.needs_refresh(cfg.refresh_lead_seconds, Utc::now()) {
+                if !tokens.needs_refresh(cfg.refresh_lead_seconds, Utc::now())
+                    && !(cfg.id == "nous" && tokens.extra_value("nous_agent_key").is_none()) {
                     return Ok(tokens);
                 }
             }
@@ -247,11 +258,24 @@ impl OAuthService {
             .load(key)
             .await?
             .ok_or_else(|| OAuthError::NoTokens(cfg.id.clone()))?;
-        if !force && !current.needs_refresh(cfg.refresh_lead_seconds, Utc::now()) {
+        if !force && !current.needs_refresh(cfg.refresh_lead_seconds, Utc::now())
+            && !(cfg.id == "nous" && current.extra_value("nous_agent_key").is_none()) {
             return Ok(current);
         }
-        let creds = self.credentials.credentials_for(&cfg.id).await?;
-        let fresh = refresh::refresh_tokens(&self.http, cfg, &creds, &current).await?;
+        let refresh_portal = force || current.needs_refresh(cfg.refresh_lead_seconds, Utc::now());
+        let fresh = if refresh_portal {
+            let creds = self.credentials.credentials_for(&cfg.id).await?;
+            refresh::refresh_tokens(&self.http, cfg, &creds, &current).await?
+        } else {
+            current
+        };
+        if cfg.id == "nous" {
+            // Persist a rotated refresh token before the independent Agent Key request.
+            self.store.save(key, &fresh).await?;
+            let prepared = self.prepare_inference_tokens(&cfg.id, fresh).await?;
+            self.store.save(key, &prepared).await?;
+            return Ok(prepared);
+        }
         self.store.save(key, &fresh).await?;
         Ok(fresh)
     }

@@ -1536,6 +1536,25 @@
     "riskNotice": null
   },
   {
+    "id": "nous",
+    "alias": "nous",
+    "name": "Nous Research",
+    "category": "freeTier",
+    "color": "#7C3AED",
+    "textIcon": "NR",
+    "website": "https://nousresearch.com",
+    "format": "openai",
+    "baseUrlHost": "inference-api.nousresearch.com",
+    "hasOAuth": true,
+    "oauthFlow": "device",
+    "authModes": ["oauth", "apikey"],
+    "noAuth": false,
+    "serviceKinds": ["llm", "imageToText"],
+    "modelCount": 8,
+    "deprecated": false,
+    "riskNotice": "OAUTH_RISK_NOTICE"
+  },
+  {
     "id": "ollama-local",
     "alias": "ollama-local",
     "name": "Ollama Local",

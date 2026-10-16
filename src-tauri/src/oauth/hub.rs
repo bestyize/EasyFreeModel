@@ -257,6 +257,13 @@ impl Inner {
         let Some((provider_id, target)) = self.pending_target(session_id) else {
             return PollResult::Cancelled;
         };
+        let tokens = match self.service.prepare_inference_tokens(&provider_id, tokens).await {
+            Ok(tokens) => tokens,
+            Err(e) => return PollResult::Failed { code: e.code().to_owned() },
+        };
+        if self.pending_target(session_id).is_none() {
+            return PollResult::Cancelled;
+        }
         let store = self.service.token_store();
         match target {
             Target::New { label } => {

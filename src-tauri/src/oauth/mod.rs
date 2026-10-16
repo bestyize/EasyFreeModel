@@ -20,6 +20,7 @@ pub mod flow;
 pub mod http;
 pub mod hub;
 pub mod loopback;
+pub mod nous;
 pub mod pkce;
 pub mod refresh;
 pub mod secret;

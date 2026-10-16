@@ -2,6 +2,7 @@ import type { CustomProtocol } from '@/types'
 
 export const CUSTOM_PROTOCOLS: { value: CustomProtocol; label: string }[] = [
   { value: 'openai-chat', label: 'OpenAI 兼容（Chat Completions）' },
+  { value: 'openai-responses', label: 'OpenAI 兼容（Responses）' },
   { value: 'anthropic-messages', label: 'Anthropic 兼容（Messages）' },
   { value: 'gemini', label: 'Gemini 兼容' },
 ]

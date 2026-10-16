@@ -17,6 +17,7 @@
 //! - `stream`：首帧探测与拉取式（带背压）的流式转发。
 
 mod auth;
+mod count_tokens;
 pub(crate) mod collect;
 pub(crate) mod convert;
 mod forward;

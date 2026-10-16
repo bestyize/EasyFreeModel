@@ -2,7 +2,7 @@
 
 /**
  * 提供商分组。'apikey'（API Key 提供商）是对 PRODUCT_DESIGN.md §4.2「固定三组」的有意扩展：
- * 9Router 对齐后目录有 133 家，其中 87 家放不进原来的三组。
+ * 9Router 对齐后目录有 134 家，其中 87 家放不进原来的三组。
  */
 export type ProviderGroup = 'custom' | 'oauth' | 'free' | 'apikey'
 export type ConnectionStatus = 'connected' | 'disconnected' | 'error' | 'unsupported' | 'checking'
@@ -82,8 +82,8 @@ export interface ProviderDetail extends ProviderSummary {
   baseUrl?: string | null
 }
 
-/** 自定义提供商支持的协议（不含 openai-responses） */
-export type CustomProtocol = 'openai-chat' | 'anthropic-messages' | 'gemini'
+/** 自定义提供商支持的上游协议 */
+export type CustomProtocol = Protocol
 
 export interface CreateCustomProviderInput {
   name: string

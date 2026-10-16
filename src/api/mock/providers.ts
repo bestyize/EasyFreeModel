@@ -18,7 +18,7 @@ import modelsJson from '../../../src-tauri/resources/provider_models.json'
  * 浏览器预览用 mock，仅在非 Tauri 环境生效。
  *
  * 目录直接读取 Rust 侧内嵌的同两份资源（provider_catalog.json / provider_status.json），
- * 与真实应用一致：133 家，adapterReady 由 provider_status.json 的 adapter 是否为 null 决定，
+ * 与真实应用一致：134 家，adapterReady 由 provider_status.json 的 adapter 是否为 null 决定，
  * 待接入原因取自 reason。规则与 Rust 的 providers::catalog 保持一致（分组、默认服务类型、色值规范化）。
  *
  * mock 同样遵守红线：API Key 只在 addConnection / updateConnectionCredential 的入参里出现一次，
@@ -310,8 +310,8 @@ export const providersMock: ProvidersApi = {
     await delay()
     const name = input.name.trim()
     if (!name || [...name].length > 64) throw new Error('提供商名称需为 1–64 个字符')
-    if (!['openai-chat', 'anthropic-messages', 'gemini'].includes(input.protocol)) {
-      throw new Error('协议仅支持 openai-chat / anthropic-messages / gemini')
+    if (!['openai-chat', 'openai-responses', 'anthropic-messages', 'gemini'].includes(input.protocol)) {
+      throw new Error('协议仅支持 openai-chat / openai-responses / anthropic-messages / gemini')
     }
     const url = validateBaseUrl(input.baseUrl)
     if (!url.ok) throw new Error(url.message)

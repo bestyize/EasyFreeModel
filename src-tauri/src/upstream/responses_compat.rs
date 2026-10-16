@@ -53,6 +53,14 @@ impl Adapter for ResponsesAdapter {
         Self::responses_url(&target.endpoint.base_url, target.endpoint.path.as_deref())
     }
 
+    fn request_url(&self, target: &UpstreamTarget, req: &UpstreamRequest) -> Url {
+        let base = self.endpoint_url(target);
+        if target.provider_id == "codex" && req.body.get("_compact").and_then(Value::as_bool) == Some(true) {
+            return join_path(&base, "compact");
+        }
+        base
+    }
+
     fn models_url(&self, target: &UpstreamTarget) -> Url {
         let base = &target.endpoint.base_url;
         let trimmed = base.path().trim_end_matches('/');
@@ -65,6 +73,7 @@ impl Adapter for ResponsesAdapter {
     }
 
     fn prepare_body(&self, body: &mut Value, _req: &UpstreamRequest, target: &UpstreamTarget) {
+        if let Some(obj) = body.as_object_mut() { obj.remove("_compact"); }
         if target.provider_id != "codex" { return; }
         let Some(obj) = body.as_object_mut() else { return; };
         // ChatGPT Codex 的 Responses 入口要求明确的 instructions / store，并只接受其子集。
@@ -162,6 +171,31 @@ mod tests {
         assert_eq!(ResponsesAdapter::responses_url(&u("https://a.example/v1/"), None).as_str(), "https://a.example/v1/responses");
         assert_eq!(ResponsesAdapter::responses_url(&u("https://a.example/v1/responses"), None).as_str(), "https://a.example/v1/responses");
         assert_eq!(ResponsesAdapter::responses_url(&u("https://a.example"), Some("/openai/v1/responses")).as_str(), "https://a.example/openai/v1/responses");
+    }
+
+    #[test]
+    fn compact_uses_codex_endpoint_and_never_forwards_internal_marker() {
+        let target = UpstreamTarget {
+            provider_id: "codex".into(), connection_id: "c".into(),
+            endpoint: super::super::ResolvedEndpoint::new(
+                AdapterKind::OpenAiResponses,
+                Url::parse("https://chatgpt.com/backend-api/codex/responses").unwrap(),
+                super::super::AuthStyle::Bearer,
+            ),
+            api_key: None, extra_headers: vec![], timeout: std::time::Duration::from_secs(10),
+        };
+        let req = UpstreamRequest { model: "gpt-6.1-sol".into(), stream: false, passthrough: true,
+            body: serde_json::json!({"model":"gpt-6.1-sol", "input":"compact", "_compact":true}), extra_headers: vec![] };
+        assert_eq!(ResponsesAdapter.request_url(&target, &req).path(), "/backend-api/codex/responses/compact");
+        let mut body = req.body.clone();
+        ResponsesAdapter.prepare_body(&mut body, &req, &target);
+        assert!(body.get("_compact").is_none());
+        let mut custom = target;
+        custom.provider_id = "custom".into();
+        assert_eq!(ResponsesAdapter.request_url(&custom, &req).path(), "/backend-api/codex/responses");
+        let mut body = req.body.clone();
+        ResponsesAdapter.prepare_body(&mut body, &req, &custom);
+        assert!(body.get("_compact").is_none());
     }
 
     #[test]

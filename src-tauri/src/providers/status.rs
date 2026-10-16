@@ -107,7 +107,7 @@ pub fn adapter_for_custom_protocol(protocol: crate::models::Protocol) -> Option<
         OpenaiChat => Some(Adapter::OpenaiCompatible),
         AnthropicMessages => Some(Adapter::AnthropicCompatible),
         Gemini => Some(Adapter::Gemini),
-        OpenaiResponses => None,
+        OpenaiResponses => Some(Adapter::OpenaiResponses),
     }
 }
 

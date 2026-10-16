@@ -317,7 +317,12 @@ impl Runtime {
                 if provider.id == "codex" {
                     codex_account_id = tokens.chatgpt_account_id();
                 }
-                Some(Secret::new(tokens.access_token.expose()))
+                let inference_key = if provider.id == "nous" {
+                    tokens.extra_value("nous_agent_key").ok_or(TargetError::TokenTransient)?
+                } else {
+                    tokens.access_token.expose()
+                };
+                Some(Secret::new(inference_key))
             } else {
                 None
             }

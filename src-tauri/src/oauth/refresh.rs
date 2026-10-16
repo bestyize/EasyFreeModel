@@ -45,21 +45,19 @@ pub async fn refresh_tokens(
     let encoding = cfg.refresh_request_encoding.unwrap_or(cfg.refresh_encoding);
 
     let mut fields: Vec<(String, String)> = vec![];
-    match cfg.refresh_token_header.as_deref() {
-        // 个别上游（CodeBuddy）把 refresh token 放在请求头里，请求体为空对象。
-        Some(header) => {
-            headers.0.push((header.to_owned(), refresh_token.expose().to_owned()));
+    if let Some(header) = cfg.refresh_token_header.as_deref() {
+        headers.0.push((header.to_owned(), refresh_token.expose().to_owned()));
+    }
+    // CodeBuddy only needs the header; Nous requires the token in both places.
+    if cfg.refresh_token_header.is_none() || cfg.refresh_token_in_body_with_header {
+        fields.push(("grant_type".into(), "refresh_token".into()));
+        fields.push(("refresh_token".into(), refresh_token.expose().to_owned()));
+        fields.push(("client_id".into(), client.client_id.clone()));
+        if let Some(secret) = &client.client_secret {
+            fields.push(("client_secret".into(), secret.expose().to_owned()));
         }
-        None => {
-            fields.push(("grant_type".into(), "refresh_token".into()));
-            fields.push(("refresh_token".into(), refresh_token.expose().to_owned()));
-            fields.push(("client_id".into(), client.client_id.clone()));
-            if let Some(secret) = &client.client_secret {
-                fields.push(("client_secret".into(), secret.expose().to_owned()));
-            }
-            if let Some(scope) = &cfg.refresh_scope {
-                fields.push(("scope".into(), scope.clone()));
-            }
+        if let Some(scope) = &cfg.refresh_scope {
+            fields.push(("scope".into(), scope.clone()));
         }
     }
 
@@ -90,6 +88,9 @@ pub async fn refresh_tokens(
     // 沿用旧的附加字段（例如 id_token），新响应里的同名字段优先。
     for (key, value) in &current.extra {
         fresh.extra.entry(key.clone()).or_insert_with(|| value.clone());
+    }
+    if cfg.id == "nous" {
+        fresh.extra.remove("nous_agent_key");
     }
     if fresh.scopes.is_empty() {
         fresh.scopes = current.scopes.clone();
