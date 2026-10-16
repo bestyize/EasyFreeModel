@@ -157,6 +157,11 @@ pub struct ToolNameMap {
 }
 
 impl ToolNameMap {
+    /// Register a reversible provider alias without applying Gemini's sanitization.
+    pub(crate) fn insert_alias(&mut self, original: &str, wire: &str) {
+        self.to_wire.insert(original.to_string(), wire.to_string());
+        self.from_wire.insert(wire.to_string(), original.to_string());
+    }
     pub fn is_identity(&self) -> bool {
         self.to_wire.iter().all(|(k, v)| k == v)
     }

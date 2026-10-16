@@ -149,8 +149,13 @@ pub(crate) async fn proxy_inbound(rt: Arc<Runtime>, key: VerifiedKey, inbound: I
     let passthrough = outbound.passthrough;
     let stream = want_stream;
     let client_wants_usage = outbound.client_wants_usage;
-    let tool_names = outbound.tool_names;
+    let mut tool_names = outbound.tool_names;
     let mut upstream_body = outbound.body;
+    if resolved.provider.kind == "builtin" && resolved.provider.id == "opencode" {
+        tool_names = crate::upstream::opencode_compat::prepare_for_endpoint(
+            &mut upstream_body, &resolved.provider.id, &resolved.endpoint,
+        );
+    }
     if force_collect {
         if let Some(obj) = upstream_body.as_object_mut() {
             obj.insert("stream".into(), Value::Bool(true));

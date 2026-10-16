@@ -24,10 +24,11 @@ async fn decode_until(
     mut observe: impl FnMut(StreamEvent) -> Result<bool, UpstreamError>,
 ) -> Result<(), UpstreamError> {
     let Primed { mut body, mut splitter, mut frames } = primed;
-    let mut decoder = new_decoder(kind, names);
+    let mut decoder = new_decoder(kind, names.clone());
     let mut received = 0usize;
     loop {
-        if let Some(frame) = frames.pop_front() {
+        if let Some(mut frame) = frames.pop_front() {
+            crate::upstream::opencode_compat::restore_frame_names(&mut frame, &names);
             let events = decoder.push(&frame).map_err(|_| malformed())?;
             for event in events {
                 if observe(event)? { return Ok(()); }
@@ -178,6 +179,18 @@ mod tests {
         let broken = collect_complete(prepared(first).await, AdapterKind::OpenAiCompatible,
             ToolNameMap::default(), Duration::from_secs(1)).await;
         assert!(broken.is_err(), "an interrupted stream must not produce a partial JSON response");
+    }
+
+    #[tokio::test]
+    async fn collected_tool_calls_restore_provider_aliases_before_encoding() {
+        let first = "data: {\"id\":\"chat-1\",\"model\":\"model-1\",\"choices\":[{\"delta\":{\"tool_calls\":[{\"index\":0,\"id\":\"call-1\",\"type\":\"function\",\"function\":{\"name\":\"shell_client\",\"arguments\":\"{\\\"cmd\\\":\\\"pwd\\\"}\"}}]},\"finish_reason\":null}]}\n\n";
+        let end = "data: {\"choices\":[{\"delta\":{},\"finish_reason\":\"tool_calls\"}]}\n\ndata: [DONE]\n\n";
+        let mut names = ToolNameMap::default();
+        names.insert_alias("shell", "shell_client");
+        let response = collect_complete(prepared(&format!("{first}{end}")).await,
+            AdapterKind::OpenAiCompatible, names, Duration::from_secs(1)).await.unwrap();
+        assert!(response.content.iter().any(|part| matches!(part,
+            ContentPart::ToolUse { name, input, .. } if name == "shell" && input["cmd"] == "pwd")));
     }
 
     #[tokio::test]
