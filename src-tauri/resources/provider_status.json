@@ -517,7 +517,7 @@
   },
   "opencode": {
     "adapter": "openai-compatible",
-    "baseUrl": "https://opencode.ai/zen/v1/chat/completions",
+    "baseUrl": "https://opencode.ai/inference/v1/chat/completions",
     "auth": "bearer",
     "reason": null
   },

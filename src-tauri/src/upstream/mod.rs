@@ -21,6 +21,7 @@ pub mod gemini_compat;
 mod iflow_signing;
 pub mod ollama_compat;
 pub mod openai_compat;
+mod opencode_compat;
 pub mod responses_compat;
 pub mod sse_decode;
 pub mod vertex_compat;
@@ -468,6 +469,8 @@ fn build_headers<A: Adapter + ?Sized>(
         headers.insert("anthropic-beta", HeaderValue::from_str(&flags.join(","))
             .map_err(|_| UpstreamError::Config("invalid Anthropic beta header".into()))?);
     }
+    // Keep OpenCode Free's v2 wire headers separate from paid Zen and custom endpoints.
+    opencode_compat::add_headers(target, &mut headers);
     if target.provider_id == "codex" {
         headers.insert("originator", HeaderValue::from_static("codex_cli_rs"));
         headers.insert("version", HeaderValue::from_static(client::CODEX_CLI_VERSION));
@@ -494,6 +497,7 @@ async fn send<A: Adapter + ?Sized>(
     let url = adapter.request_url(target, &req);
     let mut body = std::mem::take(&mut req.body);
     adapter.prepare_body(&mut body, &req, target);
+    opencode_compat::prepare_body(&mut body, target);
     let bytes = Bytes::from(serde_json::to_vec(&body).map_err(|_| UpstreamError::Config("request body could not be serialised".into()))?);
     let total = if stream { None } else { Some(target.timeout) };
     // 日志里只有主机与路径：查询串（如 `?alt=sse`）与凭据都不记录
