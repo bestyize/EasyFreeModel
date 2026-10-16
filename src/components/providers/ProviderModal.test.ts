@@ -178,7 +178,18 @@ describe('ProviderModal', () => {
     expect(w.text()).toContain('待接入')
     expect(w.text()).not.toContain('已连接')
     const add = w.findAll('button').find((b) => b.text().includes('添加 API Key'))
-    expect(add).toBeUndefined()
+    expect(add?.attributes('disabled')).toBeDefined()
+  })
+
+  it('allows API Key connections for OAuth-classified providers when that auth mode is declared', async () => {
+    const w = await open(detail({ authModes: ['oauth', 'apiKey'], connections: [] }), { ...summary, authModes: ['oauth', 'apiKey'] })
+    apiMock.addConnection.mockResolvedValue({ id: 'key-1', providerId: 'ag', accountLabel: 'team', kind: 'apiKey', status: 'active', priority: 1, weight: 1, enabled: true })
+    await w.findAll('button').find((b) => b.text().includes('添加 API Key'))!.trigger('click')
+    await w.find('input[aria-label="名称"]').setValue('team')
+    await w.find('input[aria-label="API Key"]').setValue('sk-test-valid-key')
+    await w.find('form[aria-label="添加 API Key"]').trigger('submit')
+    await flushPromises()
+    expect(apiMock.addConnection).toHaveBeenCalledWith({ providerId: 'ag', accountLabel: 'team', apiKey: 'sk-test-valid-key' })
   })
 
   it('requires confirmation before removing a connection, and removal marks dirty', async () => {

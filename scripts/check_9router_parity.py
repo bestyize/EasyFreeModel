@@ -14,6 +14,8 @@ ROOT = Path(__file__).resolve().parents[1]
 REFERENCE_COMMIT = "87a74e1bda3677193c6f71a7e2100c90311f0689"
 IMPORT = re.compile(r'^import\s+(p\w+)\s+from\s+"\./([^"/]+)\.js";')
 ACTIVE = re.compile(r'^\s+(p\w+),\s*$')
+AUTH_MODES = re.compile(r'\bauthModes\s*:\s*\[([^\]]*)\]', re.DOTALL)
+QUOTED = re.compile(r'["\']([A-Za-z]+)["\']')
 
 
 def active_reference_ids(index: Path) -> set[str]:
@@ -44,6 +46,16 @@ def main() -> None:
     pending_chat = sorted(item["id"] for item in catalog
                           if "llm" in (item.get("serviceKinds") or ["llm"])
                           and not status[item["id"]].get("adapter"))
+    auth_mode_mismatches = []
+    for item in catalog:
+        if item["category"] != "oauth":
+            continue
+        source = (args.reference / "open-sse" / "providers" / "registry" / f'{item["id"]}.js').read_text(encoding="utf-8")
+        declared = AUTH_MODES.search(source)
+        expected = {mode.lower() for mode in QUOTED.findall(declared.group(1))} if declared else {"oauth"}
+        actual = {mode.lower() for mode in item["authModes"]}
+        if actual != expected:
+            auth_mode_mismatches.append({"id": item["id"], "reference": sorted(expected), "current": sorted(actual)})
     print(json.dumps({
         "referenceCommit": REFERENCE_COMMIT,
         "referenceActive": len(reference),
@@ -54,6 +66,7 @@ def main() -> None:
                                 for item in catalog if "llm" in (item.get("serviceKinds") or ["llm"])),
         "pendingChatAdapters": pending_chat,
         "customOAuthFlows": sorted(item["id"] for item in oauth if item["flow"] == "custom"),
+        "authModeMismatches": auth_mode_mismatches,
     }, ensure_ascii=False, indent=2))
 
 

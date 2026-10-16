@@ -369,7 +369,7 @@ describe('自定义提供商', () => {
     await openCustomDialog(w, '添加 Anthropic 兼容')
     const select = () => field(w, '协议')
     expect(valueOf(select())).toBe('anthropic-messages')
-    expect(select().findAll('option').map((o) => o.attributes('value'))).toEqual(['openai-chat', 'anthropic-messages', 'gemini'])
+    expect(select().findAll('option').map((o) => o.attributes('value'))).toEqual(['openai-chat', 'openai-responses', 'anthropic-messages', 'gemini'])
 
     await select().setValue('gemini')
     await field(w, '提供商名称').setValue('内部 Gemini')

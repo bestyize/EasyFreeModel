@@ -136,20 +136,23 @@ impl Runtime {
 
         match outcome {
             // 2xx 还不够：上游可能在 200 里塞一个错误对象或空结果（9Router 同样会检查响应体）。
-            Ok(d) => match (match &d.value {
-                ProbeReply::Json(reply) => validate_reply(reply, upstream_proto),
-                ProbeReply::Stream(true) => Ok(()),
-                ProbeReply::Stream(false) => Err("上游流未返回任何内容（该模型可能不可用）"),
-            }) {
-                Ok(()) => Ok(TestResult {
-                    connection_id: String::new(),
-                    provider_id: Some(provider_id.to_string()),
-                    ok: true,
-                    latency_ms: Some(latency_ms),
-                    error: None,
-                }),
-                Err(reason) => Ok(fail(reason.to_string())),
-            },
+            Ok(d) => {
+                let validated = match &d.value {
+                    ProbeReply::Json(reply) => validate_reply(reply, upstream_proto),
+                    ProbeReply::Stream(true) => Ok(()),
+                    ProbeReply::Stream(false) => Err("上游流未返回任何内容（该模型可能不可用）"),
+                };
+                match validated {
+                    Ok(()) => Ok(TestResult {
+                        connection_id: String::new(),
+                        provider_id: Some(provider_id.to_string()),
+                        ok: true,
+                        latency_ms: Some(latency_ms),
+                        error: None,
+                    }),
+                    Err(reason) => Ok(fail(reason.to_string())),
+                }
+            }
             Err(failure) => Ok(fail(describe_failure(&failure))),
         }
     }

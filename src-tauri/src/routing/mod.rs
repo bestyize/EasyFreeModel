@@ -27,7 +27,7 @@ use tokio::sync::Semaphore;
 
 use crate::error::{AppError, AppResult};
 use crate::gateway::VerifiedKey;
-use crate::oauth::{exchange, OAuthError, OAuthService};
+use crate::oauth::{OAuthError, OAuthService};
 use crate::protocols::{ApiError, ApiErrorKind};
 use crate::security::vault::{self, CredentialVault};
 use crate::store::settings as settings_repo;
@@ -308,19 +308,15 @@ impl Runtime {
         let is_oauth = conn.kind == "oauth";
         let mut codex_account_id = None;
         let api_key = if is_oauth {
-            // 兑换步骤未接入的提供商即使不需要密钥头也要如实拒绝
-            if let Some(note) = exchange::token_exchange_note(&provider.id) {
-                return Err(TargetError::ExchangePending(note));
-            }
             if endpoint.auth.needs_key() {
                 let tokens = self.oauth_tokens(&provider.id, conn, force_refresh).await?;
                 if provider.id == "codex" {
                     codex_account_id = tokens.chatgpt_account_id();
                 }
-                let inference_key = if provider.id == "nous" {
-                    tokens.extra_value("nous_agent_key").ok_or(TargetError::TokenTransient)?
-                } else {
-                    tokens.access_token.expose()
+                let inference_key = match provider.id.as_str() {
+                    "nous" => tokens.extra_value("nous_agent_key").ok_or(TargetError::TokenTransient)?,
+                    "github" => tokens.extra_value("copilot_token").ok_or(TargetError::TokenTransient)?,
+                    _ => tokens.access_token.expose(),
                 };
                 Some(Secret::new(inference_key))
             } else {

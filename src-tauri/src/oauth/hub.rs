@@ -28,7 +28,6 @@ use tokio::time::Instant;
 
 use super::config::{ClientCredentialAdmin, ClientCredentials, FlowKind, OAuthProviderConfig};
 use super::error::OAuthError;
-use super::exchange;
 use super::http::ensure_secure_endpoint;
 use super::secret::Secret;
 use super::service::{CancelHandle, OAuthService};
@@ -466,13 +465,8 @@ impl OAuthHub {
             Ok(Some(row)) => row.adapter_ready,
             _ => false,
         };
-        let exchange_note = exchange::token_exchange_note(&cfg.id);
-        let limitation = match (exchange_note, adapter_ready) {
-            (Some(note), true) => Some(note.to_owned()),
-            (Some(note), false) => Some(format!("{note}；该提供商的转发适配器也尚未接入")),
-            (None, false) => Some("该提供商的转发适配器尚未接入，授权成功的连接暂不会参与路由".to_owned()),
-            (None, true) => None,
-        };
+        let limitation = (!adapter_ready)
+            .then_some("该提供商的转发适配器尚未接入，授权成功的连接暂不会参与路由".to_owned());
 
         ProviderInfo {
             provider_id: cfg.id.clone(),
@@ -481,7 +475,7 @@ impl OAuthHub {
             reason: None,
             requires: Vec::new(),
             limitation,
-            token_exchange_pending: exchange_note.is_some(),
+            token_exchange_pending: false,
             risk_notice: cfg.risk_notice.clone(),
             client_id_required: cfg.client_id.is_none() && !cfg.no_client_id,
             client_secret: if cfg.requires_client_secret && cfg.client_secret.is_none() {

@@ -849,7 +849,7 @@ async fn check_oauth_connection(
     provider: &ProviderRow,
     conn: &repo::ConnectionRow,
 ) -> TestResult {
-    use crate::oauth::{exchange, OAuthCatalog, TokenSet};
+    use crate::oauth::{OAuthCatalog, TokenSet};
     let fail = |msg: String| test_fail(&conn.id, &provider.id, msg);
     if AccountStatus::parse(&conn.status) == Some(AccountStatus::NeedsReauth) {
         return fail("授权已失效，需要重新授权".to_string());
@@ -874,9 +874,16 @@ async fn check_oauth_connection(
     if tokens.is_expired(chrono::Utc::now()) && !refreshable {
         return fail("授权令牌已过期且无法自动刷新，需要重新授权".to_string());
     }
-    if let Some(note) = exchange::token_exchange_note(&provider.id) {
-        return fail(format!("授权令牌已保存，但{note}"));
-    }
+    let inference_token = match provider.id.as_str() {
+        "github" => tokens.extra_value("copilot_token"),
+        "nous" => tokens.extra_value("nous_agent_key"),
+        "muse" if tokens.extra_value("muse_oauth_token").is_some() => Some(tokens.access_token.expose()),
+        "muse" => None,
+        _ => Some(tokens.access_token.expose()),
+    };
+    let Some(inference_token) = inference_token else {
+        return fail("账户令牌已保存，但推理凭据尚未兑换；请重新授权或发起模型探测".to_string());
+    };
     if !provider.adapter_ready {
         return fail(format!("授权令牌已保存，但{ADAPTER_NOT_READY}（{}）", pending_text(provider)));
     }
@@ -884,7 +891,7 @@ async fn check_oauth_connection(
         Ok(t) => t,
         Err(_) => return fail("该提供商尚未配置上游端点，无法探测".to_string()),
     };
-    match probe_connection(&target, tokens.access_token.expose()).await {
+    match probe_connection(&target, inference_token).await {
         ProbeOutcome::Reachable { latency_ms } => TestResult {
             connection_id: conn.id.clone(),
             provider_id: Some(provider.id.clone()),
@@ -1800,6 +1807,15 @@ mod tests {
     }
 
     #[tokio::test]
+    async fn oauth_category_uses_declared_api_key_modes() {
+        let (pool, vault) = setup().await;
+        let key = add_connection(&pool, &vault, "clinepass", "team", SECRET).await.unwrap();
+        assert_eq!(key.kind, CredentialKind::ApiKey);
+        let err = add_connection(&pool, &vault, "claude", "team", SECRET).await.unwrap_err().to_string();
+        assert!(err.contains("不支持 API Key"));
+    }
+
+    #[tokio::test]
     async fn add_connection_rejects_bad_input_without_leaking_the_key() {
         let (pool, vault) = setup().await;
         for key in ["", "   ", "\n\t", "has space inside", "line\nbreak", "nul\0byte"] {
@@ -2073,8 +2089,8 @@ mod tests {
         assert!(e.contains("授权令牌已保存"), "{e}");
         // muse 不支持 refresh：过期即需重新授权，即使存着 refresh token
         assert!(err(t("muse-expired").await).contains("已过期且无法自动刷新"));
-        // github：令牌兑换步骤没接入
-        assert!(err(t("gh").await).contains("令牌兑换步骤尚未接入"));
+        // github：旧连接尚无 Copilot 推理令牌，不得把账户令牌送去探测
+        assert!(err(t("gh").await).contains("推理凭据尚未兑换"));
 
         // 令牌内容绝不出现在结果里
         let all = test_providers(&pool, &vault, &["claude".into(), "github".into()]).await.unwrap();

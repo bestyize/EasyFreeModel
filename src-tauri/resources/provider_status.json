@@ -159,6 +159,13 @@
     "adapter": "openai-compatible",
     "baseUrl": "https://api.deepseek.com/chat/completions",
     "auth": "bearer",
+    "transports": {
+      "anthropic-messages": {
+        "adapter": "anthropic-compatible",
+        "baseUrl": "https://api.deepseek.com/anthropic/v1/messages",
+        "auth": "x-api-key"
+      }
+    },
     "reason": null
   },
   "edge-tts": {
@@ -221,6 +228,18 @@
     "adapter": "openai-compatible",
     "baseUrl": "https://api.githubcopilot.com/chat/completions",
     "auth": "bearer",
+    "transports": {
+      "anthropic-messages": {
+        "adapter": "anthropic-compatible",
+        "baseUrl": "https://api.githubcopilot.com/v1/messages",
+        "auth": "bearer"
+      },
+      "openai-responses": {
+        "adapter": "openai-responses",
+        "baseUrl": "https://api.githubcopilot.com/responses",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "gitlab": {
@@ -239,6 +258,13 @@
     "adapter": "anthropic-compatible",
     "baseUrl": "https://api.z.ai/api/anthropic/v1/messages",
     "auth": "x-api-key",
+    "transports": {
+      "openai-chat": {
+        "adapter": "openai-compatible",
+        "baseUrl": "https://api.z.ai/api/coding/paas/v4/chat/completions",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "google-pse": {
@@ -323,6 +349,18 @@
     "adapter": "anthropic-compatible",
     "baseUrl": "https://api.kimi.com/coding/v1/messages",
     "auth": "x-api-key",
+    "transports": {
+      "openai-chat": {
+        "adapter": "openai-compatible",
+        "baseUrl": "https://api.kimi.com/coding/v1/chat/completions",
+        "auth": "bearer"
+      },
+      "openai-responses": {
+        "adapter": "openai-responses",
+        "baseUrl": "https://api.kimi.com/coding/v1/responses",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "kiro": {
@@ -353,12 +391,26 @@
     "adapter": "anthropic-compatible",
     "baseUrl": "https://api.minimaxi.com/anthropic/v1/messages",
     "auth": "x-api-key",
+    "transports": {
+      "openai-chat": {
+        "adapter": "openai-compatible",
+        "baseUrl": "https://api.minimaxi.com/v1/chat/completions",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "minimax": {
     "adapter": "anthropic-compatible",
     "baseUrl": "https://api.minimax.io/anthropic/v1/messages",
     "auth": "x-api-key",
+    "transports": {
+      "openai-chat": {
+        "adapter": "openai-compatible",
+        "baseUrl": "https://api.minimax.io/v1/chat/completions",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "mistral": {
@@ -431,12 +483,36 @@
     "adapter": "openai-compatible",
     "baseUrl": "https://opencode.ai/zen/go/v1/chat/completions",
     "auth": "bearer",
+    "transports": {
+      "anthropic-messages": {
+        "adapter": "anthropic-compatible",
+        "baseUrl": "https://opencode.ai/zen/go/v1/messages",
+        "auth": "x-api-key"
+      },
+      "openai-responses": {
+        "adapter": "openai-responses",
+        "baseUrl": "https://opencode.ai/zen/go/v1/responses",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "opencode-zen": {
     "adapter": "openai-compatible",
     "baseUrl": "https://opencode.ai/zen/v1/chat/completions",
     "auth": "bearer",
+    "transports": {
+      "anthropic-messages": {
+        "adapter": "anthropic-compatible",
+        "baseUrl": "https://opencode.ai/zen/v1/messages",
+        "auth": "x-api-key"
+      },
+      "openai-responses": {
+        "adapter": "openai-responses",
+        "baseUrl": "https://opencode.ai/zen/v1/responses",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "opencode": {
@@ -595,12 +671,26 @@
     "adapter": "openai-compatible",
     "baseUrl": "https://api.x.ai/v1/chat/completions",
     "auth": "bearer",
+    "transports": {
+      "openai-responses": {
+        "adapter": "openai-responses",
+        "baseUrl": "https://api.x.ai/v1/responses",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "xiaomi-mimo": {
     "adapter": "openai-compatible",
     "baseUrl": "https://api.xiaomimimo.com/v1/chat/completions",
     "auth": "bearer",
+    "transports": {
+      "anthropic-messages": {
+        "adapter": "anthropic-compatible",
+        "baseUrl": "https://api.xiaomimimo.com/anthropic/v1/messages",
+        "auth": "x-api-key"
+      }
+    },
     "reason": null
   },
   "xiaomi-tokenplan": {
@@ -781,6 +871,13 @@
     "adapter": "openai-compatible",
     "baseUrl": "https://api.meta.ai/v1/chat/completions",
     "auth": "bearer",
+    "transports": {
+      "openai-responses": {
+        "adapter": "openai-responses",
+        "baseUrl": "https://api.meta.ai/v1/responses",
+        "auth": "bearer"
+      }
+    },
     "reason": null
   },
   "minimax-code": {

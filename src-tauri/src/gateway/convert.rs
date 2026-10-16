@@ -19,6 +19,7 @@ pub(crate) struct Outbound {
     pub body: Value,
     pub passthrough: bool,
     pub warnings: Vec<String>,
+    #[allow(dead_code)]
     pub stream: bool,
     /// 客户端是否要求在流里带 usage（OpenAI `stream_options.include_usage`）。
     pub client_wants_usage: bool,

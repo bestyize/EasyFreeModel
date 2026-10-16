@@ -18,6 +18,7 @@
 
 use super::repo::ProviderCfg;
 use crate::providers::status::{self, AuthScheme, AuthSpec};
+use crate::protocols::ProtocolKind;
 use crate::upstream::endpoint::validate_base_url;
 use crate::upstream::vertex_compat::check_express_config;
 use crate::upstream::{AdapterKind, AuthStyle, NotReady, ResolvedEndpoint};
@@ -86,9 +87,68 @@ pub fn endpoint_for(p: &ProviderCfg) -> Result<ResolvedEndpoint, NotReady> {
     Ok(endpoint)
 }
 
+/// A built-in provider may expose a native endpoint for a particular client protocol.
+pub fn endpoint_for_client(p: &ProviderCfg, client: ProtocolKind) -> Result<Option<ResolvedEndpoint>, NotReady> {
+    if p.kind != "builtin" {
+        return Ok(None);
+    }
+    let Some(transport) = status::get(&p.id).and_then(|entry| entry.transports.get(client.id())) else {
+        return Ok(None);
+    };
+    let kind = kind_for(transport.adapter.as_str())?;
+    let base_url = validate_base_url(&transport.base_url).map_err(NotReady)?;
+    Ok(Some(ResolvedEndpoint::new(kind, base_url, auth_for(&transport.auth))))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn glm_selects_native_openai_transport_without_changing_anthropic_default() {
+        let glm = row("glm", "builtin", "anthropic-compatible", true, None);
+        let default = endpoint_for(&glm).unwrap();
+        assert_eq!(default.kind, AdapterKind::AnthropicCompatible);
+        let alternate = endpoint_for_client(&glm, ProtocolKind::OpenAiChat).unwrap().unwrap();
+        assert_eq!(alternate.kind, AdapterKind::OpenAiCompatible);
+        assert_eq!(alternate.base_url.as_str(), "https://api.z.ai/api/coding/paas/v4/chat/completions");
+        assert!(endpoint_for_client(&glm, ProtocolKind::OpenAiResponses).unwrap().is_none());
+        let custom = row("glm", "custom", "anthropic-compatible", true, Some("https://example.com"));
+        assert!(endpoint_for_client(&custom, ProtocolKind::OpenAiChat).unwrap().is_none());
+    }
+
+    #[test]
+    fn deepseek_selects_native_anthropic_transport() {
+        let deepseek = row("deepseek", "builtin", "openai-compatible", true, None);
+        assert_eq!(endpoint_for(&deepseek).unwrap().kind, AdapterKind::OpenAiCompatible);
+        let alternate = endpoint_for_client(&deepseek, ProtocolKind::AnthropicMessages).unwrap().unwrap();
+        assert_eq!(alternate.kind, AdapterKind::AnthropicCompatible);
+        assert_eq!(alternate.base_url.as_str(), "https://api.deepseek.com/anthropic/v1/messages");
+    }
+
+    #[test]
+    fn github_selects_native_transports() {
+        let gh = row("github", "builtin", "openai-compatible", true, None);
+        assert_eq!(endpoint_for(&gh).unwrap().kind, AdapterKind::OpenAiCompatible);
+        let anthropic = endpoint_for_client(&gh, ProtocolKind::AnthropicMessages).unwrap().unwrap();
+        assert_eq!(anthropic.kind, AdapterKind::AnthropicCompatible);
+        assert_eq!(anthropic.base_url.as_str(), "https://api.githubcopilot.com/v1/messages");
+        let responses = endpoint_for_client(&gh, ProtocolKind::OpenAiResponses).unwrap().unwrap();
+        assert_eq!(responses.kind, AdapterKind::OpenAiResponses);
+        assert_eq!(responses.base_url.as_str(), "https://api.githubcopilot.com/responses");
+    }
+
+    #[test]
+    fn kimi_selects_native_transports() {
+        let kimi = row("kimi", "builtin", "anthropic-compatible", true, None);
+        assert_eq!(endpoint_for(&kimi).unwrap().kind, AdapterKind::AnthropicCompatible);
+        let chat = endpoint_for_client(&kimi, ProtocolKind::OpenAiChat).unwrap().unwrap();
+        assert_eq!(chat.kind, AdapterKind::OpenAiCompatible);
+        assert_eq!(chat.base_url.as_str(), "https://api.kimi.com/coding/v1/chat/completions");
+        let responses = endpoint_for_client(&kimi, ProtocolKind::OpenAiResponses).unwrap().unwrap();
+        assert_eq!(responses.kind, AdapterKind::OpenAiResponses);
+        assert_eq!(responses.base_url.as_str(), "https://api.kimi.com/coding/v1/responses");
+    }
 
     fn row(id: &str, kind: &str, adapter: &str, ready: bool, base_url: Option<&str>) -> ProviderCfg {
         ProviderCfg {

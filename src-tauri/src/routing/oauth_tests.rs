@@ -1,5 +1,5 @@
 //! OAuth 连接在转发管线里的行为：取令牌（含提前刷新）、401 强制刷新并重试一次、需重新授权 → 标记并换账号、
-//! 瞬时故障 → 保留凭据并回退、github / muse 的令牌兑换步骤未接入。
+//! 瞬时故障 → 保留凭据并回退、github / muse 的令牌兑换。
 //!
 //! 直接驱动 `Runtime::dispatch`（不经 HTTP 网关）：`op` 记录每次尝试用的访问令牌；令牌刷新走真实 HTTP 的假授权服务器。
 
@@ -12,7 +12,6 @@ use chrono::{Duration as ChronoDuration, Utc};
 use super::dispatch::{Attempt, DispatchError};
 use super::repo::{self, ProviderCfg};
 use super::{endpoint, Runtime};
-use crate::oauth::exchange::TOKEN_EXCHANGE_PENDING;
 use crate::oauth::testkit::*;
 use crate::oauth::{Secret, TokenSet, TokenStore};
 use crate::security::{CredentialVault, VaultTokenStore};
@@ -290,22 +289,42 @@ async fn a_lone_account_with_a_transient_refresh_failure_ends_with_a_503_style_e
 }
 
 #[tokio::test]
-async fn github_and_muse_report_the_missing_exchange_step_and_never_send_the_account_token() {
+async fn github_exchanges_account_token_for_copilot_session_key() {
+    let t = setup("github", true).await;
+    t.add_oauth_connection("a", 1, "ACCESS-A", "REFRESH-A", 3600).await;
+    let calls = new_calls();
+    let (conn, token) = t.run(&calls, |_, _| None).await.unwrap();
+    assert_eq!(conn, "a");
+    assert_eq!(token, "COPILOT-KEY-1");
+    assert_eq!(t.env.fake.copilot_count.load(Ordering::SeqCst), 1);
+    assert_eq!(t.stored_access("a").await, "ACCESS-A");
+    assert_eq!(t.status_of("a").await, "active");
+}
+
+#[tokio::test]
+async fn muse_exchanges_account_token_for_model_api_key() {
+    let t = setup("muse", true).await;
+    t.add_oauth_connection("a", 1, "ACCESS-A", "REFRESH-A", 3600).await;
+    let calls = new_calls();
+    let (conn, token) = t.run(&calls, |_, _| None).await.unwrap();
+    assert_eq!(conn, "a");
+    assert_eq!(token, "LLM|MUSE-KEY-1");
+    assert_eq!(t.env.fake.muse_key_count.load(Ordering::SeqCst), 1);
+    assert_eq!(t.stored_access("a").await, "LLM|MUSE-KEY-1");
+    assert_eq!(t.status_of("a").await, "active");
+}
+
+#[tokio::test]
+async fn github_and_muse_never_send_raw_account_token_if_exchange_fails() {
     for id in ["github", "muse"] {
         let t = setup(id, true).await;
-        t.add_oauth_connection("a", 1, "ACCOUNT-TOKEN-MUST-NOT-LEAK", "REFRESH-A", 3600).await;
+        // 假端点要求 ACCESS- 前缀，这里传无效账户令牌触发 401 兑换失败
+        t.add_oauth_connection("a", 1, "INVALID-ACCOUNT-TOKEN", "REFRESH-A", 3600).await;
         let calls = new_calls();
         let failure = t.run(&calls, |_, _| None).await.unwrap_err();
-        match failure.error {
-            DispatchError::NotImplemented(msg) => {
-                assert!(msg.starts_with(TOKEN_EXCHANGE_PENDING), "{id}: {msg}");
-                assert!(!msg.contains("ACCOUNT-TOKEN"), "{id}");
-            }
-            other => panic!("{id}: expected NotImplemented, got {other:?}"),
-        }
-        assert!(calls.lock().unwrap().is_empty(), "{id}: the account token is never used as a model key");
-        assert_eq!(t.env.fake.refresh_count.load(Ordering::SeqCst), 0, "{id}: not even a refresh is attempted");
-        assert_eq!(t.status_of("a").await, "active", "{id}: the connection itself is healthy");
+        assert!(matches!(failure.error, DispatchError::NoConnection(ref nc) if nc.needs_reauth > 0), "{id}: {:?}", failure.error);
+        assert!(calls.lock().unwrap().is_empty(), "{id}: raw account token must never be sent to model endpoint");
+        assert_eq!(t.status_of("a").await, "needsReauth", "{id}: connection marked needsReauth on 401 exchange error");
     }
 }
 

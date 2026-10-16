@@ -97,6 +97,8 @@ pub struct OAuthProviderConfig {
     /// Optional provider-specific endpoint used after OAuth to mint an inference credential.
     #[serde(default)]
     pub agent_key_url: Option<String>,
+    #[serde(default)]
+    pub exchange_url: Option<String>,
     /// 设备码响应没有给出 verification_uri 时使用的回退地址。
     #[serde(default)]
     pub verification_uri: Option<String>,
@@ -360,6 +362,10 @@ impl OAuthProviderConfig {
         self.required(&self.agent_key_url, "agentKeyUrl", creds)
     }
 
+    pub fn exchange_endpoint(&self, creds: &ClientCredentials) -> Result<String, OAuthError> {
+        self.required(&self.exchange_url, "exchangeUrl", creds)
+    }
+
     pub fn scope_string(&self) -> String {
         self.scopes.join(" ")
     }
@@ -376,6 +382,7 @@ impl OAuthProviderConfig {
             ("tokenUrl", &self.token_url),
             ("refreshUrl", &self.refresh_url),
             ("agentKeyUrl", &self.agent_key_url),
+            ("exchangeUrl", &self.exchange_url),
             ("verificationUri", &self.verification_uri),
         ];
         for (name, value) in url_fields {

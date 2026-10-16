@@ -91,7 +91,17 @@ pub struct StatusEntry {
     #[serde(default)]
     pub auth: Option<AuthSpec>,
     #[serde(default)]
+    pub transports: HashMap<String, TransportEntry>,
+    #[serde(default)]
     pub reason: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct TransportEntry {
+    pub adapter: Adapter,
+    pub base_url: String,
+    pub auth: AuthSpec,
 }
 
 impl StatusEntry {
@@ -151,6 +161,13 @@ fn parse_table() -> Result<HashMap<String, StatusEntry>, String> {
     let table: HashMap<String, StatusEntry> =
         serde_json::from_str(STATUS_JSON).map_err(|e| format!("provider_status.json 解析失败：{e}"))?;
     for (id, e) in &table {
+        for (source, transport) in &e.transports {
+            if crate::protocols::ProtocolKind::from_id(source).is_none() {
+                return Err(format!("{id}: unknown transport source protocol {source}"));
+            }
+            validate_base_url(&transport.base_url)
+                .map_err(|err| format!("{id}: transport {source} baseUrl 无效：{err}"))?;
+        }
         match e.adapter {
             Some(_) => {
                 let url = e.base_url.as_deref().ok_or_else(|| format!("{id}: adapter 非空时 baseUrl 必填"))?;

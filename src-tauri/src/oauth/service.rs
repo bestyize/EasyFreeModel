@@ -144,14 +144,28 @@ impl OAuthService {
         &self.store
     }
 
-    /// Exchange a Portal login token for the credential accepted by its inference API.
+    /// Exchange an account login token for the credential accepted by its inference API.
     pub async fn prepare_inference_tokens(&self, provider_id: &str, tokens: TokenSet) -> Result<TokenSet, OAuthError> {
-        if provider_id != "nous" {
+        if !matches!(provider_id, "nous" | "github" | "muse") {
             return Ok(tokens);
         }
         let cfg = self.catalog.get(provider_id).ok_or_else(|| OAuthError::UnknownProvider(provider_id.into()))?;
         let creds = self.credentials.credentials_for(provider_id).await?;
-        super::nous::mint_agent_key(&self.http, cfg, &creds, tokens).await
+        match provider_id {
+            "nous" => super::nous::mint_agent_key(&self.http, cfg, &creds, tokens).await,
+            "github" => super::exchange::github_copilot_token(&self.http, cfg, &creds, tokens).await,
+            "muse" => super::exchange::muse_model_key(&self.http, cfg, &creds, tokens).await,
+            _ => unreachable!(),
+        }
+    }
+
+    fn inference_exchange_needed(provider_id: &str, tokens: &TokenSet, lead_seconds: i64) -> bool {
+        match provider_id {
+            "nous" => tokens.extra_value("nous_agent_key").is_none(),
+            "github" => super::exchange::copilot_token_needs_exchange(tokens, Utc::now(), lead_seconds),
+            "muse" => tokens.extra_value("muse_oauth_token").is_none(),
+            _ => false,
+        }
     }
 
     fn provider(&self, provider_id: &str, expected: FlowKind) -> Result<&OAuthProviderConfig, OAuthError> {
@@ -227,7 +241,7 @@ impl OAuthService {
                     .await?
                     .ok_or_else(|| OAuthError::NoTokens(provider_id.to_owned()))?;
                 if !tokens.needs_refresh(cfg.refresh_lead_seconds, Utc::now())
-                    && !(cfg.id == "nous" && tokens.extra_value("nous_agent_key").is_none()) {
+                    && !Self::inference_exchange_needed(&cfg.id, &tokens, cfg.refresh_lead_seconds) {
                     return Ok(tokens);
                 }
             }
@@ -259,19 +273,21 @@ impl OAuthService {
             .await?
             .ok_or_else(|| OAuthError::NoTokens(cfg.id.clone()))?;
         if !force && !current.needs_refresh(cfg.refresh_lead_seconds, Utc::now())
-            && !(cfg.id == "nous" && current.extra_value("nous_agent_key").is_none()) {
+            && !Self::inference_exchange_needed(&cfg.id, &current, cfg.refresh_lead_seconds) {
             return Ok(current);
         }
-        let refresh_portal = force || current.needs_refresh(cfg.refresh_lead_seconds, Utc::now());
+        let refresh_portal = cfg.id != "muse"
+            && (current.needs_refresh(cfg.refresh_lead_seconds, Utc::now())
+                || (force && cfg.id != "github"));
         let fresh = if refresh_portal {
             let creds = self.credentials.credentials_for(&cfg.id).await?;
             refresh::refresh_tokens(&self.http, cfg, &creds, &current).await?
         } else {
             current
         };
-        if cfg.id == "nous" {
-            // Persist a rotated refresh token before the independent Agent Key request.
-            self.store.save(key, &fresh).await?;
+        if matches!(cfg.id.as_str(), "nous" | "github" | "muse") {
+            // Persist a rotated account refresh token before the independent exchange.
+            if refresh_portal { self.store.save(key, &fresh).await?; }
             let prepared = self.prepare_inference_tokens(&cfg.id, fresh).await?;
             self.store.save(key, &prepared).await?;
             return Ok(prepared);

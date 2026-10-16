@@ -44,7 +44,7 @@ const summary: ProviderSummary = {
   website: null,
   color: null,
   textIcon: null,
-  authModes: ['oauth', 'apiKey'],
+  authModes: ['oauth'],
   pendingReason: null,
 }
 

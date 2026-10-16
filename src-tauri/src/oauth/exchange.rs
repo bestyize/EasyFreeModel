@@ -1,36 +1,108 @@
-//! 授权之后、转发之前的「令牌兑换」步骤的接入状态。
-//!
-//! github（账户令牌 -> Copilot 会话令牌）与 muse（账户令牌 -> 铸造 Model API Key）在取得账户令牌之后还需要
-//! 一步兑换，授权框架不负责，本版本也没有接入。这两家的 OAuth 连接可以授权成功并保存令牌，但转发时必须如实
-//! 报告该步骤尚未接入——绝不能把账户令牌当作模型调用的 Key 发给上游。
+//! Exchange account OAuth tokens for credentials accepted by inference APIs.
+//! The account token is never returned to the gateway as a model key.
 
-/// 面向用户/客户端的固定说明前缀（测试与界面据此断言）。
-pub const TOKEN_EXCHANGE_PENDING: &str = "该提供商授权后的令牌兑换步骤尚未接入";
+use chrono::{DateTime, Duration, Utc};
+use reqwest::Client;
+use serde_json::{json, Value};
 
-/// 该提供商授权后是否还需要尚未接入的令牌兑换步骤；有则返回完整说明。
-pub fn token_exchange_note(provider_id: &str) -> Option<&'static str> {
-    match provider_id {
-        "github" => Some(
-            "该提供商授权后的令牌兑换步骤尚未接入（GitHub：账户令牌需再换取 Copilot 会话令牌），授权成功的连接暂不能用于转发",
-        ),
-        "muse" => Some(
-            "该提供商授权后的令牌兑换步骤尚未接入（Muse：账户令牌需再铸造 Model API Key），授权成功的连接暂不能用于转发",
-        ),
-        _ => None,
+use super::config::{ClientCredentials, OAuthProviderConfig};
+use super::error::OAuthError;
+use super::http::{self, ExtraHeaders, Reply};
+use super::secret::Secret;
+use super::token::TokenSet;
+
+fn exchange_error(provider: &str, reply: &Reply, account_token: &str) -> OAuthError {
+    match reply.status {
+        401 | 403 => OAuthError::ReauthRequired {
+            provider: provider.into(), reason: "the account token was rejected by the inference credential endpoint".into(),
+        },
+        408 | 425 | 429 | 500..=599 => OAuthError::Transient(format!(
+            "{provider} inference credential exchange returned HTTP {}", reply.status,
+        )),
+        status => {
+            let (code, description) = http::error_fields(reply.body.as_ref(), &[account_token]);
+            OAuthError::TokenEndpoint { status, code, description }
+        }
     }
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn only_github_and_muse_need_the_missing_exchange_step() {
-        for id in ["github", "muse"] {
-            assert!(token_exchange_note(id).unwrap().starts_with(TOKEN_EXCHANGE_PENDING), "{id}");
-        }
-        for id in ["claude", "codex", "antigravity", "gemini-cli", "gitlab", "grok-cli", "kimi", "minimax-code"] {
-            assert!(token_exchange_note(id).is_none(), "{id}");
-        }
+fn copilot_expiry(value: &Value) -> Option<DateTime<Utc>> {
+    if let Some(seconds) = value.as_i64().or_else(|| value.as_str().and_then(|s| s.parse().ok())) {
+        return DateTime::<Utc>::from_timestamp(seconds, 0);
     }
+    value.as_str().and_then(|s| DateTime::parse_from_rfc3339(s).ok()).map(|dt| dt.with_timezone(&Utc))
+}
+
+pub fn copilot_token_needs_exchange(tokens: &TokenSet, now: DateTime<Utc>, lead_seconds: i64) -> bool {
+    tokens.extra_value("copilot_token").is_none()
+        || tokens.extra_value("copilot_expires_at")
+            .and_then(|s| s.parse::<i64>().ok())
+            .and_then(|seconds| DateTime::<Utc>::from_timestamp(seconds, 0))
+            .is_none_or(|expiry| expiry <= now + Duration::seconds(lead_seconds))
+}
+
+pub async fn github_copilot_token(
+    client: &Client,
+    cfg: &OAuthProviderConfig,
+    creds: &ClientCredentials,
+    mut tokens: TokenSet,
+) -> Result<TokenSet, OAuthError> {
+    let url = cfg.exchange_endpoint(creds)?;
+    let account_token = tokens.access_token.expose();
+    let headers = ExtraHeaders(vec![
+        ("Authorization".into(), format!("token {account_token}")),
+        ("X-GitHub-Api-Version".into(), "2022-11-28".into()),
+    ]);
+    let reply = http::get_with(client, &url, &headers).await?;
+    if !(200..300).contains(&reply.status) {
+        return Err(exchange_error(&cfg.id, &reply, account_token));
+    }
+    let body = reply.body.ok_or_else(|| OAuthError::InvalidResponse("Copilot token response is not JSON".into()))?;
+    let copilot = body.get("token").and_then(Value::as_str).filter(|s| !s.is_empty())
+        .ok_or_else(|| OAuthError::InvalidResponse("Copilot token response has no token".into()))?;
+    let expires_at = body.get("expires_at").and_then(copilot_expiry)
+        .unwrap_or_else(|| Utc::now() + Duration::minutes(30));
+    if expires_at <= Utc::now() {
+        return Err(OAuthError::InvalidResponse("Copilot token has already expired".into()));
+    }
+    tokens.extra.insert("copilot_token".into(), Secret::new(copilot));
+    tokens.extra.insert("copilot_expires_at".into(), Secret::new(expires_at.timestamp().to_string()));
+    Ok(tokens)
+}
+
+pub async fn muse_model_key(
+    client: &Client,
+    cfg: &OAuthProviderConfig,
+    creds: &ClientCredentials,
+    mut tokens: TokenSet,
+) -> Result<TokenSet, OAuthError> {
+    let url = cfg.exchange_endpoint(creds)?;
+    let account_token = tokens.extra_value("muse_oauth_token").unwrap_or_else(|| tokens.access_token.expose()).to_owned();
+    let headers = ExtraHeaders(vec![
+        ("Authorization".into(), format!("Bearer {account_token}")),
+        ("x-api-version".into(), "1.0.0".into()),
+    ]);
+    let mut reply = http::post_json_with(client, &url, &json!({"onboard": true}), &headers).await?;
+    for attempt in 0..2 {
+        if !matches!(reply.status, 429 | 500..=599) { break; }
+        tokio::time::sleep(std::time::Duration::from_secs(5 * (attempt + 1))).await;
+        reply = http::post_json_with(client, &url, &json!({"onboard": true}), &headers).await?;
+    }
+    if !(200..300).contains(&reply.status) {
+        return Err(exchange_error(&cfg.id, &reply, &account_token));
+    }
+    let body = reply.body.ok_or_else(|| OAuthError::InvalidResponse("Muse Model API key response is not JSON".into()))?;
+    if body.get("is_subs_active").and_then(Value::as_bool) == Some(false) {
+        return Err(OAuthError::TokenEndpoint { status: 403, code: "subscription_inactive".into(), description: None });
+    }
+    let model_key = body.get("api_key").and_then(Value::as_str).filter(|s| !s.is_empty());
+    if model_key.is_none() && body.get("require_payment").and_then(Value::as_bool) == Some(true) {
+        return Err(OAuthError::TokenEndpoint { status: 402, code: "payment_required".into(), description: None });
+    }
+    let model_key = model_key.ok_or_else(|| OAuthError::InvalidResponse("Muse Model API key response has no api_key".into()))?;
+    tokens.extra.insert("muse_oauth_token".into(), Secret::new(account_token));
+    tokens.access_token = Secret::new(model_key);
+    tokens.refresh_token = None;
+    tokens.expires_at = None;
+    Ok(tokens)
 }

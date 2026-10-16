@@ -270,6 +270,8 @@ mod tests {
         }
         assert_eq!(find("opencode").unwrap().auth_modes(), vec![CredentialKind::None]);
         assert_eq!(find("opencode-zen").unwrap().auth_modes(), vec![CredentialKind::ApiKey]);
+        assert_eq!(find("claude").unwrap().auth_modes(), vec![CredentialKind::Oauth]);
+        assert_eq!(find("clinepass").unwrap().auth_modes(), vec![CredentialKind::ApiKey, CredentialKind::Oauth]);
     }
 
     #[test]

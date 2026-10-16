@@ -8,7 +8,7 @@ use std::time::Duration;
 
 use axum::body::Bytes;
 use axum::extract::{Query, State};
-use axum::http::StatusCode;
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Redirect, Response};
 use axum::routing::{get, post};
 use axum::{Json, Router};
@@ -37,6 +37,8 @@ pub struct Fake {
     pub refresh_mode: Mutex<RefreshMode>,
     pub refresh_count: AtomicUsize,
     pub exchange_count: AtomicUsize,
+    pub copilot_count: AtomicUsize,
+    pub muse_key_count: AtomicUsize,
     code_counter: AtomicUsize,
     device_counter: AtomicUsize,
     challenges: Mutex<HashMap<String, Option<String>>>,
@@ -156,6 +158,25 @@ async fn device_token(State(f): State<Arc<Fake>>) -> Response {
     json_reply(200, tokens_body(&f, format!("ACCESS-DEV-{n}"), format!("REFRESH-DEV-{n}")))
 }
 
+async fn copilot_token(State(f): State<Arc<Fake>>, headers: HeaderMap) -> Response {
+    if !headers.get("authorization").and_then(|v| v.to_str().ok())
+        .is_some_and(|value| value.starts_with("token ACCESS-")) {
+        return json_reply(401, json!({"error":"unauthorized"}));
+    }
+    let n = f.copilot_count.fetch_add(1, Ordering::SeqCst) + 1;
+    json_reply(200, json!({"token":format!("COPILOT-KEY-{n}"), "expires_at":chrono::Utc::now().timestamp()+3600}))
+}
+
+async fn muse_key(State(f): State<Arc<Fake>>, headers: HeaderMap, Json(body): Json<Value>) -> Response {
+    if !headers.get("authorization").and_then(|v| v.to_str().ok())
+        .is_some_and(|value| value.starts_with("Bearer ACCESS-"))
+        || body.get("onboard").and_then(Value::as_bool) != Some(true) {
+        return json_reply(401, json!({"error":"unauthorized"}));
+    }
+    let n = f.muse_key_count.fetch_add(1, Ordering::SeqCst) + 1;
+    json_reply(200, json!({"api_key":format!("LLM|MUSE-KEY-{n}"), "is_subs_active":true}))
+}
+
 /// 测试用目录：每个端点都指向假服务器（http 回环是允许的）。
 pub fn catalog_json(base: &str) -> String {
     let code = |id: &str| {
@@ -188,11 +209,14 @@ pub fn catalog_json(base: &str) -> String {
     let mut hosted = code("t-hosted");
     hosted["clientId"] = Value::Null;
     hosted["baseUrlDefault"] = json!("https://git.example.com");
-    // 与内置目录同 id：转发时必须报告「令牌兑换步骤尚未接入」
+    let mut github = device("github");
+    github["exchangeUrl"] = json!(format!("{base}/copilot/token"));
+    let mut muse = device("muse");
+    muse["exchangeUrl"] = json!(format!("{base}/muse/key"));
     let custom = json!({"id": "t-custom", "flow": "custom", "custom": {"reason": "proprietary protocol", "requires": ["official API"]}});
     json!({"schemaVersion": 1, "providers": [
         code("t-code"), code("t-code2"), device("t-device"), device("t-device2"), secret, hosted, custom,
-        device("github"), device("muse"), state_poll("t-state")
+        github, muse, state_poll("t-state")
     ]})
     .to_string()
 }
@@ -230,6 +254,8 @@ pub async fn env_with(tuning: OAuthTuning, limits: HubLimits) -> Env {
         .route("/token", post(token))
         .route("/device/code", post(device_code))
         .route("/device/token", post(device_token))
+        .route("/copilot/token", get(copilot_token))
+        .route("/muse/key", post(muse_key))
         .route("/state", post(state_endpoint))
         .route("/state/token", get(state_token))
         .with_state(fake.clone());

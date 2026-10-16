@@ -113,6 +113,11 @@ pub(crate) async fn proxy_inbound(rt: Arc<Runtime>, key: VerifiedKey, inbound: I
         Ok(r) => r,
         Err(e) => return error_response(protocol, &e),
     };
+    match crate::routing::endpoint::endpoint_for_client(&resolved.provider, protocol) {
+        Ok(Some(endpoint)) => resolved.endpoint = endpoint,
+        Ok(None) => {}
+        Err(e) => return error_response(protocol, &ApiError::new(ApiErrorKind::NotImplemented, e.to_string())),
+    }
     if rt.stream_usage_disabled(&resolved.provider.id) {
         resolved.endpoint.stream_usage = false;
     }
