@@ -2,9 +2,11 @@
 import { computed, ref } from 'vue'
 import { APP_NAME, APP_VERSION } from '@/router/nav'
 import { useSystemStore } from '@/stores/system'
+import { useUpdateStore } from '@/stores/update'
 import SettingsRow from './SettingsRow.vue'
 
 const system = useSystemStore()
+const update = useUpdateStore()
 const copyMsg = ref<string | null>(null)
 const inTauri = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window
 
@@ -36,9 +38,9 @@ async function copy() {
     <SettingsRow label="许可" description="项目当前未包含 LICENSE 文件，尚未声明开源许可证。">
       <span class="muted">未声明</span>
     </SettingsRow>
-    <SettingsRow label="检查更新" description="自动更新属于后续里程碑（M5）。">
-      <span class="pending">待实现</span>
-      <button class="btn" type="button" disabled title="待实现：自动更新尚未接入">检查更新</button>
+    <SettingsRow label="检查更新" description="启动时及运行期间每 24 小时自动检查新版本。">
+      <button v-if="update.latestVersion" class="btn btn-primary" type="button" @click="update.download">下载 v{{ update.latestVersion }}</button>
+      <button class="btn" type="button" :disabled="update.checking" @click="update.check">{{ update.checking ? '检查中…' : '检查更新' }}</button>
     </SettingsRow>
     <div class="diag">
       <div class="diag-head">
@@ -54,7 +56,6 @@ async function copy() {
 <style scoped>
 .section { padding: 20px 24px; }
 .muted { color: var(--c-text-2); font-size: var(--fs-small); }
-.pending { padding: 2px 8px; border-radius: 4px; background: var(--c-surface-2); color: var(--c-text-2); font-size: var(--fs-caption); }
 .diag { padding-top: 14px; border-top: 1px solid var(--c-border); }
 .diag-head { display: flex; align-items: center; justify-content: space-between; }
 h3 { margin: 0; font-size: var(--fs-body); font-weight: 500; }

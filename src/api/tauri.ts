@@ -58,6 +58,7 @@ export const tauriApi: Api = {
     invoke('set_quota_account_enabled', { connectionId, enabled }),
 
   systemStatus: () => invoke('system_status'),
+  checkForUpdate: () => invoke('check_for_update'),
   getSettings: () => invoke('get_settings'),
   saveSettings: (settings) => invoke('save_settings', { settings }),
   startGateway: () => invoke('start_gateway'),

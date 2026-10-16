@@ -97,6 +97,7 @@ pub fn run() {
             commands::quota::refresh_quota,
             commands::quota::set_quota_account_enabled,
             commands::system::system_status,
+            commands::update::check_for_update,
             commands::system::get_settings,
             commands::system::save_settings,
             commands::system::start_gateway,
