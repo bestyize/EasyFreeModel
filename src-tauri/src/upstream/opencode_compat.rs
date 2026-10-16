@@ -156,6 +156,32 @@ fn inject_fingerprint_tools(body: &mut Value, flat: bool) {
     }
 }
 
+/// Responses requires flat function tools rather than Chat's nested function
+/// wrapper. This is a wire-format conversion, not a mutation of caller tools.
+fn normalize_responses_tools(body: &mut Value) {
+    let Some(tools) = body.get_mut("tools").and_then(Value::as_array_mut) else { return };
+    tools.retain_mut(|tool| {
+        let Some(obj) = tool.as_object() else { return false };
+        let function = obj.get("function").and_then(Value::as_object).unwrap_or(obj);
+        let Some(name) = function.get("name").and_then(Value::as_str).filter(|s| !s.trim().is_empty()) else { return false };
+        let mut parameters = function.get("parameters").cloned()
+            .filter(Value::is_object).unwrap_or_else(|| json!({"type":"object","properties":{}}));
+        if parameters.get("type").and_then(Value::as_str) == Some("object")
+            && parameters.get("properties").is_none()
+        { parameters["properties"] = json!({}); }
+        let mut flattened = json!({
+            "type": "function",
+            "name": name,
+            "parameters": parameters,
+        });
+        if let Some(desc) = function.get("description").and_then(Value::as_str) {
+            flattened["description"] = json!(desc);
+        }
+        *tool = flattened;
+        true
+    });
+}
+
 pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
     if !is_free(target) { return; }
     let Some(obj) = body.as_object_mut() else { return };
@@ -184,6 +210,7 @@ pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
                 reasoning.entry("summary").or_insert_with(|| json!("auto"));
             }
             obj.entry("tool_choice").or_insert_with(|| json!("auto"));
+            normalize_responses_tools(body);
             inject_fingerprint_tools(body, true);
         }
         AdapterKind::OpenAiCompatible => inject_fingerprint_tools(body, false),
@@ -244,6 +271,19 @@ mod tests {
         assert_eq!(body["tools"][1]["function"]["name"], "read");
         assert_eq!(body["tools"][2]["function"]["name"], "shell");
         assert!(body["messages"][0]["content"].as_str().unwrap().contains("placeholders"));
+    }
+
+    #[test]
+    fn responses_flattens_chat_style_tool_definitions() {
+        let mut t = target("opencode");
+        t.endpoint.kind = AdapterKind::OpenAiResponses;
+        let mut body = json!({"model":"muse-spark-1.3-contributor-free", "input":"ping",
+            "tools":[{"type":"function","function":{"name":"my_tool","description":"hello","parameters":{"type":"object"}}}]});
+        prepare_body(&mut body, &t);
+        assert_eq!(body["tools"][0]["name"], "my_tool");
+        assert_eq!(body["tools"][0]["parameters"]["properties"], json!({}));
+        assert!(body["tools"][0].get("function").is_none());
+        assert_eq!(body["tools"][1]["name"], "read");
     }
 
     #[test]
