@@ -1538,9 +1538,15 @@
     "baseUrlHost": "inference-api.nousresearch.com",
     "hasOAuth": true,
     "oauthFlow": "device",
-    "authModes": ["oauth", "apikey"],
+    "authModes": [
+      "oauth",
+      "apikey"
+    ],
     "noAuth": false,
-    "serviceKinds": ["llm", "imageToText"],
+    "serviceKinds": [
+      "llm",
+      "imageToText"
+    ],
     "modelCount": 8,
     "deprecated": false,
     "riskNotice": "OAUTH_RISK_NOTICE"
@@ -1735,9 +1741,9 @@
       "llm",
       "systemone"
     ],
-    "modelCount": 4,
+    "modelCount": 7,
     "deprecated": false,
-    "riskNotice": null
+    "riskNotice": "OpenCode Free 上游仅允许在 OpenCode 客户端内使用；第三方代理可能收到 FreeTierError (403)。如需稳定的第三方 API，请使用 OpenCode Zen API Key 或其他明确开放的端点。"
   },
   {
     "id": "openrouter",
