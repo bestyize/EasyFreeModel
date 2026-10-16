@@ -422,12 +422,13 @@ export const providersMock: ProvidersApi = {
     const curated = CURATED_MODELS[providerId] ?? []
     // 按稳定 id 合并，保留用户已改的公开别名与启用状态（同一 upstreamModelId 可有多个档位）
     const prevById = new Map(d.models.map((m) => [m.id, m]))
+    const customByUpstream = new Map(d.models.filter((m) => m.id.startsWith(`${providerId}/custom/`)).map((m) => [m.upstreamModelId, m]))
     const merged = curated.map((m) => {
-      const prev = prevById.get(m.id)
-      return prev ? { ...m, publicAlias: prev.publicAlias, enabled: prev.enabled } : m
+      const prev = prevById.get(m.id) ?? customByUpstream.get(m.upstreamModelId)
+      return prev ?? m
     })
     // 用户手动添加、预设库里没有的模型保留
-    const curatedIds = new Set(curated.map((m) => m.id))
+    const curatedIds = new Set(merged.map((m) => m.id))
     for (const m of d.models) if (!curatedIds.has(m.id)) merged.push(m)
     d.models = merged
     return d.models.map((m) => ({ ...m }))

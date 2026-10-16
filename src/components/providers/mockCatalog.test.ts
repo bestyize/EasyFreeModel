@@ -149,6 +149,13 @@ describe('mock 命令遵守同样的红线', () => {
 })
 
 describe('预设模型与拉取模型', () => {
+  it('OpenCode Free 包含新增的三个免费模型', async () => {
+    const d = await mock.getProvider('opencode')
+    for (const id of ['deepseek-v4.1-flash-free', 'mimo-v2.6-flash-free', 'nemotron-3.5-super-vl-free']) {
+      expect(d.models).toContainEqual(expect.objectContaining({ upstreamModelId: id, publicAlias: `oc/${id}`, enabled: true }))
+    }
+  })
+
   it('绝大多数提供商预置了可用模型（与内置模型库一致）', async () => {
     const withModels = Object.entries(curated).filter(([, ms]) => ms.length)
     expect(withModels.length).toBeGreaterThan(60)
