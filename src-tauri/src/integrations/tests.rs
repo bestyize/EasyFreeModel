@@ -209,8 +209,48 @@ fn claude_import_maps_each_model_tier_independently() {
     assert_eq!(config["env"]["ANTHROPIC_DEFAULT_HAIKU_MODEL"], "fast");
     assert_eq!(config["env"]["ANTHROPIC_DEFAULT_SONNET_MODEL"], "balanced");
     assert_eq!(config["env"]["ANTHROPIC_DEFAULT_OPUS_MODEL"], "strong");
-    request.haiku_model = Some(" ".into());
-    assert!(validate(&request).is_err());
+}
+
+#[test]
+fn blank_optional_model_tiers_fall_back_to_default_for_both_clients() {
+    for client in [ClientKind::Claude, ClientKind::Codex] {
+        for blank in [None, Some(""), Some("   ")] {
+            let mut request = input(client);
+            request.model = "cx/gpt-6-luna[1m]".into();
+            request.haiku_model = blank.map(str::to_string);
+            request.sonnet_model = blank.map(str::to_string);
+            request.opus_model = Some(" oc/deepseek-v4.1-flash-free ".into());
+            let params = validate(&request).unwrap();
+            assert_eq!(params.haiku_model, request.model);
+            assert_eq!(params.sonnet_model, request.model);
+            assert_eq!(params.opus_model, "oc/deepseek-v4.1-flash-free");
+            let plan = plan(client, None, &params).unwrap();
+            match client {
+                ClientKind::Claude => {
+                    let config: Value = serde_json::from_str(&plan.content).unwrap();
+                    assert_eq!(config["env"]["ANTHROPIC_DEFAULT_HAIKU_MODEL"], request.model);
+                    assert_eq!(config["env"]["ANTHROPIC_DEFAULT_SONNET_MODEL"], request.model);
+                    assert_eq!(config["env"]["ANTHROPIC_DEFAULT_OPUS_MODEL"], params.opus_model);
+                }
+                ClientKind::Codex => assert_eq!(toml(&plan.content)["model"].as_str(), Some(request.model.as_str())),
+            }
+        }
+    }
+}
+
+#[test]
+fn invalid_optional_model_tiers_are_still_rejected() {
+    for bad in ["model\0name".to_string(), "model\nname".to_string(), "x".repeat(201)] {
+        for tier in 0..3 {
+            let mut request = input(ClientKind::Claude);
+            match tier {
+                0 => request.haiku_model = Some(bad.clone()),
+                1 => request.sonnet_model = Some(bad.clone()),
+                _ => request.opus_model = Some(bad.clone()),
+            }
+            assert!(validate(&request).is_err());
+        }
+    }
 }
 
 #[test]

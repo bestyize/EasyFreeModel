@@ -149,8 +149,11 @@ fn validate(input: &ImportInput) -> Result<Params, String> {
         return Err("模型名为空或包含无效字符".into());
     }
     let slot = |raw: Option<&String>| -> Result<String, String> {
-        let name = raw.map(String::as_str).unwrap_or(model).trim();
-        if name.is_empty() || name.chars().count() > 200 || !no_control(name) {
+        // The model picker sends empty strings for optional, unselected tiers.
+        // Treat blank and omitted tiers alike, as promised by the import UI.
+        let name = raw.map(String::as_str).map(str::trim)
+            .filter(|name| !name.is_empty()).unwrap_or(model);
+        if name.chars().count() > 200 || !no_control(name) {
             return Err("模型名为空或包含无效字符".into());
         }
         Ok(name.to_string())
