@@ -21,7 +21,7 @@ pub mod gemini_compat;
 mod iflow_signing;
 pub mod ollama_compat;
 pub mod openai_compat;
-mod opencode_compat;
+pub(crate) mod opencode_compat;
 pub mod responses_compat;
 pub mod sse_decode;
 pub mod vertex_compat;
