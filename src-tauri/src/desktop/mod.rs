@@ -75,6 +75,21 @@ pub fn setup_tray<R: Runtime>(app: &mut tauri::App<R>, enabled: bool) -> tauri::
     Ok(())
 }
 
+/// macOS Dock clicks emit Reopen for an already-running hidden app.
+/// The tray's left-click/menu actions cover Windows and Linux.
+pub fn reopen_plugin<R: Runtime>() -> tauri::plugin::TauriPlugin<R> {
+    tauri::plugin::Builder::new("tray-reopen")
+        .on_event(|app, event| {
+            #[cfg(target_os = "macos")]
+            if let tauri::RunEvent::Reopen { has_visible_windows: false, .. } = event {
+                show_main(app);
+            }
+            #[cfg(not(target_os = "macos"))]
+            let _ = (app, event);
+        })
+        .build()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

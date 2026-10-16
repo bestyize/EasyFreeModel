@@ -28,6 +28,7 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(commands::oauth::exit_cleanup_plugin())
+        .plugin(desktop::reopen_plugin())
         .setup(|app| {
             let data_dir = app.path().app_data_dir()?;
             // setup 在主线程同步执行；这里阻塞到数据库就绪后再 manage，命令不会看到半初始化状态
