@@ -31,20 +31,20 @@ pub fn user_agent() -> String {
 #[derive(Debug, Clone)]
 pub struct ClientOptions {
     pub connect_timeout: Duration,
-    /// 忽略系统 / 环境变量代理（测试访问回环地址时使用）。
+    /// 忽略环境代理；生产默认开启，由应用代理池明确选路。
     pub no_proxy: bool,
 }
 
 impl Default for ClientOptions {
     fn default() -> Self {
-        Self { connect_timeout: Duration::from_secs(15), no_proxy: false }
+        Self { connect_timeout: Duration::from_secs(15), no_proxy: true }
     }
 }
 
 #[derive(Clone)]
 pub struct UpstreamClient {
     http: reqwest::Client,
-    /// 代理池：未注入时一律直连（系统 / 环境变量代理仍按 reqwest 默认行为生效）。
+    /// 代理池：生产直连客户端忽略环境代理，代理节点由池配置决定。
     pool: Option<Arc<ProxyPool>>,
 }
 
@@ -95,13 +95,13 @@ impl UpstreamClient {
 
     /// 按代理池给出的尝试顺序发送。代理连不上（`is_connect`）才换下一个节点并记失败；
     /// 其它错误（上游超时、响应错误）与代理无关，原样返回。
-    async fn send_routed<F, Fut>(&self, provider_id: &str, mut attempt: F) -> Result<reqwest::Response, UpstreamError>
+    async fn send_routed<F, Fut>(&self, provider_id: &str, url: &Url, mut attempt: F) -> Result<reqwest::Response, UpstreamError>
     where
         F: FnMut(reqwest::Client) -> Fut,
         Fut: std::future::Future<Output = Result<reqwest::Response, SendFailure>>,
     {
         let routes = match &self.pool {
-            Some(pool) => pool.plan(provider_id),
+            Some(pool) => pool.plan_for_url(provider_id, url),
             None => vec![Route::Direct],
         };
         if routes.is_empty() {
@@ -115,6 +115,13 @@ impl UpstreamClient {
                 Route::Proxy { node_id, client } => (client, Some(node_id)),
             };
             match attempt(client).await {
+                Ok(resp) if node.is_some() && resp.status().as_u16() == 407 => {
+                    if let (Some(pool), Some(id)) = (&self.pool, &node) {
+                        pool.report_failure(id, "代理认证失败（HTTP 407）");
+                    }
+                    last = UpstreamError::Network("proxy authentication failed (HTTP 407)".into());
+                    continue;
+                }
                 Ok(resp) => {
                     if let (Some(pool), Some(id)) = (&self.pool, &node) {
                         pool.report_success(id);
@@ -156,7 +163,7 @@ impl UpstreamClient {
             _ => user_agent(),
         };
         headers.insert(USER_AGENT, HeaderValue::from_str(&agent).expect("static user agent"));
-        self.send_routed(provider_id, |http| {
+        self.send_routed(provider_id, &url, |http| {
             let mut rb = http.post(url.clone()).headers(headers.clone()).body(body.clone());
             if let Some(t) = total_timeout {
                 rb = rb.timeout(t);
@@ -181,7 +188,7 @@ impl UpstreamClient {
     ) -> Result<reqwest::Response, UpstreamError> {
         let agent = super::opencode_compat::free_user_agent(provider_id, &url).map(str::to_string).unwrap_or_else(user_agent);
         headers.insert(USER_AGENT, HeaderValue::from_str(&agent).expect("static user agent"));
-        self.send_routed(provider_id, |http| {
+        self.send_routed(provider_id, &url, |http| {
             let rb = http.get(url.clone()).headers(headers.clone()).timeout(timeout);
             async move { rb.send().await.map_err(SendFailure::from) }
         })

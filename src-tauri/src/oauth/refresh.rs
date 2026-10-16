@@ -61,7 +61,7 @@ pub async fn refresh_tokens(
         }
     }
 
-    let reply = http::post_with(http, &url, encoding, &fields, &headers).await?;
+    let reply = http::post_with(http, &cfg.id, &url, encoding, &fields, &headers).await?;
 
     let mut secrets: Vec<&str> = vec![refresh_token.expose()];
     if let Some(s) = &client.client_secret {

@@ -116,7 +116,7 @@ impl MediaAdapter for OpenAiTranscriptions {
         } else {
             form = form.text("response_format", "json");
         }
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.multipart(form)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.multipart(form)).await?;
         let plain = str_at(&v, &["text"]).ok_or_else(|| MediaError::BadResponse("缺少 text 字段".into()))?;
         let segments: Vec<Segment> = v
             .get("segments")
@@ -171,7 +171,7 @@ impl MediaAdapter for DeepgramListen {
             }
         }
         let rb = cx.post(url.as_str())?.header(reqwest::header::CONTENT_TYPE, file.mime.as_str()).body(file.read().await?);
-        let v = cx.http.send_json(rb).await?;
+        let v = cx.http.send_json(cx.provider_id, rb).await?;
         let plain = v
             .pointer("/results/channels/0/alternatives/0/transcript")
             .and_then(Value::as_str)
@@ -257,7 +257,7 @@ impl MediaAdapter for ElevenLabsStt {
         if timestamps {
             form = form.text("timestamps_granularity", "word");
         }
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.multipart(form)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.multipart(form)).await?;
         let plain = str_at(&v, &["text"]).ok_or_else(|| MediaError::BadResponse("缺少 text 字段".into()))?;
         let words = v.get("words").and_then(Value::as_array).cloned().unwrap_or_default();
         let segments = group_words(&words, diarization);

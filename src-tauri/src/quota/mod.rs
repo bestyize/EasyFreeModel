@@ -125,11 +125,10 @@ pub async fn refresh(
                 let client = clients
                     .entry(conn.provider_id.clone())
                     .or_insert_with(|| {
-                        crate::proxy::probe_builder(
-                            reqwest::Client::builder().no_proxy().timeout(std::time::Duration::from_secs(12)),
-                            &conn.provider_id,
-                        )
-                        .and_then(|b| b.build().map_err(|e| format!("构建 HTTP 客户端失败：{e}")))
+                        reqwest::Client::builder().no_proxy()
+                            .redirect(reqwest::redirect::Policy::none())
+                            .timeout(std::time::Duration::from_secs(12))
+                            .build().map_err(|_| "构建 HTTP 客户端失败".to_string())
                     })
                     .clone();
                 let client = match client {

@@ -130,7 +130,7 @@ pub(super) async fn start(
         fields.push((key.clone(), value.clone()));
     }
 
-    let reply = http::post(&http, &device_url, Encoding::Form, &fields).await?;
+    let reply = http::post(&http, &cfg.id, &device_url, Encoding::Form, &fields).await?;
     let secrets: Vec<&str> = client.client_secret.iter().map(Secret::expose).collect();
     match reply.status {
         200..=299 => {}
@@ -224,7 +224,7 @@ impl DeviceSession {
     }
 
     async fn poll_once(&self) -> Result<Poll, OAuthError> {
-        let reply = http::post(&self.http, &self.token_url, Encoding::Form, &self.poll_fields()).await?;
+        let reply = http::post(&self.http, &self.cfg.id, &self.token_url, Encoding::Form, &self.poll_fields()).await?;
         let mut secrets: Vec<&str> = vec![self.device_code.expose()];
         if let Some(v) = &self.verifier {
             secrets.push(v.expose());

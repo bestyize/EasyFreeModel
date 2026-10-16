@@ -371,23 +371,19 @@ async fn upstream_client_fails_over_to_next_proxy() {
 }
 
 #[tokio::test]
-async fn upstream_client_blocks_direct_when_all_proxies_down() {
+async fn shared_sender_blocks_unavailable_proxies_and_respects_direct_fallback() {
     let (pool, _, _) = setup().await;
-    // 一个直连就能成功的“上游”，用来证明没有悄悄直连
-    let (direct_port, direct_seen) = fake_proxy("direct", "200 OK").await;
+    let (port, seen) = fake_proxy("direct", "200 OK").await;
     pool.save_node(input("dead", "127.0.0.1", dead_port().await)).await.unwrap();
     enable(&pool, |_| {}).await;
-
-    let client = http_client(&pool);
-    let url = Url::parse(&format!("http://127.0.0.1:{direct_port}/x")).unwrap();
-    let err = client.get("p", url.clone(), reqwest::header::HeaderMap::new(), Duration::from_secs(5)).await.unwrap_err();
-    assert!(matches!(err, crate::upstream::UpstreamError::Connect), "{err:?}");
-    assert!(direct_seen.lock().unwrap().is_empty(), "不允许回退直连时不得直连");
-
-    // 打开回退直连后才会直连成功
+    let addr = format!("127.0.0.1:{port}").parse().unwrap();
+    let client = reqwest::Client::builder().no_proxy().resolve("direct.test", addr).build().unwrap();
+    let url = format!("http://direct.test:{port}/x");
+    assert!(http::send_with_pool(Some(&pool), "p", client.get(&url), Duration::from_secs(3)).await.is_err());
+    assert!(seen.lock().unwrap().is_empty());
     enable(&pool, |c| c.fallback_direct = true).await;
-    let resp = client.get("p", url, reqwest::header::HeaderMap::new(), Duration::from_secs(5)).await.unwrap();
-    assert_eq!(resp.text().await.unwrap(), "direct");
+    let response = http::send_with_pool(Some(&pool), "p", client.get(&url), Duration::from_secs(3)).await.unwrap();
+    assert_eq!(response.text().await.unwrap(), "direct");
 }
 
 #[tokio::test]
@@ -398,6 +394,95 @@ async fn upstream_client_without_pool_is_direct() {
     let resp = client.get("p", url, reqwest::header::HeaderMap::new(), Duration::from_secs(5)).await.unwrap();
     assert_eq!(resp.text().await.unwrap(), "hi");
     assert!(seen.lock().unwrap()[0].starts_with("GET /x"));
+}
+
+#[test]
+fn only_loopback_targets_bypass_the_proxy_pool() {
+    for raw in ["http://127.0.0.1:20128/v1", "http://127.2.3.4/x",
+        "http://localhost./x", "http://app.localhost/x", "http://[::1]/x", "http://[::ffff:127.0.0.1]/x"] {
+        assert!(http::is_loopback_url(&Url::parse(raw).unwrap()), "{raw}");
+    }
+    for raw in ["https://localhost.evil.test/x", "https://evillocalhost/x", "https://example.com/x", "https://10.0.0.1/x"] {
+        assert!(!http::is_loopback_url(&Url::parse(raw).unwrap()), "{raw}");
+    }
+}
+
+#[tokio::test]
+async fn local_service_bypasses_even_an_empty_or_broken_pool() {
+    let (pool, _, _) = setup().await;
+    let (port, seen) = fake_proxy("local", "200 OK").await;
+    enable(&pool, |_| {}).await;
+    let url = Url::parse(&format!("http://127.0.0.1:{port}/models")).unwrap();
+    for broken in [false, true] {
+        if broken { pool.save_node(input("dead", "127.0.0.1", dead_port().await)).await.unwrap(); }
+        let response = http_client(&pool).get("ollama-local", url.clone(), reqwest::header::HeaderMap::new(), Duration::from_secs(3)).await.unwrap();
+        assert_eq!(response.text().await.unwrap(), "local");
+        let direct = reqwest::Client::builder().no_proxy().build().unwrap();
+        let response = http::send_with_pool(Some(&pool), "custom", direct.get(url.clone()), Duration::from_secs(3)).await.unwrap();
+        assert_eq!(response.text().await.unwrap(), "local");
+    }
+    assert_eq!(seen.lock().unwrap().len(), 4);
+    assert!(pool.state().nodes.iter().all(|node| node.failure_count == 0));
+}
+
+#[tokio::test]
+async fn shared_sender_fails_over_and_preserves_request_headers() {
+    let (pool, _, _) = setup().await;
+    pool.save_node(input("dead", "127.0.0.1", dead_port().await)).await.unwrap();
+    let (port, seen) = fake_proxy("token", "200 OK").await;
+    pool.save_node(input("good", "127.0.0.1", port)).await.unwrap();
+    enable(&pool, |c| c.strategy = Strategy::Failover).await;
+    let client = reqwest::Client::builder().no_proxy().build().unwrap();
+    let request = client.post("http://auth.test/token").bearer_auth("test-token").body("grant_type=refresh_token");
+    let response = http::send_with_pool(Some(&pool), "github", request, Duration::from_secs(3)).await.unwrap();
+    assert_eq!(response.text().await.unwrap(), "token");
+    let request = seen.lock().unwrap()[0].to_ascii_lowercase();
+    assert!(request.starts_with("post http://auth.test/token"));
+    assert!(request.contains("authorization: bearer test-token"));
+    assert_eq!(pool.state().nodes[0].failure_count, 1);
+    assert_eq!(pool.state().nodes[1].success_count, 1);
+}
+
+#[tokio::test]
+async fn proxy_auth_rejection_moves_to_the_next_node_in_both_paths() {
+    let (pool, _, _) = setup().await;
+    let (bad, _) = fake_proxy("", "407 Proxy Authentication Required").await;
+    let (good, seen) = fake_proxy("ok", "200 OK").await;
+    pool.save_node(input("auth", "127.0.0.1", bad)).await.unwrap();
+    pool.save_node(input("good", "127.0.0.1", good)).await.unwrap();
+    enable(&pool, |c| c.strategy = Strategy::Failover).await;
+    let direct = reqwest::Client::builder().no_proxy().build().unwrap();
+    let response = http::send_with_pool(Some(&pool), "p", direct.get("http://upstream.test/models"), Duration::from_secs(3)).await.unwrap();
+    assert_eq!(response.text().await.unwrap(), "ok");
+    let response = http_client(&pool).get("p", Url::parse("http://upstream.test/models").unwrap(), reqwest::header::HeaderMap::new(), Duration::from_secs(3)).await.unwrap();
+    assert_eq!(response.text().await.unwrap(), "ok");
+    assert_eq!(seen.lock().unwrap().len(), 2);
+    assert_eq!(pool.state().nodes[0].failure_count, 2);
+    assert_eq!(pool.state().nodes[0].success_count, 0);
+}
+
+#[tokio::test]
+async fn upstream_errors_and_streaming_uploads_are_not_replayed() {
+    let (pool, _, _) = setup().await;
+    let (bad, first) = fake_proxy("rejected", "500 Internal Server Error").await;
+    let (good, second) = fake_proxy("ok", "200 OK").await;
+    pool.save_node(input("first", "127.0.0.1", bad)).await.unwrap();
+    pool.save_node(input("second", "127.0.0.1", good)).await.unwrap();
+    enable(&pool, |c| c.strategy = Strategy::Failover).await;
+    let client = reqwest::Client::builder().no_proxy().build().unwrap();
+    let response = http::send_with_pool(Some(&pool), "p", client.post("http://upstream.test/generate").body("prompt"), Duration::from_secs(3)).await.unwrap();
+    assert_eq!(response.status().as_u16(), 500);
+    assert_eq!(first.lock().unwrap().len(), 1);
+    assert!(second.lock().unwrap().is_empty());
+    let id = pool.state().nodes[0].id.clone();
+    let mut dead = input("dead", "127.0.0.1", dead_port().await);
+    dead.id = Some(id);
+    pool.save_node(dead).await.unwrap();
+    let stream = futures_util::stream::once(async { Ok::<_, std::io::Error>(bytes::Bytes::from_static(b"upload")) });
+    let request = client.post("http://upstream.test/upload").body(reqwest::Body::wrap_stream(stream));
+    assert!(request.try_clone().is_none());
+    assert!(http::send_with_pool(Some(&pool), "p", request, Duration::from_secs(3)).await.is_err());
+    assert!(second.lock().unwrap().is_empty());
 }
 
 #[tokio::test]

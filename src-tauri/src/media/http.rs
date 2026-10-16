@@ -5,7 +5,7 @@
 //! - 不禁用 TLS 证书校验；
 //! - API 请求不跟随重定向（避免凭据被带到别的主机）；
 //! - 下载上游返回的 URL 只允许 https，且禁止指向回环/内网/链路本地等地址。域名要先解析再逐个检查，
-//!   并把连接固定到已检查的地址上（防 DNS 重绑定），每一跳重定向都重新检查。
+//!   直连时固定到已检查的地址；经显式代理时由节点处理目标 DNS。每一跳重定向都重新检查。
 
 use std::net::{IpAddr, Ipv4Addr, Ipv6Addr, SocketAddr};
 use std::path::Path;
@@ -320,7 +320,7 @@ pub struct MediaHttp {
 }
 
 fn base_builder() -> reqwest::ClientBuilder {
-    Client::builder().user_agent(user_agent()).redirect(redirect::Policy::none()).connect_timeout(CONNECT_TIMEOUT)
+    Client::builder().no_proxy().user_agent(user_agent()).redirect(redirect::Policy::none()).connect_timeout(CONNECT_TIMEOUT)
 }
 
 fn sensitive_header(name: &str, value: &str) -> Result<(HeaderName, HeaderValue), MediaError> {
@@ -378,8 +378,9 @@ impl MediaHttp {
     }
 
     /// 发送并把非 2xx 转成 `MediaError::Upstream`（带脱敏后的上游错误摘要）。
-    pub async fn send(&self, rb: RequestBuilder) -> Result<Response, MediaError> {
-        let resp = rb.send().await.map_err(net_err)?;
+    pub async fn send(&self, provider_id: &str, rb: RequestBuilder) -> Result<Response, MediaError> {
+        let resp = crate::proxy::http::send(provider_id, rb, API_TIMEOUT).await
+            .map_err(|e| MediaError::Network(e.to_string()))?;
         if resp.status().is_success() {
             Ok(resp)
         } else {
@@ -387,8 +388,8 @@ impl MediaHttp {
         }
     }
 
-    pub async fn send_json(&self, rb: RequestBuilder) -> Result<Value, MediaError> {
-        let resp = self.send(rb).await?;
+    pub async fn send_json(&self, provider_id: &str, rb: RequestBuilder) -> Result<Value, MediaError> {
+        let resp = self.send(provider_id, rb).await?;
         read_json(resp, MAX_JSON_BYTES).await
     }
 
@@ -413,10 +414,11 @@ impl MediaHttp {
     /// 下载上游返回的 URL 到 `dest`（先写 `.part` 再改名）。
     ///
     /// - `creds` 仅当目标与首个 URL 同主机且属于受信域名时才带上凭据（Bearer/Header 方式）；
-    /// - 每一跳（含重定向）都重新做 SSRF 检查，连接固定到检查过的地址；
+    /// - 每一跳（含重定向）都重新做 SSRF 检查；直连连接固定到检查过的地址；
     /// - 超过 `max_bytes` 立即中止并删除半成品。
     pub async fn download_to_file(
         &self,
+        provider_id: &str,
         url: &str,
         creds: Option<(&CapabilityConfig, &Secret)>,
         max_bytes: u64,
@@ -444,7 +446,8 @@ impl MediaHttp {
                     rb = Self::apply_header_auth(rb, &cfg.auth, secret)?;
                 }
             }
-            let resp = rb.send().await.map_err(net_err)?;
+            let resp = crate::proxy::http::send(provider_id, rb, DOWNLOAD_TIMEOUT).await
+                .map_err(|e| MediaError::Network(e.to_string()))?;
             if resp.status().is_redirection() {
                 let loc = resp
                     .headers()
@@ -640,7 +643,7 @@ mod tests {
         let http = fake.http();
         let dir = tempdir();
         let dest = dir.join("a.png");
-        let n = http.download_to_file(&format!("{}/img.png", fake.url()), None, 1024, &dest).await.unwrap();
+        let n = http.download_to_file("test", &format!("{}/img.png", fake.url()), None, 1024, &dest).await.unwrap();
         assert_eq!(n, 4);
         assert_eq!(std::fs::read(&dest).unwrap(), vec![1, 2, 3, 4]);
         assert!(!dir.join("a.png.part").exists());
@@ -655,7 +658,7 @@ mod tests {
         let http = fake.http();
         let dir = tempdir();
         let dest = dir.join("v.mp4");
-        let err = http.download_to_file(&format!("{}/v", fake.url()), None, 1000, &dest).await.unwrap_err();
+        let err = http.download_to_file("test", &format!("{}/v", fake.url()), None, 1000, &dest).await.unwrap_err();
         assert!(matches!(err, MediaError::TooLarge(_)), "{err:?}");
         assert!(!dest.exists());
         assert!(!dir.join("v.mp4.part").exists());
@@ -683,7 +686,7 @@ mod tests {
             let http = fake.http();
             let tmp = tempdir();
             let dest = tmp.join("x.bin");
-            let err = http.download_to_file(&format!("{}/hop", fake.url()), None, 1024, &dest).await.unwrap_err();
+            let err = http.download_to_file("test", &format!("{}/hop", fake.url()), None, 1024, &dest).await.unwrap_err();
             assert!(matches!(err, MediaError::Blocked(_)), "redirect to {err:?}");
             assert!(!dest.exists());
             assert_eq!(fake.requests().len(), 1, "不应向内网目标发出请求");
@@ -700,8 +703,8 @@ mod tests {
         .await;
         let http = fake.http();
         let dir = tempdir();
-        assert_eq!(http.download_to_file(&format!("{}/a", fake.url()), None, 100, &dir.join("ok.mp3")).await.unwrap(), 8);
-        let err = http.download_to_file(&format!("{}/loop", fake.url()), None, 100, &dir.join("no.mp3")).await.unwrap_err();
+        assert_eq!(http.download_to_file("test", &format!("{}/a", fake.url()), None, 100, &dir.join("ok.mp3")).await.unwrap(), 8);
+        let err = http.download_to_file("test", &format!("{}/loop", fake.url()), None, 100, &dir.join("no.mp3")).await.unwrap_err();
         assert!(matches!(err, MediaError::Blocked(_)), "{err:?}");
     }
 
@@ -709,7 +712,7 @@ mod tests {
     async fn production_policy_refuses_loopback_download_even_for_plain_fake() {
         let fake = Fake::start(|_r| Reply::bytes(200, "text/plain", b"x".to_vec())).await;
         let http = MediaHttp::new().unwrap(); // 无豁免
-        let err = http.download_to_file(&format!("{}/x", fake.url()), None, 100, &tempdir().join("x")).await.unwrap_err();
+        let err = http.download_to_file("test", &format!("{}/x", fake.url()), None, 100, &tempdir().join("x")).await.unwrap_err();
         assert!(matches!(err, MediaError::Blocked(_)), "{err:?}");
         assert!(fake.requests().is_empty());
     }
@@ -721,12 +724,12 @@ mod tests {
         let http = fake.http();
         let cfg = CapabilityConfig { base_url: fake.url(), ..Default::default() };
         let dir = tempdir();
-        http.download_to_file(&format!("{}/v.mp4", fake.url()), Some((&cfg, &secret)), 100, &dir.join("a.mp4")).await.unwrap();
+        http.download_to_file("test", &format!("{}/v.mp4", fake.url()), Some((&cfg, &secret)), 100, &dir.join("a.mp4")).await.unwrap();
         assert_eq!(fake.requests()[0].header("authorization").unwrap(), "Bearer sk-test-download-secret");
 
         // 不属于该供应商的域名：不带凭据
         let other = CapabilityConfig { base_url: "https://api.other.example".into(), ..Default::default() };
-        http.download_to_file(&format!("{}/v.mp4", fake.url()), Some((&other, &secret)), 100, &dir.join("b.mp4")).await.unwrap();
+        http.download_to_file("test", &format!("{}/v.mp4", fake.url()), Some((&other, &secret)), 100, &dir.join("b.mp4")).await.unwrap();
         assert!(fake.requests()[1].header("authorization").is_none());
     }
 
@@ -737,14 +740,14 @@ mod tests {
         let http = fake.http();
         let cfg = CapabilityConfig { base_url: fake.url(), auth: AuthSpec::Query { name: "api_key".into() }, ..Default::default() };
         let rb = http.request(Method::GET, &format!("{}/search", fake.url()), &cfg, &secret).unwrap();
-        let err = http.send(rb).await.unwrap_err();
+        let err = http.send("test", rb).await.unwrap_err();
         assert!(matches!(err, MediaError::Upstream { status: 302, .. }), "{err:?}");
         assert_eq!(fake.requests().len(), 1);
         assert_eq!(fake.requests()[0].query("api_key").as_deref(), Some("sk-query-secret-123"));
 
         // 连接失败的错误文本不应包含带密钥的 URL
         let rb = http.request(Method::GET, "http://127.0.0.1:1/x", &cfg, &secret).unwrap();
-        let err = http.send(rb).await.unwrap_err().to_string();
+        let err = http.send("test", rb).await.unwrap_err().to_string();
         assert!(!err.contains("sk-query-secret-123") && !err.contains("api_key"), "{err}");
     }
 

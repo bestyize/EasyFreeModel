@@ -132,7 +132,7 @@ pub(super) async fn start(
         None => format!("{state_url}?platform={platform}"),
     };
 
-    let reply = http::post_with(&http, &url, http::Encoding::Json, &[], &headers).await?;
+    let reply = http::post_with(&http, &cfg.id, &url, http::Encoding::Json, &[], &headers).await?;
     if !(200..300).contains(&reply.status) {
         return Err(OAuthError::TokenEndpoint {
             status: reply.status,
@@ -204,7 +204,7 @@ impl StateSession {
     }
 
     async fn poll_once(&self) -> Result<Poll, OAuthError> {
-        let reply = http::get_with(&self.http, &self.poll_url(), &self.headers).await?;
+        let reply = http::get_with(&self.http, &self.cfg.id, &self.poll_url(), &self.headers).await?;
         let secrets: Vec<&str> = vec![self.state.expose()];
         if !(200..300).contains(&reply.status) {
             return Err(OAuthError::Transient(format!("token endpoint returned HTTP {}", reply.status)));

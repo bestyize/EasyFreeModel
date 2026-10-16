@@ -5,10 +5,11 @@
 //! - 转发管线每次出站前调用 [`ProxyPool::plan`] 得到按策略排好的尝试顺序；代理连不上（`is_connect`）时
 //!   自动换下一个节点，连续失败达到阈值的节点进入冷却，冷却结束后半开重试（再失败一次立即重新冷却）。
 //! - 默认关闭；开启后若没有可用节点，默认**拒绝出站**而不是悄悄直连（可在配置里打开“回退直连”）。
-//! - 范围：网关转发的上游请求，以及提供商连接测试 / 拉取模型 / 配额查询（经 [`probe_builder`]）。
-//!   OAuth 授权与多模态媒体请求暂不经过代理池。
+//! - 范围：聊天、连接测试、拉取模型、配额、应用内 OAuth 授权 / 刷新与媒体请求。
+//!   本机目标始终直连；浏览器打开的授权页面由浏览器自身网络设置处理。
 
 pub mod parse;
+pub mod http;
 
 use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
@@ -312,14 +313,6 @@ pub enum Route {
     Proxy { node_id: String, client: reqwest::Client },
 }
 
-/// 一次性探测客户端的选路结果。
-pub enum ProbeRoute {
-    Direct,
-    Proxy(reqwest::Proxy),
-    /// 代理池已开启但没有可用节点，且不允许回退直连。
-    Blocked,
-}
-
 pub struct ProxyPool {
     db: SqlitePool,
     vault: Arc<dyn CredentialVault>,
@@ -510,19 +503,9 @@ impl ProxyPool {
         routes
     }
 
-    /// 给提测 / 拉模型 / 查配额这类一次性客户端选一个出口（不做故障转移，也不记录健康）。
-    pub fn probe_route(&self, provider_id: &str) -> ProbeRoute {
-        let snap = self.snapshot();
-        let cfg = &snap.config;
-        if !cfg.enabled || !cfg.applies_to(provider_id) {
-            return ProbeRoute::Direct;
-        }
-        let first = self.ordered_candidates(&snap, Instant::now()).into_iter().find_map(|n| n.proxy().ok());
-        match first {
-            Some(p) => ProbeRoute::Proxy(p),
-            None if cfg.fallback_direct => ProbeRoute::Direct,
-            None => ProbeRoute::Blocked,
-        }
+    /// Local services must never be sent through an external proxy.
+    pub fn plan_for_url(&self, provider_id: &str, url: &Url) -> Vec<Route> {
+        if http::is_loopback_url(url) { vec![Route::Direct] } else { self.plan(provider_id) }
     }
 
     // ───────── 健康 ─────────
@@ -803,17 +786,6 @@ static GLOBAL: OnceLock<Arc<ProxyPool>> = OnceLock::new();
 /// 生产环境在 `AppState::init` 里安装；测试不安装，一次性客户端保持直连。
 pub fn install_global(pool: Arc<ProxyPool>) {
     let _ = GLOBAL.set(pool);
-}
-
-/// 给提供商相关的一次性 HTTP 客户端（连接测试、拉取模型、配额）套上代理池选出的出口。
-/// 返回 Err 表示代理池开启但无可用节点且不允许直连，调用方应报告“无法确认”而不是直连。
-pub fn probe_builder(builder: reqwest::ClientBuilder, provider_id: &str) -> Result<reqwest::ClientBuilder, String> {
-    let Some(pool) = GLOBAL.get() else { return Ok(builder) };
-    match pool.probe_route(provider_id) {
-        ProbeRoute::Direct => Ok(builder),
-        ProbeRoute::Proxy(p) => Ok(builder.proxy(p)),
-        ProbeRoute::Blocked => Err("代理池已开启但没有可用的代理节点，已阻止直连".to_string()),
-    }
 }
 
 #[cfg(test)]

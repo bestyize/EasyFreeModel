@@ -113,7 +113,7 @@ onActivated(() => {
         <div class="ov-text">
           <h2 class="section-title">启用代理池</h2>
           <p class="ov-desc">
-            开启后，网关转发给上游的请求会按下面的策略经过代理节点；修改立即对新请求生效，无需重启网关。
+            聊天、连接测试、模型列表、额度、应用内授权与媒体请求共用代理配置。本机地址始终直连；关闭后直接连接，不使用环境代理。修改立即对新请求生效。
           </p>
           <p class="ov-stats" data-testid="overview-stats">
             {{ store.nodes.length }} 个节点 · {{ store.usableCount }} 个可用 · {{ strategyLabel(store.saved!.strategy) }} · {{ scopeText }}
@@ -125,7 +125,7 @@ onActivated(() => {
       <div v-if="noUsable" class="banner" :class="store.saved!.fallbackDirect ? 'warn' : 'danger'" role="alert" data-testid="no-usable-banner">
         <ShieldAlert :size="18" aria-hidden="true" />
         <span v-if="store.saved!.fallbackDirect">代理池已开启，但目前没有可用节点，请求会回退为直连上游。</span>
-        <span v-else>代理池已开启，但目前没有可用节点：生效范围内提供商的上游请求会被拒绝，直到添加并启用可用节点（或开启“无可用代理时回退直连”）。</span>
+        <span v-else>代理池已开启，但目前没有可用节点：生效范围内提供商的非本机请求会被拒绝，直到添加并启用可用节点（或开启“无可用代理时回退直连”）。</span>
       </div>
 
       <ProxyConfigCard />

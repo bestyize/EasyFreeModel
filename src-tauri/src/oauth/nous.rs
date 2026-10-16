@@ -19,7 +19,7 @@ pub async fn mint_agent_key(
     let url = cfg.agent_key_endpoint(creds)?;
     let mut headers = ExtraHeaders::default();
     headers.0.push(("Authorization".into(), format!("Bearer {}", tokens.access_token.expose())));
-    let reply = http::post_json_with(client, &url, &json!({"min_ttl_seconds": 7200}), &headers).await?;
+    let reply = http::post_json_with(client, &cfg.id, &url, &json!({"min_ttl_seconds": 7200}), &headers).await?;
     match reply.status {
         200..=299 => {}
         401 | 403 => return Err(OAuthError::ReauthRequired {

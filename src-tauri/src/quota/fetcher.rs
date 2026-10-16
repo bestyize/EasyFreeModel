@@ -4,6 +4,8 @@
 
 use chrono::DateTime;
 use reqwest::Client;
+use crate::proxy::http::RoutedRequest;
+use std::time::Duration;
 use serde_json::Value;
 
 use crate::error::{AppError, AppResult};
@@ -113,7 +115,7 @@ async fn fetch_deepseek(
         .get("https://api.deepseek.com/user/balance")
         .bearer_auth(key)
         .header("User-Agent", crate::upstream::client::user_agent())
-        .send()
+        .send_routed("deepseek", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("DeepSeek 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -158,7 +160,7 @@ async fn fetch_claude(
         .header("anthropic-beta", "oauth-2025-04-20")
         .header("anthropic-version", "2023-06-01")
         .header("User-Agent", "claude-cli/2.1.280 (external, cli)")
-        .send()
+        .send_routed("claude", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Claude 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -219,7 +221,7 @@ async fn fetch_codex(
         .get("https://chatgpt.com/backend-api/wham/usage")
         .bearer_auth(token)
         .header("User-Agent", crate::upstream::client::user_agent())
-        .send()
+        .send_routed("codex", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Codex 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -273,7 +275,7 @@ async fn fetch_github(
         .header("Accept", "application/json")
         .header("X-GitHub-Api-Version", "2022-11-28")
         .header("User-Agent", "GitHubCopilotChat/0.26.7")
-        .send()
+        .send_routed("github", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("GitHub Copilot 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -359,7 +361,7 @@ async fn fetch_codebuddy(
         .header("X-Requested-With", "XMLHttpRequest")
         .header("User-Agent", ua)
         .body("{}")
-        .send()
+        .send_routed(provider_id, Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("CodeBuddy 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -448,7 +450,7 @@ async fn fetch_antigravity(
         .header("Content-Type", "application/json")
         .header("x-request-source", "local")
         .json(&load_body)
-        .send()
+        .send_routed("antigravity", Duration::from_secs(12))
         .await;
 
     if let Ok(resp) = load_resp {
@@ -475,7 +477,7 @@ async fn fetch_antigravity(
         .header("X-Client-Version", "1.107.0")
         .header("x-request-source", "local")
         .json(&Value::Object(req_body))
-        .send()
+        .send_routed("antigravity", Duration::from_secs(12))
         .await;
 
     let mut rows = Vec::new();
@@ -530,7 +532,7 @@ async fn fetch_antigravity(
         .header("X-Client-Name", "antigravity")
         .header("X-Client-Version", "2.11.0")
         .body("{}")
-        .send()
+        .send_routed("antigravity", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Antigravity 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -578,7 +580,7 @@ async fn fetch_gemini_cli(
         .header("Authorization", format!("Bearer {token}"))
         .header("Content-Type", "application/json")
         .body("{}")
-        .send()
+        .send_routed("gemini-cli", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Gemini CLI 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -628,7 +630,7 @@ async fn fetch_kimi(
     } else {
         req = req.header("Authorization", format!("Bearer {key_or_token}"));
     }
-    let resp = req.send().await.map_err(|e| AppError::msg(format!("Kimi 网络请求失败：{e}")))?;
+    let resp = req.send_routed("kimi", Duration::from_secs(12)).await.map_err(|e| AppError::msg(format!("Kimi 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
         return Err(AppError::msg(format!("Kimi 响应错误 ({})", resp.status())));
     }
@@ -674,7 +676,7 @@ async fn fetch_glm(
     let resp = client
         .get(url)
         .header("Authorization", format!("Bearer {token}"))
-        .send()
+        .send_routed(provider_id, Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("GLM 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -720,7 +722,7 @@ async fn fetch_openrouter(
     let resp = client
         .get("https://openrouter.ai/api/v1/auth/key")
         .bearer_auth(key)
-        .send()
+        .send_routed("openrouter", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("OpenRouter 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -773,7 +775,7 @@ async fn fetch_groq(
     let resp = client
         .get("https://api.groq.com/openai/v1/models")
         .bearer_auth(key)
-        .send()
+        .send_routed("groq", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Groq 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -826,7 +828,7 @@ async fn fetch_vercel(
     let resp = client
         .get("https://ai-gateway.vercel.sh/v1/credits")
         .bearer_auth(key)
-        .send()
+        .send_routed("vercel-ai-gateway", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Vercel 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -861,7 +863,7 @@ async fn fetch_grok_cli(
         .bearer_auth(token)
         .header("x-grok-client-identifier", "grok-shell")
         .header("User-Agent", "grok-shell/1.0.44 (linux; x86_64)")
-        .send()
+        .send_routed("grok-cli", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Grok CLI 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -926,7 +928,7 @@ async fn fetch_minimax(
     let resp = client
         .get(url)
         .header("Authorization", format!("Bearer {key_or_token}"))
-        .send()
+        .send_routed(provider_id, Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("MiniMax 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -969,7 +971,7 @@ async fn fetch_ollama(
     let resp = client
         .get("https://ollama.com/api/usage")
         .bearer_auth(key)
-        .send()
+        .send_routed("ollama", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Ollama Cloud 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -1016,7 +1018,7 @@ async fn fetch_kiro(
         .get(url)
         .header("Authorization", format!("Bearer {token}"))
         .header("x-amz-user-agent", "aws-sdk-js/1.0.0 KiroIDE")
-        .send()
+        .send_routed("kiro", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Kiro 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -1063,7 +1065,7 @@ async fn fetch_qoder(
     let resp = client
         .get(url)
         .header("Authorization", format!("Bearer {token}"))
-        .send()
+        .send_routed(provider_id, Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Qoder 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -1121,7 +1123,7 @@ async fn fetch_commandcode(
     let resp = client
         .get("https://api.commandcode.ai/api/credits")
         .header("Authorization", format!("Bearer {key}"))
-        .send()
+        .send_routed("commandcode", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("CommandCode 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -1165,7 +1167,7 @@ async fn fetch_opencode(
     let resp = client
         .get(url)
         .header("Authorization", format!("Bearer {key}"))
-        .send()
+        .send_routed(provider_id, Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("OpenCode 网络请求失败：{e}")))?;
     if !resp.status().is_success() {
@@ -1205,7 +1207,7 @@ async fn fetch_zed(
     let resp = client
         .get("https://cloud.zed.dev/client/users/me")
         .header("Authorization", format!("Bearer {token}"))
-        .send()
+        .send_routed("zed", Duration::from_secs(12))
         .await
         .map_err(|e| AppError::msg(format!("Zed 网络请求失败：{e}")))?;
     if !resp.status().is_success() {

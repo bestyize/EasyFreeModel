@@ -100,7 +100,7 @@ impl MediaAdapter for XaiVideo {
             body["image"] = json!({"url": img.data_uri().await?});
         }
         let url = format!("{}/generations", cx.cfg.base_url.trim_end_matches('/'));
-        let v = cx.http.send_json(cx.post(&url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&url)?.json(&body)).await?;
         let id = str_at(&v, &["request_id"]).ok_or_else(|| MediaError::BadResponse("缺少 request_id".into()))?;
         safe_path_segment(id, "任务 ID").map_err(|_| MediaError::BadResponse("上游返回的任务 ID 不合法".into()))?;
         Ok(Submission::Pending(RemoteTask::new("xai-video", id)))
@@ -109,7 +109,7 @@ impl MediaAdapter for XaiVideo {
     async fn poll(&self, cx: &AdapterCtx<'_>, task: &RemoteTask) -> Result<PollState, MediaError> {
         safe_path_segment(&task.id, "任务 ID")?;
         let url = format!("{}/{}", cx.cfg.base_url.trim_end_matches('/'), task.id);
-        let v = cx.http.send_json(cx.get(&url)?).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.get(&url)?).await?;
         match str_at(&v, &["status"]).unwrap_or("").to_ascii_lowercase().as_str() {
             "done" | "completed" => {
                 let u = str_at(&v, &["video", "url"]).ok_or_else(|| MediaError::BadResponse("任务完成但缺少 video.url".into()))?;
@@ -166,7 +166,7 @@ impl MediaAdapter for OpenRouterVideo {
             let uri = img.data_uri().await?;
             body["frame_images"] = json!([{"type": "image_url", "image_url": {"url": uri}, "frame_type": "first_frame"}]);
         }
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         let id = str_at(&v, &["id"]).ok_or_else(|| MediaError::BadResponse("缺少任务 id".into()))?;
         safe_path_segment(id, "任务 ID").map_err(|_| MediaError::BadResponse("上游返回的任务 ID 不合法".into()))?;
         let mut task = RemoteTask::new("openrouter-video", id);
@@ -184,7 +184,7 @@ impl MediaAdapter for OpenRouterVideo {
                 format!("{}/{}", cx.cfg.base_url.trim_end_matches('/'), task.id)
             }
         };
-        let v = cx.http.send_json(cx.get(&url)?).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.get(&url)?).await?;
         match str_at(&v, &["status"]).unwrap_or("").to_ascii_lowercase().as_str() {
             "completed" => {
                 let u = v

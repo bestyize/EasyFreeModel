@@ -181,7 +181,7 @@ impl AuthSession {
             fields.push((key.clone(), value.clone()));
         }
         let encoding: Encoding = self.cfg.token_encoding;
-        let reply = http::post(&self.http, &self.token_url, encoding, &fields).await?;
+        let reply = http::post(&self.http, &self.cfg.id, &self.token_url, encoding, &fields).await?;
 
         let mut secrets: Vec<&str> = vec![code.expose(), &self.state];
         if let Some(v) = &self.verifier {

@@ -88,7 +88,7 @@ impl MediaAdapter for OpenAiSpeech {
         if let Some(s) = check_speed(cx, req, 0.25, 4.0)? {
             body["speed"] = json!(s);
         }
-        let resp = cx.http.send(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let resp = cx.http.send(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         Ok(Submission::Done(audio_outcome(resp, fmt).await?))
     }
 }
@@ -119,7 +119,7 @@ impl MediaAdapter for ElevenLabsTts {
             }
         }
         let url = format!("{}/{voice}?output_format=mp3_44100_128", cx.cfg.base_url.trim_end_matches('/'));
-        let resp = cx.http.send(cx.post(&url)?.json(&body)).await?;
+        let resp = cx.http.send(cx.provider_id, cx.post(&url)?.json(&body)).await?;
         Ok(Submission::Done(audio_outcome(resp, "mp3").await?))
     }
 }
@@ -153,7 +153,7 @@ impl MediaAdapter for CartesiaTts {
                 body["language"] = Value::String(l.to_string());
             }
         }
-        let resp = cx.http.send(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let resp = cx.http.send(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         Ok(Submission::Done(audio_outcome(resp, "mp3").await?))
     }
 }

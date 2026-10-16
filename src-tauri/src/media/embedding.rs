@@ -101,7 +101,7 @@ impl MediaAdapter for OpenAiEmbeddings {
         if let Some(d) = dimensions(cx, req)? {
             body["dimensions"] = json!(d);
         }
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         let data = v.get("data").and_then(Value::as_array).ok_or_else(|| MediaError::BadResponse("缺少 data 数组".into()))?;
         // 按 index 排序，不信任返回顺序
         let mut rows: Vec<(u64, Vec<f32>)> = Vec::with_capacity(data.len());
@@ -153,7 +153,7 @@ impl MediaAdapter for GeminiEmbeddings {
             })
             .collect();
         let url = format!("{}/{model}:batchEmbedContents", cx.cfg.base_url.trim_end_matches('/'));
-        let v = cx.http.send_json(cx.post(&url)?.json(&json!({"requests": requests}))).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&url)?.json(&json!({"requests": requests}))).await?;
         let vectors = v
             .get("embeddings")
             .and_then(Value::as_array)

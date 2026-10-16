@@ -16,7 +16,7 @@ const providerQuery = ref('')
 const strategyHint = computed(() => STRATEGY_OPTIONS.find((o) => o.id === draft.value.strategy)?.description ?? '')
 const providerList = computed(() => {
   const q = providerQuery.value.trim().toLowerCase()
-  const list = providers.providers.filter((p) => p.serviceKinds.includes('llm') || p.serviceKinds.length === 0 || draft.value.providerIds.includes(p.id))
+  const list = providers.providers
   return q ? list.filter((p) => p.name.toLowerCase().includes(q) || p.id.toLowerCase().includes(q)) : list
 })
 
@@ -61,7 +61,7 @@ async function save() {
       </select>
     </SettingsRow>
 
-    <SettingsRow label="生效范围" description="选择哪些提供商的上游请求（以及连接测试、拉取模型、配额查询）经过代理池，其余直连。" for-id="px-scope">
+    <SettingsRow label="生效范围" description="聊天、测试、模型列表、额度、应用内授权与媒体请求共用此范围。其余直连；本机地址始终直连。" for-id="px-scope">
       <select id="px-scope" v-model="draft.providerScope" class="input" data-testid="scope">
         <option v-for="o in SCOPE_OPTIONS" :key="o.id" :value="o.id">{{ o.label }}</option>
       </select>

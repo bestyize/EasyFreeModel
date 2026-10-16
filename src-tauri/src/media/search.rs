@@ -208,7 +208,7 @@ impl MediaAdapter for SerperSearch {
             });
         }
         let url = format!("{}/search", cx.cfg.base_url.trim_end_matches('/'));
-        let v = cx.http.send_json(cx.post(&url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&url)?.json(&body)).await?;
         let hits = hits_from(v.get("organic").and_then(Value::as_array), |i| SearchHit::new(s(i, "title"), s(i, "link"), s(i, "snippet")));
         done(cx.provider_id, hits, &q)
     }
@@ -240,7 +240,7 @@ impl MediaAdapter for BraveSearch {
             .to_string()));
         }
         let url = with_query(&format!("{}/web/search", cx.cfg.base_url.trim_end_matches('/')), &pairs)?;
-        let v = cx.http.send_json(cx.get(&url)?.header(reqwest::header::ACCEPT, "application/json")).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.get(&url)?.header(reqwest::header::ACCEPT, "application/json")).await?;
         let hits = hits_from(v.pointer("/web/results").and_then(Value::as_array), |i| SearchHit::new(s(i, "title"), s(i, "url"), s(i, "description")));
         done(cx.provider_id, hits, &q)
     }
@@ -262,7 +262,7 @@ impl MediaAdapter for TavilySearch {
         if let Some(t) = q.time_range {
             body["time_range"] = json!(t);
         }
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         let hits = hits_from(v.get("results").and_then(Value::as_array), |i| SearchHit::new(s(i, "title"), s(i, "url"), s(i, "content")));
         done(cx.provider_id, hits, &q)
     }
@@ -281,7 +281,7 @@ impl MediaAdapter for ExaSearch {
     async fn submit(&self, cx: &AdapterCtx<'_>, req: &MediaRequest) -> Result<Submission, MediaError> {
         let q = query(cx, req)?;
         let body = json!({"query": q.text, "numResults": q.count, "type": "auto", "contents": {"text": {"maxCharacters": 500}}});
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         let hits = hits_from(v.get("results").and_then(Value::as_array), |i| SearchHit::new(s(i, "title"), s(i, "url"), s(i, "text")));
         done(cx.provider_id, hits, &q)
     }
@@ -311,7 +311,7 @@ impl MediaAdapter for LinkupSearch {
             body["fromDate"] = json!((now - chrono::Duration::days(days)).format("%Y-%m-%d").to_string());
             body["toDate"] = json!(now.format("%Y-%m-%d").to_string());
         }
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         let hits = hits_from(v.get("results").and_then(Value::as_array), |i| {
             let title = if s(i, "name").is_empty() { s(i, "title") } else { s(i, "name") };
             SearchHit::new(title, s(i, "url"), s(i, "content"))
@@ -336,7 +336,7 @@ impl MediaAdapter for PerplexitySearch {
         if let Some(r) = &q.region {
             body["country"] = json!(r);
         }
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         let hits = hits_from(v.get("results").and_then(Value::as_array), |i| SearchHit::new(s(i, "title"), s(i, "url"), s(i, "snippet")));
         done(cx.provider_id, hits, &q)
     }
@@ -362,7 +362,7 @@ impl MediaAdapter for YouComSearch {
             pairs.push(("freshness", t.to_string()));
         }
         let url = with_query(&cx.cfg.base_url, &pairs)?;
-        let v = cx.http.send_json(cx.get(&url)?).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.get(&url)?).await?;
         let hits = hits_from(v.pointer("/results/web").and_then(Value::as_array), |i| {
             let snippet = i.get("snippets").and_then(Value::as_array).and_then(|a| a.first()).and_then(Value::as_str).unwrap_or_else(|| s(i, "description"));
             SearchHit::new(s(i, "title"), s(i, "url"), snippet)
@@ -391,7 +391,7 @@ impl MediaAdapter for SearchApiSearch {
             pairs.push(("time_period", format!("last_{t}")));
         }
         let url = with_query(&cx.cfg.base_url, &pairs)?; // api_key 由鉴权方式 query 并入
-        let v = cx.http.send_json(cx.get(&url)?).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.get(&url)?).await?;
         let hits = hits_from(v.get("organic_results").and_then(Value::as_array), |i| SearchHit::new(s(i, "title"), s(i, "link"), s(i, "snippet")));
         done(cx.provider_id, hits, &q)
     }
@@ -410,7 +410,7 @@ impl MediaAdapter for OllamaSearch {
     async fn submit(&self, cx: &AdapterCtx<'_>, req: &MediaRequest) -> Result<Submission, MediaError> {
         let q = query(cx, req)?;
         let body = json!({"query": q.text, "max_results": q.count.min(10)});
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&body)).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&body)).await?;
         let hits = hits_from(v.get("results").and_then(Value::as_array), |i| SearchHit::new(s(i, "title"), s(i, "url"), s(i, "content")));
         done(cx.provider_id, hits, &q)
     }
@@ -466,7 +466,7 @@ impl MediaAdapter for FirecrawlScrape {
     }
     async fn submit(&self, cx: &AdapterCtx<'_>, req: &MediaRequest) -> Result<Submission, MediaError> {
         let url = fetch_url(req)?;
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&json!({"url": url, "formats": ["markdown"]}))).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&json!({"url": url, "formats": ["markdown"]}))).await?;
         if v.get("success").and_then(Value::as_bool) == Some(false) {
             return Err(MediaError::Failed(format!("Firecrawl 抓取失败：{}", truncate_chars(s(&v, "error"), 200))));
         }
@@ -488,7 +488,7 @@ impl MediaAdapter for JinaReader {
     async fn submit(&self, cx: &AdapterCtx<'_>, req: &MediaRequest) -> Result<Submission, MediaError> {
         let url = fetch_url(req)?;
         let rb = cx.post(&cx.cfg.base_url)?.header(reqwest::header::ACCEPT, "application/json").json(&json!({"url": url}));
-        let resp = cx.http.send(rb).await?;
+        let resp = cx.http.send(cx.provider_id, rb).await?;
         let bytes = read_limited(resp, MAX_JSON_BYTES).await?;
         // JSON 模式：{ data: { title, content } }；否则按纯文本（Markdown）处理
         if let Ok(v) = serde_json::from_slice::<Value>(&bytes) {
@@ -511,7 +511,7 @@ impl MediaAdapter for TavilyExtract {
     }
     async fn submit(&self, cx: &AdapterCtx<'_>, req: &MediaRequest) -> Result<Submission, MediaError> {
         let url = fetch_url(req)?;
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&json!({"urls": [url], "extract_depth": "basic"}))).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&json!({"urls": [url], "extract_depth": "basic"}))).await?;
         if let Some(first) = v.pointer("/results/0") {
             return fetch_outcome(cx.provider_id, &url, "", s(first, "raw_content"));
         }
@@ -532,7 +532,7 @@ impl MediaAdapter for ExaContents {
     }
     async fn submit(&self, cx: &AdapterCtx<'_>, req: &MediaRequest) -> Result<Submission, MediaError> {
         let url = fetch_url(req)?;
-        let v = cx.http.send_json(cx.post(&cx.cfg.base_url)?.json(&json!({"urls": [url], "text": true}))).await?;
+        let v = cx.http.send_json(cx.provider_id, cx.post(&cx.cfg.base_url)?.json(&json!({"urls": [url], "text": true}))).await?;
         if let Some(first) = v.pointer("/results/0") {
             return fetch_outcome(cx.provider_id, &url, s(first, "title"), s(first, "text"));
         }
