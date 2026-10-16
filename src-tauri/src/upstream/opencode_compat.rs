@@ -329,7 +329,7 @@ mod tests {
             {"type":"function_call_output","call_id":"abcdefghijklmnopqrstuvwxyz0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZlong",
              "output":[{"text":"ok"}]}]});
         prepare_body(&mut body, &t);
-        assert_eq!(body["input"][0]["arguments"], "{\\"q\\":\\"hi\\"}");
+        assert_eq!(body["input"][0]["arguments"], r#"{"q":"hi"}"#);
         assert_eq!(body["input"][0]["call_id"], body["input"][1]["call_id"]);
         assert_eq!(body["input"][0]["call_id"].as_str().unwrap().len(), 64);
         assert_eq!(body["input"][1]["output"], "ok");
