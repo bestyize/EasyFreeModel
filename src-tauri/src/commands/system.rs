@@ -2,8 +2,9 @@ use std::collections::HashSet;
 use std::io::ErrorKind;
 use std::net::IpAddr;
 
-use tauri::State;
+use tauri::{Manager, State};
 
+use crate::desktop::{TrayPreference, TRAY_ID};
 use crate::error::{AppError, AppResult};
 use crate::gateway::GatewayStatus;
 use crate::gateway::VerifiedKey;
@@ -86,9 +87,22 @@ pub async fn get_settings(state: State<'_, AppState>) -> AppResult<AppSettings> 
 }
 
 #[tauri::command]
-pub async fn save_settings(state: State<'_, AppState>, settings: AppSettings) -> AppResult<AppSettings> {
+pub async fn save_settings(
+    app: tauri::AppHandle,
+    state: State<'_, AppState>,
+    tray_preference: State<'_, TrayPreference>,
+    settings: AppSettings,
+) -> AppResult<AppSettings> {
     let s = validate_settings(settings)?;
     settings_repo::save(&state.db, &s).await?;
+    // Apply immediately when the user saves the preference; the on_window_event
+    // handler must read an in-memory flag instead of querying SQLite on the UI thread.
+    if let Some(tray) = app.tray_by_id(TRAY_ID) {
+        match tray.set_visible(s.tray_enabled) {
+            Ok(()) => tray_preference.set_enabled(s.tray_enabled),
+            Err(error) => tracing::warn!(%error, "failed to update tray visibility"),
+        }
+    }
     Ok(s)
 }
 

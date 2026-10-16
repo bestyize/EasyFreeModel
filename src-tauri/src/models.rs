@@ -406,7 +406,7 @@ impl Default for AppSettings {
             listen_address: "127.0.0.1".into(),
             port: 20128,
             auto_start: false,
-            tray_enabled: false,
+            tray_enabled: true,
             timeout_seconds: 120,
             retry_count: 2,
             language: Language::ZhCn,

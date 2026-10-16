@@ -88,7 +88,7 @@ async function toggle() {
     <SettingsRow label="开机自启" description="登录系统后自动启动本应用。">
       <ToggleSwitch v-model="draft.autoStart" label="开机自启" />
     </SettingsRow>
-    <SettingsRow label="托盘运行" description="关闭窗口后保持在系统托盘继续运行。">
+    <SettingsRow label="托盘运行" description="默认开启：点击窗口关闭按钮后隐藏到系统托盘，网关继续运行；可通过托盘菜单重新显示或退出。">
       <ToggleSwitch v-model="draft.trayEnabled" label="托盘运行" />
     </SettingsRow>
   </section>

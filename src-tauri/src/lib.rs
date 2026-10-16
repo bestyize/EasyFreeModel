@@ -32,8 +32,37 @@ pub fn run() {
             let data_dir = app.path().app_data_dir()?;
             // setup 在主线程同步执行；这里阻塞到数据库就绪后再 manage，命令不会看到半初始化状态
             let state = tauri::async_runtime::block_on(state::AppState::init(&data_dir))?;
+            // Load saved preference before the first close event; a new
+            // install defaults to tray mode and an existing opt-out persists.
+            let tray_enabled = tauri::async_runtime::block_on(store::settings::load(&state.db))?.tray_enabled;
+            app.manage(desktop::TrayPreference::new(tray_enabled));
+            desktop::setup_tray(app, tray_enabled)?;
             app.manage(state);
             Ok(())
+        })
+        .on_window_event(|window, event| {
+            if window.label() != "main" {
+                return;
+            }
+            if let tauri::WindowEvent::CloseRequested { api, .. } = event {
+                let app = window.app_handle();
+                let tray_enabled = app
+                    .try_state::<desktop::TrayPreference>()
+                    .is_some_and(|p| p.enabled());
+                if tray_enabled && app.tray_by_id(desktop::TRAY_ID).is_some() {
+                    api.prevent_close();
+                    // Hide rather than destroy the webview: the active gateway,
+                    // authenticated sessions and in-memory state stay alive.
+                    if let Err(error) = window.hide() {
+                        tracing::error!(%error, "could not hide window to tray; exiting safely");
+                        app.exit(0);
+                    }
+                } else {
+                    // Explicitly disabled tray mode: close really quits,
+                    // including on macOS where closing a window may not exit.
+                    app.exit(0);
+                }
+            }
         })
         .invoke_handler(tauri::generate_handler![
             commands::providers::list_providers,
