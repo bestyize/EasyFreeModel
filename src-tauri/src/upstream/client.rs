@@ -146,6 +146,8 @@ impl UpstreamClient {
         header_timeout: Duration,
     ) -> Result<reqwest::Response, UpstreamError> {
         let agent = match provider_id {
+            "opencode" if super::opencode_compat::free_user_agent(provider_id, &url).is_some() =>
+                super::opencode_compat::free_user_agent(provider_id, &url).expect("checked endpoint").to_string(),
             "codex" => CODEX_USER_AGENT.to_string(),
             "claude" => CLAUDE_USER_AGENT.to_string(),
             "codebuddy-cn" => CODEBUDDY_CN_USER_AGENT.to_string(),
@@ -177,7 +179,8 @@ impl UpstreamClient {
         mut headers: HeaderMap,
         timeout: Duration,
     ) -> Result<reqwest::Response, UpstreamError> {
-        headers.insert(USER_AGENT, HeaderValue::from_str(&user_agent()).expect("static user agent"));
+        let agent = super::opencode_compat::free_user_agent(provider_id, &url).map(str::to_string).unwrap_or_else(user_agent);
+        headers.insert(USER_AGENT, HeaderValue::from_str(&agent).expect("static user agent"));
         self.send_routed(provider_id, |http| {
             let rb = http.get(url.clone()).headers(headers.clone()).timeout(timeout);
             async move { rb.send().await.map_err(SendFailure::from) }
@@ -235,6 +238,46 @@ mod tests {
     #[test]
     fn user_agent_is_fixed() {
         assert_eq!(user_agent(), format!("RouterDesktop/{}", env!("CARGO_PKG_VERSION")));
+    }
+
+    #[test]
+    fn opencode_headers_are_selected_only_for_free_inference() {
+        let free = Url::parse("https://opencode.ai/inference/v1/chat/completions").unwrap();
+        assert_eq!(super::super::opencode_compat::free_user_agent("opencode", &free), Some("opencode/latest/2.0.26/cli"));
+        assert!(super::super::opencode_compat::free_user_agent("opencode-zen", &free).is_none());
+        assert!(super::super::opencode_compat::free_user_agent("custom", &free).is_none());
+        let paid = Url::parse("https://opencode.ai/zen/v1/chat/completions").unwrap();
+        assert!(super::super::opencode_compat::free_user_agent("opencode", &paid).is_none());
+    }
+
+    #[tokio::test]
+    async fn final_http_sender_keeps_opencode_user_agent_on_the_wire() {
+        use tokio::io::{AsyncReadExt, AsyncWriteExt};
+        let listener = tokio::net::TcpListener::bind("127.0.0.1:0").await.unwrap();
+        let addr = listener.local_addr().unwrap();
+        let server = tokio::spawn(async move {
+            let (mut socket, _) = listener.accept().await.unwrap();
+            let mut received = Vec::new();
+            let mut chunk = [0u8; 1024];
+            while !received.windows(4).any(|part| part == b"\r\n\r\n") {
+                let n = socket.read(&mut chunk).await.unwrap();
+                assert!(n > 0);
+                received.extend_from_slice(&chunk[..n]);
+            }
+            socket.write_all(b"HTTP/1.1 200 OK\r\ncontent-length: 2\r\nconnection: close\r\n\r\n{}").await.unwrap();
+            String::from_utf8(received).unwrap().to_lowercase()
+        });
+        let client = UpstreamClient {
+            http: reqwest::Client::builder().no_proxy().resolve("opencode.ai", addr).build().unwrap(),
+            pool: None,
+        };
+        // DNS points the genuine hostname at the local test server; no public request is sent.
+        let url = Url::parse(&format!("http://opencode.ai:{}/inference/v1/chat/completions", addr.port())).unwrap();
+        client.post_json("opencode", url, HeaderMap::new(), Bytes::from_static(b"{}"),
+            Some(Duration::from_secs(3)), Duration::from_secs(3)).await.unwrap();
+        let request = server.await.unwrap();
+        assert!(request.contains("user-agent: opencode/latest/2.0.26/cli\r\n"));
+        assert!(!request.contains("user-agent: routerdesktop/"));
     }
 
     #[test]

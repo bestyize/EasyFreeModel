@@ -250,7 +250,9 @@ pub(crate) fn convert_response(
     names: &ToolNameMap,
 ) -> Result<ConvertedResponse, ApiError> {
     let malformed = || ApiError::new(ApiErrorKind::BadGateway, "The upstream provider returned a response that could not be parsed.").with_code("bad_upstream_response");
-    let value: Value = serde_json::from_slice(raw).map_err(|_| malformed())?;
+    let mut value: Value = serde_json::from_slice(raw).map_err(|_| malformed())?;
+    let restored = crate::upstream::opencode_compat::restore_tool_names(&mut value, names);
+    let restored_raw = if restored { Bytes::from(value.to_string()) } else { raw.clone() };
     let canonical = match upstream {
         ProtocolKind::OpenAiChat => openai_chat::decode_response(&value),
         ProtocolKind::AnthropicMessages => anthropic::decode_response(&value),
@@ -262,11 +264,11 @@ pub(crate) fn convert_response(
         // 透传：响应体原样返回；解析只用于用量。无法按协议解析时仍然透传，用量退回估算。
         return Ok(match canonical {
             Ok(c) => ConvertedResponse {
-                body: raw.clone(),
+                body: restored_raw,
                 output_bytes: c.content.iter().map(ContentPart::text_bytes).sum(),
                 usage: c.usage,
             },
-            Err(_) => ConvertedResponse { body: raw.clone(), usage: Usage::default(), output_bytes: raw.len() },
+            Err(_) => ConvertedResponse { body: restored_raw, usage: Usage::default(), output_bytes: raw.len() },
         });
     }
     let canonical = canonical.map_err(|_| malformed())?;

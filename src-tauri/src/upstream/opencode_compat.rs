@@ -4,23 +4,32 @@
 //! Scoped to the built-in Free endpoint, never user-defined or paid endpoints.
 //! Wire details derived from OpenCode v2 and 9Router's OpenCode executor.
 
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::sync::{Mutex, OnceLock};
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
 use reqwest::header::{HeaderMap, HeaderValue, AUTHORIZATION, USER_AGENT};
 use serde_json::{json, Value};
+use crate::protocols::gemini::ToolNameMap;
 
-use super::{AdapterKind, UpstreamTarget};
+use super::{AdapterKind, ResolvedEndpoint, UpstreamTarget};
 
 const V2_USER_AGENT: &str = "opencode/latest/2.0.26/cli";
 const MAX_SESSIONS: usize = 1000;
 const SESSION_TTL: Duration = Duration::from_secs(24 * 60 * 60);
 
 fn is_free(target: &UpstreamTarget) -> bool {
-    target.provider_id == "opencode"
-        && target.endpoint.base_url.host_str() == Some("opencode.ai")
-        && target.endpoint.base_url.path().starts_with("/inference/v1/")
+    is_free_endpoint(&target.provider_id, &target.endpoint)
+}
+
+fn is_free_endpoint(provider: &str, endpoint: &ResolvedEndpoint) -> bool {
+    free_user_agent(provider, &endpoint.base_url).is_some()
+}
+
+/// Used by the final HTTP send path as well as header construction.
+pub(super) fn free_user_agent(provider: &str, url: &url::Url) -> Option<&'static str> {
+    (provider == "opencode" && url.host_str() == Some("opencode.ai")
+        && url.path().starts_with("/inference/v1/")).then_some(V2_USER_AGENT)
 }
 
 fn session_for(connection_id: &str) -> String {
@@ -59,6 +68,7 @@ pub(super) fn add_headers(target: &UpstreamTarget, headers: &mut HeaderMap) {
     headers.insert(USER_AGENT, HeaderValue::from_static(V2_USER_AGENT));
     headers.insert("x-opencode-client", HeaderValue::from_static("cli"));
     headers.insert("x-opencode-project", HeaderValue::from_static("global"));
+    headers.remove("x-opencode-request");
     for name in ["x-opencode-session", "x-opencode-session-id", "x-session-affinity", "x-session-id"] {
         headers.insert(name, value.clone());
     }
@@ -112,20 +122,75 @@ fn tool_name(tool: &Value) -> Option<&str> {
         .or_else(|| tool.get("function")?.get("name")?.as_str())
 }
 
-fn inject_fingerprint_tools(body: &mut Value, flat: bool) {
-    let Some(obj) = body.as_object_mut() else { return };
-    let current = obj.entry("tools").or_insert_with(|| json!([]));
-    if !current.is_array() { *current = json!([]); }
-    let list = current.as_array_mut().expect("array normalised");
+fn inject_fingerprint_tools(body: &mut Value, kind: AdapterKind) -> ToolNameMap {
+    let mut names = ToolNameMap::default();
+    let flat = kind == AdapterKind::OpenAiResponses;
+    let anthropic = kind == AdapterKind::AnthropicCompatible;
+    let Some(obj) = body.as_object_mut() else { return names };
+    let definitions = fingerprint_tools(flat).map(|mut tool| {
+        if anthropic {
+            let def = &tool["function"];
+            tool = json!({"name":def["name"], "description":def["description"], "input_schema":def["parameters"]});
+        }
+        tool
+    });
+    let mut list = obj.remove("tools").and_then(|v| v.as_array().cloned()).unwrap_or_default();
+    let mut taken: HashSet<String> = list.iter().filter_map(tool_name).map(str::to_string).collect();
+    let mut aliases = HashMap::new();
+    let mut seen = HashSet::new();
+    list.retain_mut(|tool| {
+        let Some(name) = tool_name(tool).map(str::to_string) else { return true };
+        let Some(expected) = definitions.iter().find(|def| tool_name(def) == Some(name.as_str())) else { return true };
+        if !seen.insert(name.clone()) { return false; }
+        let actual = tool.get("function").unwrap_or(tool);
+        let expected = expected.get("function").unwrap_or(expected);
+        let actual_schema = actual.get("parameters").or_else(|| actual.get("input_schema"));
+        let expected_schema = expected.get("parameters").or_else(|| expected.get("input_schema"));
+        if actual.get("description") == expected.get("description") && actual_schema == expected_schema { return true; }
+        let mut alias = format!("{name}_client");
+        let mut n = 2;
+        while taken.contains(&alias) { alias = format!("{name}_client{n}"); n += 1; }
+        taken.insert(alias.clone());
+        names.insert_alias(&name, &alias);
+        aliases.insert(name, alias.clone());
+        if tool.get("function").is_some() { tool["function"]["name"] = json!(alias); }
+        else { tool["name"] = json!(alias); }
+        true
+    });
     let mut appended = Vec::new();
-    for definition in fingerprint_tools(flat) {
+    for definition in definitions {
         let Some(name) = tool_name(&definition) else { continue };
-        // Preserve a user's real tool even when its name collides; never
-        // silently replace a caller tool with a dummy. Matching native
-        // declarations are accepted without a duplicate.
         if list.iter().any(|tool| tool_name(tool) == Some(name)) { continue; }
         appended.push(name.to_owned());
         list.push(definition);
+    }
+    obj.insert("tools".into(), json!(list));
+    if let Some(choice) = obj.get_mut("tool_choice") {
+        if let Some(name) = choice.pointer_mut("/function/name") { alias_name(name, &aliases); }
+        else if let Some(name) = choice.get_mut("name") { alias_name(name, &aliases); }
+    }
+    if let Some(input) = obj.get_mut("input").and_then(Value::as_array_mut) {
+        for item in input {
+            if item.get("type").and_then(Value::as_str) == Some("function_call") {
+                if let Some(name) = item.get_mut("name") { alias_name(name, &aliases); }
+            }
+        }
+    }
+    if let Some(messages) = obj.get_mut("messages").and_then(Value::as_array_mut) {
+        for message in messages {
+            if let Some(calls) = message.get_mut("tool_calls").and_then(Value::as_array_mut) {
+                for call in calls {
+                    if let Some(name) = call.pointer_mut("/function/name") { alias_name(name, &aliases); }
+                }
+            }
+            if let Some(parts) = message.get_mut("content").and_then(Value::as_array_mut) {
+                for part in parts {
+                    if part.get("type").and_then(Value::as_str) == Some("tool_use") {
+                        if let Some(name) = part.get_mut("name") { alias_name(name, &aliases); }
+                    }
+                }
+            }
+        }
     }
     if !appended.is_empty() {
         // The added tools are protocol declarations, not executable tools in
@@ -138,6 +203,14 @@ fn inject_fingerprint_tools(body: &mut Value, flat: bool) {
             let text = obj.get("instructions").and_then(Value::as_str).unwrap_or("");
             let combined = if text.is_empty() { note } else { format!("{text}\n\n{note}") };
             obj.insert("instructions".into(), json!(combined));
+        } else if anthropic {
+            match obj.get_mut("system") {
+                Some(Value::Array(parts)) => parts.push(json!({"type":"text", "text":note})),
+                _ => {
+                    let text = obj.get("system").and_then(Value::as_str).unwrap_or("");
+                    obj.insert("system".into(), json!(if text.is_empty() { note } else { format!("{text}\n\n{note}") }));
+                }
+            }
         } else {
             let messages = obj.entry("messages").or_insert_with(|| json!([]));
             if let Some(list) = messages.as_array_mut() {
@@ -146,7 +219,7 @@ fn inject_fingerprint_tools(body: &mut Value, flat: bool) {
                         if let Some(text) = first.get("content").and_then(Value::as_str) {
                             let combined = format!("{text}\n\n{note}");
                             first["content"] = json!(combined);
-                            return;
+                            return names;
                         }
                     }
                 }
@@ -154,6 +227,11 @@ fn inject_fingerprint_tools(body: &mut Value, flat: bool) {
             }
         }
     }
+    names
+}
+
+fn alias_name(value: &mut Value, aliases: &HashMap<String, String>) {
+    if let Some(alias) = value.as_str().and_then(|name| aliases.get(name)).cloned() { *value = json!(alias); }
 }
 
 /// Responses requires flat function tools rather than Chat's nested function
@@ -192,15 +270,26 @@ fn normalize_responses_input(body: &mut Value) {
     if items.is_empty() {
         items.push(json!({"type":"message", "role":"user", "content":[{"type":"input_text","text":"..."}]}));
     }
-    items.retain(|item| item.get("type").and_then(Value::as_str) != Some("reasoning"));
+    items.retain(|item| {
+        let kind = item.get("type").and_then(Value::as_str);
+        kind != Some("reasoning") && (kind != Some("function_call") || item.get("name")
+            .and_then(Value::as_str).is_some_and(|name| !name.trim().is_empty()))
+    });
+    if items.is_empty() {
+        items.push(json!({"type":"message", "role":"user", "content":[{"type":"input_text","text":"..."}]}));
+    }
     for item in items {
+        if let Some(obj) = item.as_object_mut() {
+            obj.remove("encrypted_content");
+            obj.remove("reasoning_encrypted_content");
+        }
         match item.get("type").and_then(Value::as_str) {
             Some("function_call") => {
                 let valid = item.get("name").and_then(Value::as_str)
                     .is_some_and(|name| !name.trim().is_empty());
                 if !valid { continue; }
                 if let Some(id) = item.get("call_id").and_then(Value::as_str).map(str::to_owned) {
-                    if id.len() > 64 { item["call_id"] = json!(&id[..64]); }
+                    if id.len() > 64 { item["call_id"] = json!(id.chars().take(64).collect::<String>()); }
                 }
                 let args = item.get("arguments").cloned().unwrap_or(Value::Null);
                 let arguments = match args {
@@ -212,7 +301,7 @@ fn normalize_responses_input(body: &mut Value) {
             }
             Some("function_call_output") => {
                 if let Some(id) = item.get("call_id").and_then(Value::as_str).map(str::to_owned) {
-                    if id.len() > 64 { item["call_id"] = json!(&id[..64]); }
+                    if id.len() > 64 { item["call_id"] = json!(id.chars().take(64).collect::<String>()); }
                 }
                 let output = item.get("output").cloned().unwrap_or(Value::Null);
                 let text = match output {
@@ -231,11 +320,17 @@ fn normalize_responses_input(body: &mut Value) {
 }
 
 pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
-    if !is_free(target) { return; }
-    let Some(obj) = body.as_object_mut() else { return };
+    let _ = prepare_for_endpoint(body, &target.provider_id, &target.endpoint);
+}
+
+/// Run before dispatch, keeping the alias map with this request's response pipeline.
+/// The send-layer fallback is idempotent for already prepared requests and probes.
+pub(crate) fn prepare_for_endpoint(body: &mut Value, provider: &str, endpoint: &ResolvedEndpoint) -> ToolNameMap {
+    if !is_free_endpoint(provider, endpoint) { return ToolNameMap::default(); }
+    let Some(obj) = body.as_object_mut() else { return ToolNameMap::default() };
     obj.insert("stream".into(), json!(true));
     obj.remove("stream_options");
-    match target.endpoint.kind {
+    match endpoint.kind {
         AdapterKind::OpenAiResponses => {
             obj.insert("store".into(), json!(false));
             if !obj.contains_key("max_output_tokens") {
@@ -255,13 +350,66 @@ pub(super) fn prepare_body(body: &mut Value, target: &UpstreamTarget) {
             obj.entry("tool_choice").or_insert_with(|| json!("auto"));
             // Strip encrypted reasoning items from prior pooled-account turns
             // and normalize the Responses function-call wire shape.
+            if body.get("input").is_none() { body["input"] = json!([]); }
             normalize_responses_input(body);
             normalize_responses_tools(body);
-            inject_fingerprint_tools(body, true);
+            inject_fingerprint_tools(body, endpoint.kind)
         }
-        AdapterKind::OpenAiCompatible => inject_fingerprint_tools(body, false),
-        AdapterKind::AnthropicCompatible => { /* Anthropic native tools retain their original schema. */ }
-        _ => {}
+        AdapterKind::OpenAiCompatible | AdapterKind::AnthropicCompatible => inject_fingerprint_tools(body, endpoint.kind),
+        _ => ToolNameMap::default(),
+    }
+}
+
+/// Restore only protocol tool-name fields; text, arguments and unrelated metadata
+/// are never searched/replaced. Covers JSON responses and the corresponding SSE events.
+pub(crate) fn restore_tool_names(value: &mut Value, names: &ToolNameMap) -> bool {
+    if names.is_identity() { return false; }
+    fn restore(name: Option<&mut Value>, names: &ToolNameMap) -> bool {
+        let Some(name) = name else { return false };
+        let Some(wire) = name.as_str() else { return false };
+        let original = names.original(wire);
+        if original == wire { return false; }
+        *name = json!(original);
+        true
+    }
+    fn item(value: &mut Value, names: &ToolNameMap) -> bool {
+        if matches!(value.get("type").and_then(Value::as_str), Some("function_call" | "tool_use")) {
+            restore(value.get_mut("name"), names)
+        } else { false }
+    }
+    let mut changed = false;
+    if let Some(items) = value.as_array_mut() {
+        for value in items { changed |= restore_tool_names(value, names); }
+        return changed;
+    }
+    for holder in ["content_block", "item"] {
+        if let Some(value) = value.get_mut(holder) { changed |= item(value, names); }
+    }
+    for holder in ["content", "output"] {
+        if let Some(items) = value.get_mut(holder).and_then(Value::as_array_mut) {
+            for value in items { changed |= item(value, names); }
+        }
+    }
+    // Responses completion events wrap the final response object.
+    if let Some(response) = value.get_mut("response") { changed |= restore_tool_names(response, names); }
+    if let Some(choices) = value.get_mut("choices").and_then(Value::as_array_mut) {
+        for choice in choices {
+            for holder in ["delta", "message"] {
+                if let Some(calls) = choice.get_mut(holder).and_then(|v| v.get_mut("tool_calls")).and_then(Value::as_array_mut) {
+                    for call in calls { changed |= restore(call.pointer_mut("/function/name"), names); }
+                }
+            }
+        }
+    }
+    changed
+}
+
+pub(crate) fn restore_frame_names(frame: &mut super::sse_decode::RawFrame, names: &ToolNameMap) {
+    if names.is_identity() { return; }
+    let Ok(mut value) = serde_json::from_str::<Value>(&frame.data) else { return };
+    if restore_tool_names(&mut value, names) {
+        frame.data = value.to_string();
+        frame.raw = crate::protocols::SseFrame { event: frame.event.clone(), data: frame.data.clone() }.to_wire().into();
     }
 }
 
@@ -279,6 +427,118 @@ mod tests {
                 Url::parse("https://opencode.ai/inference/v1/chat/completions").unwrap(), AuthStyle::None),
             api_key: None, extra_headers: vec![], timeout: Duration::from_secs(10),
         }
+    }
+
+    #[test]
+    fn aliases_declarations_choice_and_history_without_losing_parameters() {
+        let t = target("opencode");
+        let mut body = json!({"messages":[{"role":"assistant","tool_calls":[
+            {"id":"c1","type":"function","function":{"name":"shell","arguments":"{}"}}
+        ]}], "tools":[
+            {"type":"function","function":{"name":"shell","description":"Caller shell","parameters":{"type":"object","properties":{"cmd":{"type":"string"}}}}},
+            {"type":"function","function":{"name":"shell_client","parameters":{"type":"object"}}}
+        ], "tool_choice":{"type":"function","function":{"name":"shell"}}});
+        let names = prepare_for_endpoint(&mut body, "opencode", &t.endpoint);
+        assert_eq!(body["tools"][0]["function"]["name"], "shell_client2");
+        assert!(body["tools"][0]["function"]["parameters"]["properties"].get("cmd").is_some());
+        assert_eq!(body["tool_choice"]["function"]["name"], "shell_client2");
+        assert_eq!(body["messages"][1]["tool_calls"][0]["function"]["name"], "shell_client2");
+        assert_eq!(names.original("shell_client2"), "shell");
+        assert_eq!(names.original("shell_client"), "shell_client");
+        let before = body.clone();
+        // The send-layer fallback must not remap an already prepared request.
+        assert!(prepare_for_endpoint(&mut body, "opencode", &t.endpoint).is_identity());
+        assert_eq!(body, before);
+    }
+
+    #[test]
+    fn aliases_responses_tools_and_restores_every_response_envelope() {
+        let mut t = target("opencode");
+        t.endpoint.kind = AdapterKind::OpenAiResponses;
+        let mut body = json!({"input":[{"type":"function_call","name":"read","call_id":"c","arguments":"{}"}],
+            "tools":[{"type":"function","name":"read","parameters":{"type":"object","properties":{"file":{"type":"string"}}}}],
+            "tool_choice":{"type":"function","name":"read"}});
+        let names = prepare_for_endpoint(&mut body, "opencode", &t.endpoint);
+        assert_eq!(body["input"][0]["name"], "read_client");
+        assert_eq!(body["tool_choice"]["name"], "read_client");
+        assert!(body["tools"][0]["parameters"]["properties"].get("file").is_some());
+        for mut response in [
+            json!({"choices":[{"delta":{"tool_calls":[{"function":{"name":"read_client","arguments":"read_client"}}]}}]}),
+            json!({"choices":[{"message":{"tool_calls":[{"function":{"name":"read_client"}}]}}]}),
+            json!({"type":"content_block_start","content_block":{"type":"tool_use","name":"read_client"}}),
+            json!({"content":[{"type":"tool_use","name":"read_client"}]}),
+            json!({"type":"response.output_item.added","item":{"type":"function_call","name":"read_client"}}),
+            json!({"type":"response.output_item.done","item":{"type":"function_call","name":"read_client"}}),
+            json!({"output":[{"type":"function_call","name":"read_client"}]}),
+            json!({"type":"response.completed","response":{"output":[{"type":"function_call","name":"read_client"}]}}),
+        ] {
+            assert!(restore_tool_names(&mut response, &names));
+            assert!(!response.to_string().contains("\"name\":\"read_client\""));
+            assert!(!restore_tool_names(&mut response, &names), "restoration is idempotent");
+        }
+        let mut payload = json!({"text":"read_client", "arguments":"read_client"});
+        assert!(!restore_tool_names(&mut payload, &names));
+        assert_eq!(payload["text"], "read_client");
+    }
+
+    #[test]
+    fn anthropic_tools_use_native_schema_and_alias_history() {
+        let mut t = target("opencode");
+        t.endpoint.kind = AdapterKind::AnthropicCompatible;
+        let mut body = json!({"system":[{"type":"text","text":"Keep me"}],
+            "messages":[{"role":"assistant","content":[{"type":"tool_use","id":"c","name":"shell","input":{"cmd":"pwd"}}]}],
+            "tools":[{"name":"shell","input_schema":{"type":"object","properties":{"cmd":{"type":"string"}}}}],
+            "tool_choice":{"type":"tool","name":"shell"}});
+        let names = prepare_for_endpoint(&mut body, "opencode", &t.endpoint);
+        assert_eq!(names.original("shell_client"), "shell");
+        assert_eq!(body["messages"][0]["content"][0]["name"], "shell_client");
+        assert_eq!(body["tool_choice"]["name"], "shell_client");
+        assert_eq!(body["system"][0]["text"], "Keep me");
+        assert!(body["system"][1]["text"].as_str().unwrap().contains("placeholders"));
+        for tool in body["tools"].as_array().unwrap() {
+            assert!(tool.get("input_schema").is_some());
+            assert!(tool.get("function").is_none());
+        }
+    }
+
+    #[test]
+    fn exact_definitions_and_case_variants_are_kept_and_maps_are_request_local() {
+        let t = target("opencode");
+        let mut exact = json!({"tools":fingerprint_tools(false),"messages":[]});
+        assert!(prepare_for_endpoint(&mut exact, "opencode", &t.endpoint).is_identity());
+        assert_eq!(exact["tools"].as_array().unwrap().len(), 2);
+        let mut body = json!({"tools":[
+            {"type":"function","function":{"name":"Read","parameters":{"type":"object"}}},
+            {"type":"function","function":{"name":"read","parameters":{"type":"object"}}},
+            {"type":"function","function":{"name":"read","parameters":{"type":"object"}}}
+        ],"messages":[]});
+        let first = prepare_for_endpoint(&mut body, "opencode", &t.endpoint);
+        assert_eq!(first.original("read_client"), "read");
+        assert_eq!(body["tools"][0]["function"]["name"], "Read");
+        assert_eq!(body["tools"].as_array().unwrap().len(), 4);
+        let mut another = json!({"messages":[],"tools":[]});
+        assert!(prepare_for_endpoint(&mut another, "opencode", &t.endpoint).is_identity());
+        let before = body.clone();
+        assert!(prepare_for_endpoint(&mut body, "opencode-zen", &t.endpoint).is_identity());
+        assert_eq!(body, before);
+    }
+
+    #[test]
+    fn sse_restoration_preserves_events_arguments_and_text() {
+        let mut names = ToolNameMap::default();
+        names.insert_alias("shell", "shell_client");
+        let data = json!({"choices":[{"delta":{"content":"hello\nworld", "tool_calls":[{"function":{"name":"shell_client","arguments":"{\"cmd\":\"shell_client\"}"}}]}}]});
+        let mut frame = super::super::sse_decode::RawFrame {
+            raw: bytes::Bytes::new(), event: Some("custom-event".into()), data:data.to_string(),
+        };
+        restore_frame_names(&mut frame, &names);
+        let parsed = crate::protocols::sse::parse_sse(std::str::from_utf8(&frame.raw).unwrap());
+        assert_eq!(parsed.len(), 1);
+        assert_eq!(parsed[0].event.as_deref(), Some("custom-event"));
+        let out: Value = serde_json::from_str(&parsed[0].data).unwrap();
+        assert_eq!(out["choices"][0]["delta"]["content"], "hello\nworld");
+        assert_eq!(out["choices"][0]["delta"]["tool_calls"][0]["function"]["name"], "shell");
+        assert_eq!(out["choices"][0]["delta"]["tool_calls"][0]["function"]["arguments"], data["choices"][0]["delta"]["tool_calls"][0]["function"]["arguments"]);
     }
 
     #[test]

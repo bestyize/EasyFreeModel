@@ -350,8 +350,8 @@ impl Drop for Pump {
 }
 
 impl Pump {
-    pub fn new(primed: Primed, mut cfg: PumpConfig, guard: UsageGuard) -> Self {
-        let names = std::mem::take(&mut cfg.tool_names);
+    pub fn new(primed: Primed, cfg: PumpConfig, guard: UsageGuard) -> Self {
+        let names = cfg.tool_names.clone();
         Self {
             body: primed.body,
             splitter: primed.splitter,
@@ -430,7 +430,8 @@ impl Pump {
         }
     }
 
-    fn handle_frame(&mut self, frame: RawFrame) {
+    fn handle_frame(&mut self, mut frame: RawFrame) {
+        crate::upstream::opencode_compat::restore_frame_names(&mut frame, &self.cfg.tool_names);
         if self.cfg.encoder.is_none() {
             self.handle_passthrough(frame);
         } else {

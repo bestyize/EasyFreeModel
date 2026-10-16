@@ -2,10 +2,17 @@ src-tauri/resources/provider_catalog.json, provider_status.json, oauth_providers
   Provider names, categories, display colors, public website hosts and service
   kinds were extracted from the provider registry of 9router
   (https://github.com/decolua/9router, v0.5.99). No credentials, client
-  secrets or source code are included. provider_status.json, oauth_providers.json
+  secrets are included. provider_status.json, oauth_providers.json
   and media_providers.json additionally draw endpoint base URLs, OAuth endpoint
   URLs, public client ids of PKCE/device flows and model names from the same
   registry. No client secrets were copied.
+
+src-tauri/src/upstream/opencode_compat.rs
+  OpenCode Free request shaping and reversible tool-name mapping are adapted
+  from 9Router commit 87a74e1bda3677193c6f71a7e2100c90311f0689, in particular
+  open-sse/executors/opencode.js and open-sse/utils/opencodeFingerprint.js.
+  Source: https://github.com/decolua/9router
+  The MIT license below applies to this adapted code as well.
 
   MIT License
   Copyright (c) 2024-2026 decolua and contributors

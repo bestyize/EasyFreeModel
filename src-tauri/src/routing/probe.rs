@@ -56,7 +56,7 @@ impl Runtime {
             let reason = provider.pending_reason.clone().unwrap_or_else(|| "适配器尚未接入".into());
             return Ok(fail(format!("该提供商的适配器尚未接入：{reason}")));
         }
-        let endpoint = match endpoint_for(&provider) {
+        let mut endpoint = match endpoint_for(&provider) {
             Ok(e) => e,
             Err(e) => return Ok(fail(e.0)),
         };
@@ -64,6 +64,7 @@ impl Runtime {
             Some(m) => m,
             None => return Ok(fail("模型不存在，可能已被删除，请刷新后重试".to_string())),
         };
+        super::endpoint::apply_opencode_model_endpoint(&provider, &model.upstream_model_id, &mut endpoint);
 
         // 统一用 OpenAI Chat 的最小请求经规范化转换：一条代码路径即可为 6 种上游协议生成合法请求体。
         // 流式专用端点必须请求增量；读到第一个真实内容后即可关闭探测流。
