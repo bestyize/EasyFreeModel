@@ -118,6 +118,9 @@ pub(crate) async fn proxy_inbound(rt: Arc<Runtime>, key: VerifiedKey, inbound: I
         Ok(None) => {}
         Err(e) => return error_response(protocol, &ApiError::new(ApiErrorKind::NotImplemented, e.to_string())),
     }
+    crate::routing::endpoint::apply_opencode_model_endpoint(
+        &resolved.provider, &resolved.model.upstream_model_id, &mut resolved.endpoint,
+    );
     if rt.stream_usage_disabled(&resolved.provider.id) {
         resolved.endpoint.stream_usage = false;
     }
